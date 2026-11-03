@@ -11,12 +11,15 @@ vault-layer check in tests/vault/test_service.py.
 from __future__ import annotations
 
 import json
+import logging
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.core.orm import AuditLog, Case, Document
+from app.core.redact import contains_sensitive_pattern
 from app.vault import service
 from tests.api.conftest import VaultComponents
 
@@ -138,3 +141,49 @@ def test_audit_log_rows_never_contain_document_text_or_pii(
         serialized = json.dumps(row.detail)
         for pii in _PACKET_PII:
             assert pii not in serialized
+
+
+def test_no_document_text_or_pii_in_process_logs(
+    api_client: TestClient,
+    vault_components: VaultComponents,
+    db_session: Session,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Exercises the real upload -> read path (app/vault/service.py's
+    logger.info calls, added for this test to have something real to
+    check) and asserts no captured log record contains the clean-1
+    packet's PII or anything SSN/TIN-shaped - clean-1's own w9.pdf has
+    a literal "TIN: 000-xx-xxxx" line (app/eval/generator/provider.py),
+    so this also exercises app/core/redact.py's detector against real
+    rendered document content, not a hand-written example.
+    """
+    caplog.set_level(logging.INFO, logger="app.vault.service")
+    case = _create_case(api_client)
+    content = (_CLEAN_PACKET / "w9.pdf").read_bytes()
+
+    response = api_client.post(
+        f"/cases/{case['id']}/documents",
+        params={"slot": "w9"},
+        files={"file": ("w9.pdf", content, "application/pdf")},
+    )
+    assert response.status_code == 201, response.text
+    document = db_session.get(Document, response.json()["id"])
+    assert document is not None
+    case_row = db_session.get(Case, case["id"])
+    assert case_row is not None
+
+    service.read_document(
+        db_session,
+        case=case_row,
+        document=document,
+        key_manager=vault_components.key_manager,
+        blob_store=vault_components.blob_store,
+        actor="reviewer",
+    )
+
+    assert len(caplog.records) >= 2  # upload + read - not a vacuous pass
+    for record in caplog.records:
+        message = record.getMessage()
+        assert not contains_sensitive_pattern(message)
+        for pii in _PACKET_PII:
+            assert pii not in message

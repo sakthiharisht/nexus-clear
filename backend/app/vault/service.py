@@ -26,6 +26,7 @@ no longer doubling as the storage address.
 from __future__ import annotations
 
 import hashlib
+import logging
 import uuid
 
 from sqlalchemy.orm import Session
@@ -38,6 +39,12 @@ from app.vault.key_manager import KeyManager
 # Which KeyManager/scheme wrapped a case's data key — see
 # Document.key_id's docstring in app/core/orm.py.
 KEY_SCHEME_ID = "local-v1"
+
+# Same CLAUDE.md invariant 4 that governs audit_log.detail applies to
+# the process log: structural metadata only (ids, slot, hash, size),
+# never document content. The values logged below are exactly the ones
+# already written to AuditLog.detail - nothing new is exposed.
+logger = logging.getLogger(__name__)
 
 
 def sha256_hex(data: bytes) -> str:
@@ -101,6 +108,14 @@ def store_document(
             detail={"slot": slot, "sha256": digest, "size_bytes": len(content)},
         )
     )
+    logger.info(
+        "document uploaded case_id=%s document_id=%s slot=%s sha256=%s size_bytes=%d",
+        case.id,
+        document.id,
+        slot,
+        digest,
+        len(content),
+    )
     return document
 
 
@@ -125,5 +140,12 @@ def read_document(
             object_ref=str(document.id),
             detail={"slot": document.slot, "sha256": document.sha256},
         )
+    )
+    logger.info(
+        "document read case_id=%s document_id=%s slot=%s sha256=%s",
+        case.id,
+        document.id,
+        document.slot,
+        document.sha256,
     )
     return plaintext

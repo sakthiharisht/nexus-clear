@@ -22,6 +22,10 @@ dev = [
     "pytest>=9.2.0",
     "ruff>=0.17.3",
     "types-pyyaml>=6.0.12.20261030",
+    "reportlab>=5.1.0",
+    "pillow>=13.0.0",
+    "faker>=40.44.0",
+    "types-reportlab>=5.0.0.20261008",
 ]
 
 [tool.ruff]

@@ -302,18 +302,18 @@ def evaluate_history_gap(params: HistoryGapParams, ctx: EvalContext) -> KindResu
     return KindResult(status=status, evidence=[_doc_evidence(None, quote)])
 
 
-def npi_luhn_80840_valid(npi: str) -> bool:
+def npi_check_digit(base9: str) -> int:
     """CMS "Requirements for National Provider Identifier (NPI) and NPI
-    Check Digit": validate a 10-digit NPI by prepending the virtual prefix
-    80840 (80 = health applications, 840 = USA) to the first 9 digits,
-    running the standard Luhn "double every second digit from the right"
-    sum over the 14 resulting digits, and comparing the Luhn check digit to
-    the NPI's 10th digit. Verified against CMS's own worked example:
-    base 123456789 -> check digit 3 -> NPI 1234567893.
+    Check Digit": prepend the virtual prefix 80840 (80 = health
+    applications, 840 = USA) to the 9-digit base, run the standard Luhn
+    "double every second digit from the right" sum over the 14 resulting
+    digits, and return the Luhn check digit. Verified against CMS's own
+    worked example: base 123456789 -> check digit 3 -> NPI 1234567893.
+    Shared by `npi_luhn_80840_valid` (validation) and the eval generator
+    (synthetic NPI construction, app/eval/generator/npi.py) so both sides
+    of the algorithm can never drift apart.
     """
-    if len(npi) != 10 or not npi.isdigit():
-        return False
-    base = "80840" + npi[:9]
+    base = "80840" + base9
     total = 0
     for i, ch in enumerate(reversed(base), start=1):
         d = int(ch)
@@ -322,8 +322,14 @@ def npi_luhn_80840_valid(npi: str) -> bool:
             if d > 9:
                 d -= 9
         total += d
-    check_digit = (10 - (total % 10)) % 10
-    return check_digit == int(npi[9])
+    return (10 - (total % 10)) % 10
+
+
+def npi_luhn_80840_valid(npi: str) -> bool:
+    """Validate a 10-digit NPI's check digit — see `npi_check_digit`."""
+    if len(npi) != 10 or not npi.isdigit():
+        return False
+    return npi_check_digit(npi[:9]) == int(npi[9])
 
 
 def evaluate_checksum(params: ChecksumParams, ctx: EvalContext) -> KindResult:

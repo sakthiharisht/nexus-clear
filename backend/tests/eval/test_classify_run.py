@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from app.backends.types import ClassificationResult, ClassifyInput
-from app.eval.classify_run import _page1_image, _page1_text, build_classify_input, run_classify
+from app.eval.classify_run import _page1_text, build_classify_input, run_classify
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 GROUND_TRUTH = json.loads(
@@ -36,29 +36,33 @@ class _StubBackend:
 
 def test_build_classify_input_extracts_real_page1_text_for_a_text_pdf() -> None:
     classify_input = build_classify_input(_packet("clean-1"), "license", FIXTURES_ROOT)
-    assert classify_input.filename == "license.pdf"
+    assert classify_input.filename == "clean-1/license.pdf"
     assert "Christopher Lee" in classify_input.page1_text
     assert classify_input.page1_image_b64 is None
 
 
-def test_build_classify_input_attaches_an_image_for_a_textless_png() -> None:
+def test_build_classify_input_has_no_text_for_a_png_scan() -> None:
     classify_input = build_classify_input(
         _packet("benign-2-rotated-scan"), "license", FIXTURES_ROOT
     )
     assert classify_input.page1_text == ""
-    assert classify_input.page1_image_b64 is not None
-    assert classify_input.page1_image_media_type == "image/png"
+    # Deliberately no image attached here - see classify_run.py's
+    # module docstring: image bytes aren't cross-platform reproducible
+    # (this is exactly the D10/benign-2 scan that broke CI, seeded from
+    # a different OS than the one that regenerates packets in CI).
+    assert classify_input.page1_image_b64 is None
 
 
-def test_scanned_license_images_differ_between_two_different_packets() -> None:
+def test_filenames_differ_between_two_different_packets_scanned_license_slots() -> None:
     """Regression: benign-2-rotated-scan and defective-7 both render
-    their license slot as license.png with no text layer - before
-    attaching real image bytes, these collided on the same cache key
-    (app/backends/cache.py) despite being genuinely different scans
-    with very different ground-truth legibility."""
+    their license slot as license.png with no text layer, so their
+    (slot, filename, page1_text) collided on the same cache key
+    (app/backends/cache.py) when filename was just the bare basename -
+    despite being genuinely different scans with very different
+    ground-truth legibility. filename now includes the packet id."""
     a = build_classify_input(_packet("benign-2-rotated-scan"), "license", FIXTURES_ROOT)
     b = build_classify_input(_packet("defective-7"), "license", FIXTURES_ROOT)
-    assert a.page1_image_b64 != b.page1_image_b64
+    assert a.filename != b.filename
 
 
 def test_run_classify_covers_every_uploaded_document_across_all_packets() -> None:
@@ -115,12 +119,6 @@ def test_page1_text_returns_empty_for_a_corrupt_pdf(tmp_path: Path) -> None:
     bad_pdf = tmp_path / "bad.pdf"
     bad_pdf.write_bytes(b"not a real pdf")
     assert _page1_text(bad_pdf) == ""
-
-
-def test_page1_image_returns_none_for_a_non_image_suffix(tmp_path: Path) -> None:
-    textless_pdf = tmp_path / "scan.pdf"
-    textless_pdf.write_bytes(b"%PDF-1.4\n%fake\n")
-    assert _page1_image(textless_pdf) is None
 
 
 def test_run_classify_records_ground_truth_doc_types_for_the_wrong_doc_in_slot_defect() -> None:

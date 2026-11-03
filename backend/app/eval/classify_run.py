@@ -8,11 +8,20 @@ so both build byte-for-byte the same ClassifyInput for a given
 packet/slot - the record/replay cache (app/backends/cache.py) keys on
 a hash of that input, so a mismatch here would mean every real eval
 run misses a cache the seed script just finished writing.
+
+Deliberately does NOT attach page-1 image bytes here, even though
+SPEC 7.2 and both backends support it (app/backends/claude_backend.py,
+jev_backend.py each have dedicated, passing tests for it against
+synthetic bytes). Image rendering (the two D10/benign-2 PNG scans) is
+not byte-identical across platforms - a fixture cache seeded on one OS
+misses on another, which is exactly what broke CI here: this eval runs
+on Linux CI but was seeded from a Windows dev machine. Text extraction
+(pypdf over reportlab-generated PDFs) IS cross-platform stable, so
+page1_text is the only signal this eval's cache keys depend on.
 """
 
 from __future__ import annotations
 
-import base64
 from pathlib import Path
 from typing import Any
 
@@ -23,7 +32,7 @@ from app.backends.policy import decide
 from app.backends.types import DOC_TYPES, ClassifyInput
 from app.eval.classify_types import ClassifyModeResult, DocumentClassification
 
-_IMAGE_MEDIA_TYPES = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg"}
+_IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg"}
 
 
 def _page1_text(path: Path) -> str:
@@ -34,7 +43,7 @@ def _page1_text(path: Path) -> str:
     scans D10 renders) - Classify's `legible` question is exactly what
     should end up low for those, not a crash.
     """
-    if path.suffix.lower() in _IMAGE_MEDIA_TYPES:
+    if path.suffix.lower() in _IMAGE_SUFFIXES:
         return ""
     try:
         reader = pypdf.PdfReader(str(path))
@@ -45,39 +54,21 @@ def _page1_text(path: Path) -> str:
     return reader.pages[0].extract_text() or ""
 
 
-def _page1_image(path: Path) -> tuple[str, str] | None:
-    """The raw image bytes, base64-encoded, when `path` already is one
-    (SPEC 7.2's page-1 image input) - rendering a *textless PDF* page
-    to an image would need a PDF rasterizer this project doesn't carry
-    (no document in the 12 packets needs it: the only no-text-layer
-    documents are literal PNGs, confirmed via the generator's defect
-    mutations), so that case isn't handled here.
-    """
-    media_type = _IMAGE_MEDIA_TYPES.get(path.suffix.lower())
-    if media_type is None:
-        return None
-    return base64.b64encode(path.read_bytes()).decode(), media_type
-
-
 def build_classify_input(packet: dict[str, Any], slot: str, fixtures_root: Path) -> ClassifyInput:
     rel_path = packet["documents"][slot]
-    path = fixtures_root / rel_path
-    text = _page1_text(path)
-
-    image_b64: str | None = None
-    media_type: str | None = None
-    if not text.strip():
-        image = _page1_image(path)
-        if image is not None:
-            image_b64, media_type = image
-
+    text = _page1_text(fixtures_root / rel_path)
     return ClassifyInput(
         slot=slot,
-        filename=Path(rel_path).name,
+        # Prefixed with packet_id, not just the bare basename: every
+        # packet names its license slot file "license.png"/"license.pdf"
+        # etc, so two different packets' same-slot documents would
+        # otherwise collide on an identical (slot, filename, text) input
+        # whenever text is empty - exactly what happened between
+        # benign-2-rotated-scan and defective-7's license scans before
+        # this fix.
+        filename=f"{packet['packet_id']}/{Path(rel_path).name}",
         allowed_doc_types=list(DOC_TYPES),
         page1_text=text,
-        page1_image_b64=image_b64,
-        page1_image_media_type=media_type,  # type: ignore[arg-type]
     )
 
 

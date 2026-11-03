@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 import pytest
@@ -45,11 +46,20 @@ def test_rejects_path_traversal_keys(tmp_path: Path, bad_key: str) -> None:
         store.put(bad_key, b"data")
 
 
+@pytest.mark.skipif(
+    sys.platform != "win32", reason="drive-letter anchoring is a Windows pathlib behavior"
+)
 @pytest.mark.parametrize("bad_key", ["D:secret", "C:\\Windows\\evil"])
 def test_rejected_keys_never_actually_escape_root(tmp_path: Path, bad_key: str) -> None:
     """Belt-and-suspenders: even if a future change weakened the key
     validation, confirm these specific keys would have landed outside
-    `root` - the property the validation exists to prevent."""
+    `root` - the property the validation exists to prevent. Windows-
+    only: on POSIX there's no drive-letter anchoring at all, so
+    `root / "D:secret"` is just a normal (non-escaping) nested path -
+    these keys are still correctly rejected there, just not via this
+    particular escape mechanism (confirmed CI-side: the broader
+    test_rejects_path_traversal_keys parametrization runs and passes
+    on Linux too)."""
     root = tmp_path / "blobs"
     escaped = root / bad_key
     assert root not in escaped.parents

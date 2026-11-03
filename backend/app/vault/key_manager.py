@@ -16,8 +16,8 @@ from app.vault import aead
 
 
 class KeyManager(Protocol):
-    def wrap_key(self, data_key: bytes) -> bytes: ...
-    def unwrap_key(self, wrapped: bytes) -> bytes: ...
+    def wrap_key(self, data_key: bytes, aad: bytes) -> bytes: ...
+    def unwrap_key(self, wrapped: bytes, aad: bytes) -> bytes: ...
 
 
 class LocalKeyManager:
@@ -47,8 +47,8 @@ class LocalKeyManager:
         path.write_bytes(key)
         return key
 
-    def wrap_key(self, data_key: bytes) -> bytes:
-        return aead.seal(self._master_key, data_key)
+    def wrap_key(self, data_key: bytes, aad: bytes) -> bytes:
+        return aead.seal(self._master_key, data_key, aad)
 
-    def unwrap_key(self, wrapped: bytes) -> bytes:
-        return aead.open_(self._master_key, wrapped)
+    def unwrap_key(self, wrapped: bytes, aad: bytes) -> bytes:
+        return aead.open_(self._master_key, wrapped, aad)

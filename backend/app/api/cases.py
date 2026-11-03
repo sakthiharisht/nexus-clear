@@ -13,7 +13,7 @@ content judgment the rules engine makes.
 from __future__ import annotations
 
 from datetime import date, timedelta
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
@@ -73,12 +73,17 @@ def create_case(
     target_date = body.target_date or (
         date.today() + timedelta(days=pack.target_date_default_offset_days)
     )
+    # Generated here, not left to the ORM's flush-time default, because
+    # create_wrapped_case_key needs the real id for its AAD before the
+    # row exists.
+    case_id = uuid4()
     case = Case(
+        id=case_id,
         payer=body.payer,
         provider_type=body.provider_type,
         provider_profile=body.provider_profile,
         target_date=target_date,
-        wrapped_data_key=service.create_wrapped_case_key(key_manager),
+        wrapped_data_key=service.create_wrapped_case_key(key_manager, case_id=case_id),
     )
     session.add(case)
     session.commit()

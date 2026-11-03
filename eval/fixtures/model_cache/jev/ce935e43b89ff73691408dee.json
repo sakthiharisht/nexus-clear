@@ -1,0 +1,11 @@
+{
+  "doc_type": "other",
+  "probabilities": {
+    "other": 0.55
+  },
+  "legible": 0.22,
+  "slot_match": false,
+  "decided_by": "jev",
+  "cost_usd": 0.0002,
+  "latency_ms": 180.0
+}

@@ -6,6 +6,7 @@ needs them lands, not speculatively.
 """
 
 from pathlib import Path
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -40,6 +41,26 @@ class Settings(BaseSettings):
     # Intake upload limits (SPEC.md section 7.1: "Accept PDF/PNG/JPG, size
     # cap, magic-byte check").
     max_upload_size_bytes: int = 15 * 1024 * 1024  # 15 MB
+
+    # Classify (SPEC.md section 7.2 / 12). ANTHROPIC_API_KEY is read
+    # directly by the anthropic SDK, not duplicated here. JEV_MODEL is
+    # the full versioned id ("jev-1.14.0"), never an alias like
+    # "jev-latest" - CLAUDE.md invariant 7 / SPEC risk #1.
+    decision_backend: Literal["jev", "claude"] = "claude"
+    jev_api_key: str | None = None
+    jev_model: str = "jev-1.14.0"
+    model_classify_fallback: str = "claude-haiku-5-5"
+    tau_classify: float = 0.85
+    legible_threshold: float = 0.7
+
+    # Record/replay cache for model calls (CLAUDE.md: "LLM/Jev calls go
+    # through the record/replay cache so CI is offline and
+    # deterministic. Live runs refresh the cache."). "replay" (the CI/
+    # test default) never makes a network call - a cache miss is an
+    # error, not a silent live fallback. "record" calls live and writes
+    # the result to the cache for next time.
+    model_cache_mode: Literal["replay", "record"] = "replay"
+    model_cache_root: Path = _REPO_ROOT / "eval" / "fixtures" / "model_cache"
 
 
 settings = Settings()

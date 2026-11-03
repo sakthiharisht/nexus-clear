@@ -25,12 +25,20 @@ from typing import Any
 
 import yaml
 
+from app.backends.cache import CachedBackend
+from app.backends.claude_backend import ClaudeBackend
+from app.backends.factory import build_primary_and_fallback
+from app.backends.jev_backend import JevBackend
+from app.core.config import settings as app_settings
 from app.eval.baseline_extraction import extract_baseline_facts
 from app.eval.baseline_reconcile import (
     load_registry_fixtures,
     reconcile_name_matches,
     reconcile_registry_results,
 )
+from app.eval.classify_metrics import ClassifyMetrics, compute_classify_metrics
+from app.eval.classify_run import run_classify
+from app.eval.classify_types import ClassifyModeResult
 from app.eval.metrics import compute_mode_metrics
 from app.eval.report import render_markdown_report
 from app.eval.types import ModeResult, PacketResult
@@ -103,6 +111,61 @@ def run_baseline(pack: RulePack, ground_truth: dict[str, Any], fixtures_root: Pa
     return ModeResult(mode="baseline", packets=packets)
 
 
+def _cached(backend: Any, model: str) -> CachedBackend:
+    return CachedBackend(
+        backend,
+        model=model,
+        cache_root=app_settings.model_cache_root,
+        mode=app_settings.model_cache_mode,
+    )
+
+
+def run_classify_mode(
+    mode_name: str, ground_truth: dict[str, Any], fixtures_root: Path
+) -> ClassifyModeResult:
+    """Dispatches a classify eval mode by name (eval/config.yaml's
+    `classify_modes`):
+
+    - "classify-jev" / "classify-claude": the backend alone, no
+      fallback - raw per-backend accuracy/calibration. Constructed
+      directly (not via app.backends.factory, which refuses to build a
+      Jev backend with no JEV_API_KEY configured - a correct guard for
+      a live deployment, but the cache/replay path these eval runs use
+      never needs a key at all).
+    - "classify-policy-claude": app.backends.factory's real wiring,
+      forced to DECISION_BACKEND=claude regardless of the ambient env
+      - the exact path CLAUDE.md invariant 6 requires to work end to
+      end with zero Jev involvement.
+    """
+    if mode_name == "classify-jev":
+        primary: Any = _cached(
+            JevBackend(api_key=app_settings.jev_api_key or "unset", model=app_settings.jev_model),
+            app_settings.jev_model,
+        )
+        fallback = None
+    elif mode_name == "classify-claude":
+        primary = _cached(
+            ClaudeBackend(model=app_settings.model_classify_fallback),
+            app_settings.model_classify_fallback,
+        )
+        fallback = None
+    elif mode_name == "classify-policy-claude":
+        claude_settings = app_settings.model_copy(update={"decision_backend": "claude"})
+        primary, fallback = build_primary_and_fallback(claude_settings)
+    else:
+        raise ValueError(f"unknown classify mode: {mode_name!r}")
+
+    return run_classify(
+        ground_truth,
+        fixtures_root,
+        mode_name=mode_name,
+        primary=primary,
+        fallback=fallback,
+        tau_classify=app_settings.tau_classify,
+        legible_threshold=app_settings.legible_threshold,
+    )
+
+
 def run_eval(config: dict[str, Any], repo_root: Path = REPO_ROOT) -> dict[str, Any]:
     rule_pack_path = _resolve(config["rule_pack"], repo_root)
     ground_truth_path = _resolve(config["ground_truth"], repo_root)
@@ -117,6 +180,15 @@ def run_eval(config: dict[str, Any], repo_root: Path = REPO_ROOT) -> dict[str, A
     if "baseline" in config["modes"]:
         mode_results["baseline"] = run_baseline(pack, ground_truth, fixtures_root)
 
+    classify_results: dict[str, ClassifyModeResult] = {
+        mode_name: run_classify_mode(mode_name, ground_truth, fixtures_root)
+        for mode_name in config.get("classify_modes", [])
+    }
+    classify_metrics: dict[str, ClassifyMetrics] = {
+        mode_name: compute_classify_metrics(result)
+        for mode_name, result in classify_results.items()
+    }
+
     return {
         "rule_pack_version": pack.version,
         "ground_truth_seed": ground_truth["seed"],
@@ -124,6 +196,12 @@ def run_eval(config: dict[str, Any], repo_root: Path = REPO_ROOT) -> dict[str, A
         "metrics": {
             mode: compute_mode_metrics(result, pack).model_dump(mode="json")
             for mode, result in mode_results.items()
+        },
+        "classify_modes": {
+            mode: result.model_dump(mode="json") for mode, result in classify_results.items()
+        },
+        "classify_metrics": {
+            mode: metrics.model_dump(mode="json") for mode, metrics in classify_metrics.items()
         },
     }
 

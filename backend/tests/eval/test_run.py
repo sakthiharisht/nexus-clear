@@ -10,7 +10,7 @@ import pytest
 import yaml
 
 from app.eval.report import render_markdown_report
-from app.eval.run import load_config, main, run_eval
+from app.eval.run import load_config, main, run_classify_mode, run_eval
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 REAL_CONFIG_PATH = REPO_ROOT / "eval" / "config.yaml"
@@ -20,6 +20,11 @@ def test_load_config_reads_the_real_config() -> None:
     config = load_config(REAL_CONFIG_PATH)
     assert config["rule_pack"] == "rules/tx_bcbstx_lpc.yaml"
     assert set(config["modes"]) == {"ceiling", "baseline"}
+    assert set(config["classify_modes"]) == {
+        "classify-jev",
+        "classify-claude",
+        "classify-policy-claude",
+    }
 
 
 def test_load_config_rejects_a_non_mapping_yaml_file(tmp_path: Path) -> None:
@@ -57,6 +62,48 @@ def test_baseline_mode_has_no_false_positives_and_every_miss_is_explained() -> N
     assert metrics["structural_miss_count"] + metrics["overlap_explained_miss_count"] > 0
 
 
+def test_classify_modes_run_against_the_real_committed_fixture_cache() -> None:
+    """Uses the real eval/fixtures/model_cache/ fixtures committed
+    alongside this test (app/eval/classify_fixture_seed.py) - exercises
+    MODEL_CACHE_MODE=replay end to end with no API keys and no network
+    access, same as CI.
+    """
+    config = load_config(REAL_CONFIG_PATH)
+    result = run_eval(config, REPO_ROOT)
+
+    for mode in ("classify-jev", "classify-claude", "classify-policy-claude"):
+        assert mode in result["classify_metrics"]
+        metrics = result["classify_metrics"][mode]
+        assert metrics["n"] == 60  # 12 packets x 5 slots
+        assert 0.0 <= metrics["accuracy"] <= 1.0
+        assert 0.0 <= metrics["ece"] <= 1.0
+
+    # CLAUDE.md invariant 6: DECISION_BACKEND=claude must run end to end
+    # with zero Jev involvement - classify-claude (no fallback) and
+    # classify-policy-claude (the real factory wiring, forced to
+    # decision_backend="claude") exercise the exact same backend/cache,
+    # so they must agree exactly.
+    assert result["classify_metrics"]["classify-claude"] == (
+        result["classify_metrics"]["classify-policy-claude"]
+    )
+
+
+def test_run_classify_mode_rejects_an_unknown_mode_name() -> None:
+    config = load_config(REAL_CONFIG_PATH)
+    ground_truth = json.loads(
+        (REPO_ROOT / config["ground_truth"]).read_text(encoding="utf-8")
+    )
+    with pytest.raises(ValueError, match="unknown classify mode"):
+        run_classify_mode("bogus-mode", ground_truth, REPO_ROOT / config["fixtures_root"])
+
+
+def test_markdown_report_omits_the_classify_section_when_no_classify_metrics_ran() -> None:
+    config = load_config(REAL_CONFIG_PATH)
+    result = run_eval({**config, "classify_modes": []}, REPO_ROOT)
+    report = render_markdown_report(result)
+    assert "M5 Classify" not in report
+
+
 def test_markdown_report_mentions_both_modes() -> None:
     config = load_config(REAL_CONFIG_PATH)
     result = run_eval(config, REPO_ROOT)
@@ -65,6 +112,8 @@ def test_markdown_report_mentions_both_modes() -> None:
     assert "ceiling" in report
     assert "baseline" in report
     assert "Overlap-explained" in report
+    assert "M5 Classify" in report
+    assert "classify-jev" in report
     assert "—" not in report  # no em dashes - plain ASCII for portability
 
 
@@ -84,3 +133,4 @@ def test_main_writes_a_json_run_file(tmp_path: Path, monkeypatch: pytest.MonkeyP
     written = json.loads(run_files[0].read_text(encoding="utf-8"))
     assert "ceiling" in written["metrics"]
     assert "baseline" in written["metrics"]
+    assert "classify-claude" in written["classify_metrics"]

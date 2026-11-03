@@ -70,6 +70,48 @@ def _packets_table(result: dict[str, Any]) -> list[str]:
     return lines
 
 
+def _classify_table_row(mode: str, metrics: dict[str, Any]) -> str:
+    return (
+        f"| {mode} | {metrics['n']} | {_pct(metrics['accuracy'])} "
+        f"| {metrics['ece']:.3f} | {_pct(metrics['escalation_rate'])} "
+        f"| ${metrics['total_cost_usd']:.4f} | {metrics['mean_latency_ms']:.0f} |"
+    )
+
+
+def _classify_section(result: dict[str, Any]) -> list[str]:
+    classify_metrics = result.get("classify_metrics", {})
+    if not classify_metrics:
+        return []
+    lines = [
+        "## M5 Classify",
+        "",
+        "SPEC.md section 7.2: accuracy is over accepted (non-escalated) "
+        "documents only - the honest end-to-end number, matching how the "
+        "M3 baseline's accuracy_when_decided excludes undecided findings. "
+        "ECE (expected calibration error) covers every prediction, "
+        "escalated or not - calibration is a property of what the model "
+        "said, whether or not the policy trusted it.",
+        "",
+        "**classify-jev and classify-claude run each backend alone with no "
+        "fallback - raw per-backend numbers. classify-policy-claude runs "
+        "the real DECISION_BACKEND=claude wiring "
+        "(app/backends/factory.py), proving CLAUDE.md invariant 6 with "
+        "zero Jev involvement.**",
+        "",
+        "**Every classify-jev and classify-claude number below comes from "
+        "simulated fixtures (app/eval/classify_fixture_seed.py), not real "
+        "model output - no JEV_API_KEY or ANTHROPIC_API_KEY was available "
+        "when this was built. See the M5 completion report.**",
+        "",
+        "| mode | n | accuracy | ECE | escalation rate | cost | mean latency (ms) |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
+    ]
+    for mode, metrics in classify_metrics.items():
+        lines.append(_classify_table_row(mode, metrics))
+    lines.append("")
+    return lines
+
+
 def _misses_section(metrics: dict[str, Any], category: str, title: str) -> list[str]:
     rows = [m for m in metrics["misses"] if m["category"] == category]
     if not rows:
@@ -143,5 +185,7 @@ def render_markdown_report(result: dict[str, Any]) -> str:
             metrics, "structural_no_ocr", "Structural: no OCR for scanned documents"
         )
         lines += _misses_section(metrics, "unexplained", "Unexplained (needs investigation)")
+
+    lines += _classify_section(result)
 
     return "\n".join(lines)

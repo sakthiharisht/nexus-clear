@@ -1,0 +1,11 @@
+{
+  "doc_type": "cv",
+  "probabilities": {
+    "cv": 0.9805
+  },
+  "legible": 0.9199999999999999,
+  "slot_match": true,
+  "decided_by": "jev",
+  "cost_usd": 0.0002,
+  "latency_ms": 180.0
+}

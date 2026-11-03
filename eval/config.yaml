@@ -14,3 +14,10 @@ output_dir: eval/runs
 #   (PDF text layer + regex/heuristics) from the rendered packets. This is
 #   the number any future LLM-backed stage has to beat.
 modes: [ceiling, baseline]
+
+# M5 Classify (SPEC.md section 7.2): each backend run standalone (no
+# fallback/escalation - raw per-backend accuracy/calibration), plus the
+# DECISION_BACKEND=claude policy end to end (CLAUDE.md invariant 6: this
+# one must work with no Jev involvement at all). classify-policy-jev
+# needs JEV_API_KEY and isn't run without one.
+classify_modes: [classify-jev, classify-claude, classify-policy-claude]

@@ -114,14 +114,18 @@ def run_eval(config: dict[str, Any], repo_root: Path = REPO_ROOT) -> dict[str, A
     }
 
 
-def main() -> None:  # pragma: no cover - thin CLI wrapper
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Rules-only eval baseline (SPEC.md section 14, M3)"
     )
-    parser.add_argument("--config", type=Path, default=REPO_ROOT / "eval" / "config.yaml")
+    parser.add_argument("--config", default="eval/config.yaml")
     args = parser.parse_args()
 
-    config = load_config(args.config)
+    # Same convention as every path inside the config itself: relative to
+    # the repo root regardless of invocation cwd (so the documented command
+    # works whether run from the repo root or from backend/).
+    config_path = _resolve(args.config, REPO_ROOT)
+    config = load_config(config_path)
     result = run_eval(config, REPO_ROOT)
 
     output_dir = _resolve(config["output_dir"], REPO_ROOT)

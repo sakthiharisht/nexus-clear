@@ -4,7 +4,7 @@ not_applicable" (not_applicable itself is engine-level applies_when gating,
 covered in test_engine.py; this file is the per-kind pass/fail/unknown
 matrix each kind is responsible for)."""
 
-from datetime import date
+from datetime import date, timedelta
 
 from app.rules.context import (
     CaseFacts,
@@ -178,6 +178,20 @@ class TestDateNotExpired:
         ctx = _ctx(license=LicenseFacts(status="Active"))
         assert evaluate_date_not_expired(bad_params, ctx).status == "unknown"
 
+    def test_boundary_fail_one_day_before_as_of(self) -> None:
+        ctx = _ctx(coi=CoiFacts(expiration_date=AS_OF - timedelta(days=1)))
+        assert evaluate_date_not_expired(self.params_plain, ctx).status == "fail"
+
+    def test_boundary_pass_exactly_on_as_of(self) -> None:
+        # Our convention: expires ON the target date still counts as not
+        # expired (expiration >= as_of), not fail.
+        ctx = _ctx(coi=CoiFacts(expiration_date=AS_OF))
+        assert evaluate_date_not_expired(self.params_plain, ctx).status == "pass"
+
+    def test_boundary_pass_one_day_after_as_of(self) -> None:
+        ctx = _ctx(coi=CoiFacts(expiration_date=AS_OF + timedelta(days=1)))
+        assert evaluate_date_not_expired(self.params_plain, ctx).status == "pass"
+
 
 class TestDateExpiringSoon:
     params = DateExpiringSoonParams(
@@ -195,6 +209,20 @@ class TestDateExpiringSoon:
     def test_unknown_when_missing(self) -> None:
         ctx = _ctx(license=LicenseFacts(expiration_date=None))
         assert evaluate_date_expiring_soon(self.params, ctx).status == "unknown"
+
+    def test_boundary_fail_one_day_inside_the_90_day_window(self) -> None:
+        # within_days=90; 89 days out is still "within" the window.
+        ctx = _ctx(license=LicenseFacts(expiration_date=AS_OF + timedelta(days=89)))
+        assert evaluate_date_expiring_soon(self.params, ctx).status == "fail"
+
+    def test_boundary_fail_exactly_at_the_90_day_edge(self) -> None:
+        # The threshold itself is inclusive: exactly 90 days out still fails.
+        ctx = _ctx(license=LicenseFacts(expiration_date=AS_OF + timedelta(days=90)))
+        assert evaluate_date_expiring_soon(self.params, ctx).status == "fail"
+
+    def test_boundary_pass_one_day_past_the_90_day_edge(self) -> None:
+        ctx = _ctx(license=LicenseFacts(expiration_date=AS_OF + timedelta(days=91)))
+        assert evaluate_date_expiring_soon(self.params, ctx).status == "pass"
 
 
 class TestNameMatch:

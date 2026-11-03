@@ -44,3 +44,8 @@ disallow_untyped_defs = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+filterwarnings = [
+    # starlette's TestClient warns that it'll require `httpx2` in a future
+    # release; nothing to act on until that lands, so silence it for now.
+    "ignore::starlette.exceptions.StarletteDeprecationWarning",
+]

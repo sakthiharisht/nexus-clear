@@ -26,6 +26,7 @@ dev = [
     "pillow>=13.0.0",
     "faker>=40.44.0",
     "types-reportlab>=5.0.0.20261008",
+    "pypdf>=6.21.4",
 ]
 
 [tool.ruff]

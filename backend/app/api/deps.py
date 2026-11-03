@@ -26,7 +26,7 @@ def get_rule_pack() -> RulePack:
 
 @lru_cache(maxsize=1)
 def get_key_manager() -> KeyManager:
-    return LocalKeyManager(settings.master_key_path)
+    return LocalKeyManager(settings.master_key_path, settings.master_key)
 
 
 @lru_cache(maxsize=1)

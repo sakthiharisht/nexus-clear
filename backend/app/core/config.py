@@ -27,6 +27,13 @@ class Settings(BaseSettings):
     # (CLAUDE.md invariant 4). Relative (unlike rule_pack_path above): the
     # app always runs with backend/ as its working directory (uv run from
     # backend/, or the container's WORKDIR), so these resolve there.
+    #
+    # master_key is the production path: a base64-encoded 256-bit key
+    # from a real secret store (env var injected by whatever manages
+    # secrets - Docker/K8s secret, Vault, Parameter Store - never
+    # typed in by hand). When unset, LocalKeyManager falls back to
+    # master_key_path - see README.md's key-management caveat.
+    master_key: str | None = None
     master_key_path: Path = Path("data/vault/master.key")
     blob_store_root: Path = Path("data/vault/blobs")
 

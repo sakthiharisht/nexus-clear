@@ -179,22 +179,36 @@ def test_numeric_min_pair_fields_and_mins_length_mismatch(tmp_path: Path) -> Non
         load_rule_pack(_write_pack(tmp_path, data))
 
 
-def test_registry_check_with_no_decision_mode_is_rejected(tmp_path: Path) -> None:
+def test_registry_status_check_missing_expect_status_is_rejected(tmp_path: Path) -> None:
     data = _minimal_pack_dict()
-    data["rules"][0]["kind"] = "registry_check"
-    data["rules"][0]["params"] = {"tool": "nppes_lookup"}  # none of the 3 modes set
+    data["rules"][0]["kind"] = "registry_status_check"
+    data["rules"][0]["params"] = {"tool": "tx_license_lookup"}  # missing expect_status
     with pytest.raises(RulePackError):
         load_rule_pack(_write_pack(tmp_path, data))
 
 
-def test_registry_check_with_two_decision_modes_is_rejected(tmp_path: Path) -> None:
+def test_registry_flags_check_missing_expect_is_rejected(tmp_path: Path) -> None:
+    data = _minimal_pack_dict()
+    data["rules"][0]["kind"] = "registry_flags_check"
+    data["rules"][0]["params"] = {"tool": "nppes_lookup"}  # missing expect
+    with pytest.raises(RulePackError):
+        load_rule_pack(_write_pack(tmp_path, data))
+
+
+def test_registry_exclusion_check_missing_on_possible_match_is_rejected(tmp_path: Path) -> None:
+    data = _minimal_pack_dict()
+    data["rules"][0]["kind"] = "registry_exclusion_check"
+    data["rules"][0]["params"] = {"tool": "leie_check"}  # missing on_possible_match
+    with pytest.raises(RulePackError):
+        load_rule_pack(_write_pack(tmp_path, data))
+
+
+def test_old_combined_registry_check_kind_no_longer_exists(tmp_path: Path) -> None:
+    # Regression guard for the v0.2.0 split: the single `registry_check`
+    # kind must not silently resurrect.
     data = _minimal_pack_dict()
     data["rules"][0]["kind"] = "registry_check"
-    data["rules"][0]["params"] = {
-        "tool": "nppes_lookup",
-        "expect_status": "Active",
-        "expect": ["exists"],
-    }
+    data["rules"][0]["params"] = {"tool": "nppes_lookup", "expect_status": "Active"}
     with pytest.raises(RulePackError):
         load_rule_pack(_write_pack(tmp_path, data))
 

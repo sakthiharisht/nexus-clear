@@ -32,7 +32,9 @@ from app.rules.kinds import (
     evaluate_numeric_min_pair,
     evaluate_path_route,
     evaluate_presence_all,
-    evaluate_registry_check,
+    evaluate_registry_exclusion_check,
+    evaluate_registry_flags_check,
+    evaluate_registry_status_check,
 )
 from app.rules.schema import (
     ChecksumParams,
@@ -48,7 +50,9 @@ from app.rules.schema import (
     NumericMinPairParams,
     PathRouteParams,
     PresenceAllParams,
-    RegistryCheckParams,
+    RegistryExclusionCheckParams,
+    RegistryFlagsCheckParams,
+    RegistryStatusCheckParams,
 )
 
 AS_OF = date(2026, 11, 17)
@@ -224,65 +228,72 @@ class TestNameMatch:
         assert evaluate_name_match("R-LIC-004", self.params, ctx).status == "unknown"
 
 
-class TestRegistryCheck:
-    def test_expect_status_mode_pass(self) -> None:
-        params = RegistryCheckParams(
-            tool="tx_license_lookup", subject="supervisor", expect_status="Active"
-        )
+class TestRegistryStatusCheck:
+    params = RegistryStatusCheckParams(
+        tool="tx_license_lookup", subject="supervisor", expect_status="Active"
+    )
+
+    def test_pass_when_status_matches(self) -> None:
         ctx = _ctx()
         ctx.facts.registry_results["R-SUP-001"] = RegistryResult(status="Active")
-        assert evaluate_registry_check("R-SUP-001", params, ctx).status == "pass"
+        assert evaluate_registry_status_check("R-SUP-001", self.params, ctx).status == "pass"
 
-    def test_expect_status_mode_fail(self) -> None:
-        params = RegistryCheckParams(
-            tool="tx_license_lookup", subject="supervisor", expect_status="Active"
-        )
+    def test_fail_when_status_does_not_match(self) -> None:
         ctx = _ctx()
         ctx.facts.registry_results["R-SUP-001"] = RegistryResult(status="Expired")
-        assert evaluate_registry_check("R-SUP-001", params, ctx).status == "fail"
+        assert evaluate_registry_status_check("R-SUP-001", self.params, ctx).status == "fail"
 
-    def test_expect_list_mode_pass(self) -> None:
-        params = RegistryCheckParams(
-            tool="nppes_lookup", expect=["exists", "name_consistent", "taxonomy_counselor"]
-        )
+    def test_unknown_when_no_result_resolved_yet(self) -> None:
+        assert evaluate_registry_status_check("R-SUP-001", self.params, _ctx()).status == "unknown"
+
+
+class TestRegistryFlagsCheck:
+    params = RegistryFlagsCheckParams(
+        tool="nppes_lookup", expect=["exists", "name_consistent", "taxonomy_counselor"]
+    )
+
+    def test_pass_when_all_flags_true(self) -> None:
         ctx = _ctx()
         ctx.facts.registry_results["R-ID-002"] = RegistryResult(
             checks={"exists": True, "name_consistent": True, "taxonomy_counselor": True}
         )
-        assert evaluate_registry_check("R-ID-002", params, ctx).status == "pass"
+        assert evaluate_registry_flags_check("R-ID-002", self.params, ctx).status == "pass"
 
-    def test_expect_list_mode_fail_when_any_flag_false(self) -> None:
-        params = RegistryCheckParams(
-            tool="nppes_lookup", expect=["exists", "name_consistent", "taxonomy_counselor"]
-        )
+    def test_fail_when_any_flag_false(self) -> None:
         ctx = _ctx()
         ctx.facts.registry_results["R-ID-002"] = RegistryResult(
             checks={"exists": True, "name_consistent": False, "taxonomy_counselor": True}
         )
-        assert evaluate_registry_check("R-ID-002", params, ctx).status == "fail"
+        assert evaluate_registry_flags_check("R-ID-002", self.params, ctx).status == "fail"
 
-    def test_on_possible_match_mode_pass_when_clean(self) -> None:
-        params = RegistryCheckParams(tool="leie_check", on_possible_match="escalate_to_reviewer")
+    def test_unknown_when_no_result_resolved_yet(self) -> None:
+        assert evaluate_registry_flags_check("R-ID-002", self.params, _ctx()).status == "unknown"
+
+
+class TestRegistryExclusionCheck:
+    params = RegistryExclusionCheckParams(
+        tool="leie_check", on_possible_match="escalate_to_reviewer"
+    )
+
+    def test_pass_when_clean(self) -> None:
         ctx = _ctx()
         ctx.facts.registry_results["R-EXC-001"] = RegistryResult(possible_match=False)
-        assert evaluate_registry_check("R-EXC-001", params, ctx).status == "pass"
+        assert evaluate_registry_exclusion_check("R-EXC-001", self.params, ctx).status == "pass"
 
-    def test_on_possible_match_mode_unknown_when_hit(self) -> None:
-        params = RegistryCheckParams(tool="leie_check", on_possible_match="escalate_to_reviewer")
+    def test_unknown_when_hit(self) -> None:
         ctx = _ctx()
         ctx.facts.registry_results["R-EXC-001"] = RegistryResult(possible_match=True)
-        assert evaluate_registry_check("R-EXC-001", params, ctx).status == "unknown"
+        assert evaluate_registry_exclusion_check("R-EXC-001", self.params, ctx).status == "unknown"
 
-    def test_on_possible_match_mode_unknown_when_not_yet_checked(self) -> None:
-        params = RegistryCheckParams(tool="leie_check", on_possible_match="escalate_to_reviewer")
+    def test_unknown_when_not_yet_checked(self) -> None:
         ctx = _ctx()
         # A result exists (the tool ran) but hasn't determined possible_match yet.
         ctx.facts.registry_results["R-EXC-001"] = RegistryResult(possible_match=None)
-        assert evaluate_registry_check("R-EXC-001", params, ctx).status == "unknown"
+        assert evaluate_registry_exclusion_check("R-EXC-001", self.params, ctx).status == "unknown"
 
     def test_unknown_when_no_result_resolved_yet(self) -> None:
-        params = RegistryCheckParams(tool="leie_check", on_possible_match="escalate_to_reviewer")
-        assert evaluate_registry_check("R-EXC-001", params, _ctx()).status == "unknown"
+        result = evaluate_registry_exclusion_check("R-EXC-001", self.params, _ctx())
+        assert result.status == "unknown"
 
 
 class TestNumericMax:

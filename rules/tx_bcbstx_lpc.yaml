@@ -5,9 +5,14 @@
 # source I could not confirm applies to this exact path (see notes). The gap report must
 # show source + doc_date + last_verified for each finding, and surface needs_verification.
 # severity: blocker | warning | info.  kind: see SPEC.md section 6.
+#
+# v0.2.0: split the single `registry_check` kind into `registry_status_check`
+# (R-SUP-001), `registry_flags_check` (R-ID-002), `registry_exclusion_check`
+# (R-EXC-001) — each had an unrelated params shape under the old shared kind.
+# R-WORK-001's title was shortened (mechanical rename, no behavior change).
 
 pack_id: tx-bcbstx-lpc
-version: 0.1.0
+version: 0.2.0
 jurisdiction: TX
 payer: BCBSTX
 provider_type: LPC
@@ -126,7 +131,7 @@ rules:
   - id: R-SUP-001
     title: Supervisor license is active (Associates only)
     severity: blocker
-    kind: registry_check
+    kind: registry_status_check
     params: {tool: tx_license_lookup, subject: supervisor, expect_status: Active}
     applies_when: {field: license.license_type, equals: "LPC Associate"}
     source: tac_681_93
@@ -175,7 +180,7 @@ rules:
     needs_verification: false
 
   - id: R-WORK-001
-    title: Work history covers 5 years with no unexplained gap over 6 months
+    title: Work history has no gap over 6 months
     severity: warning
     kind: history_gap
     params: {min_years: 5, max_gap_months: 6, field: cv.positions}
@@ -195,7 +200,7 @@ rules:
   - id: R-ID-002
     title: NPPES record exists and its name and taxonomy fit a counselor
     severity: warning
-    kind: registry_check
+    kind: registry_flags_check
     params: {tool: nppes_lookup, expect: [exists, name_consistent, taxonomy_counselor]}
     source: internal_policy
     needs_verification: false
@@ -203,7 +208,7 @@ rules:
   - id: R-EXC-001
     title: No match on the OIG exclusion list
     severity: blocker
-    kind: registry_check
+    kind: registry_exclusion_check
     params: {tool: leie_check, on_possible_match: escalate_to_reviewer}
     source: oig_leie
     needs_verification: false

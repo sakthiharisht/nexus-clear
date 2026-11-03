@@ -6,12 +6,10 @@ its `kind` expects — see the per-kind `*Params` models below and
 pack is rejected (CLAUDE.md / SPEC.md M1 accept criterion); app/rules/loader.py
 is a thin YAML-reading wrapper around it.
 
-Known rule-pack design issue (flagged for the SPEC.md change proposal): the
-`registry_check` kind is used with three different `params` shapes in the
-seed pack (R-SUP-001: tool+subject+expect_status; R-ID-002: tool+expect list;
-R-EXC-001: tool+on_possible_match). `RegistryCheckParams` below accepts the
-union of all three rather than one coherent shape, which pushes the real
-branching into the kind evaluator (app/rules/kinds.py) instead of the schema.
+As of pack v0.2.0, `registry_check` (a single kind used with three unrelated
+`params` shapes in v0.1.0 — tool+subject+expect_status, tool+expect list,
+tool+on_possible_match) is split into three coherent kinds:
+`registry_status_check`, `registry_flags_check`, `registry_exclusion_check`.
 """
 
 from typing import Literal
@@ -27,7 +25,9 @@ RuleKind = Literal[
     "date_not_expired",
     "date_expiring_soon",
     "name_match",
-    "registry_check",
+    "registry_status_check",
+    "registry_flags_check",
+    "registry_exclusion_check",
     "numeric_max",
     "numeric_min_pair",
     "presence_all",
@@ -84,28 +84,20 @@ class NameMatchParams(_StrictModel):
     min_probability: float
 
 
-class RegistryCheckParams(_StrictModel):
+class RegistryStatusCheckParams(_StrictModel):
     tool: str
-    subject: str | None = None
-    expect_status: str | None = None
-    expect: list[str] | None = None
-    on_possible_match: str | None = None
+    expect_status: str
+    subject: str | None = None  # supplementary metadata, e.g. "supervisor"
 
-    @model_validator(mode="after")
-    def _exactly_one_decision_mode(self) -> "RegistryCheckParams":
-        # `subject` is supplementary metadata for the expect_status mode, not
-        # a decision mode of its own — see app/rules/kinds.py.
-        modes = [
-            self.expect_status is not None,
-            self.expect is not None,
-            self.on_possible_match is not None,
-        ]
-        if sum(modes) != 1:
-            raise ValueError(
-                "registry_check params must set exactly one of "
-                "expect_status, expect, or on_possible_match"
-            )
-        return self
+
+class RegistryFlagsCheckParams(_StrictModel):
+    tool: str
+    expect: list[str]
+
+
+class RegistryExclusionCheckParams(_StrictModel):
+    tool: str
+    on_possible_match: str
 
 
 class NumericMaxParams(_StrictModel):
@@ -157,7 +149,9 @@ _PARAMS_MODEL_BY_KIND: dict[RuleKind, type[_StrictModel]] = {
     "date_not_expired": DateNotExpiredParams,
     "date_expiring_soon": DateExpiringSoonParams,
     "name_match": NameMatchParams,
-    "registry_check": RegistryCheckParams,
+    "registry_status_check": RegistryStatusCheckParams,
+    "registry_flags_check": RegistryFlagsCheckParams,
+    "registry_exclusion_check": RegistryExclusionCheckParams,
     "numeric_max": NumericMaxParams,
     "numeric_min_pair": NumericMinPairParams,
     "presence_all": PresenceAllParams,

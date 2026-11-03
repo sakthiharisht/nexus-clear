@@ -31,7 +31,9 @@ from app.rules.schema import (
     NumericMinPairParams,
     PathRouteParams,
     PresenceAllParams,
-    RegistryCheckParams,
+    RegistryExclusionCheckParams,
+    RegistryFlagsCheckParams,
+    RegistryStatusCheckParams,
 )
 
 
@@ -169,49 +171,65 @@ def evaluate_name_match(rule_id: str, params: NameMatchParams, ctx: EvalContext)
     return KindResult(status=status, evidence=[_doc_evidence(None, quote)], confidence=probability)
 
 
-def evaluate_registry_check(
-    rule_id: str, params: RegistryCheckParams, ctx: EvalContext
+def _no_registry_result_yet(tool: str) -> KindResult:
+    return KindResult(
+        status="unknown",
+        evidence=[_doc_evidence(None, f"no registry result resolved yet for {tool}")],
+    )
+
+
+def evaluate_registry_status_check(
+    rule_id: str, params: RegistryStatusCheckParams, ctx: EvalContext
 ) -> KindResult:
     result = ctx.facts.registry_results.get(rule_id)
     if result is None:
+        return _no_registry_result_yet(params.tool)
+
+    quote = f"{params.tool} status = {result.status!r} (expected {params.expect_status!r})"
+    status: FindingStatus = "pass" if result.status == params.expect_status else "fail"
+    evidence = _registry_evidence(
+        result.registry, params.tool, result.record_hash, result.fetched_at, quote
+    )
+    return KindResult(status=status, evidence=[evidence])
+
+
+def evaluate_registry_flags_check(
+    rule_id: str, params: RegistryFlagsCheckParams, ctx: EvalContext
+) -> KindResult:
+    result = ctx.facts.registry_results.get(rule_id)
+    if result is None:
+        return _no_registry_result_yet(params.tool)
+
+    missing = [flag for flag in params.expect if not result.checks.get(flag)]
+    quote = f"{params.tool} checks = {result.checks!r} (required {params.expect!r})"
+    status: FindingStatus = "fail" if missing else "pass"
+    evidence = _registry_evidence(
+        result.registry, params.tool, result.record_hash, result.fetched_at, quote
+    )
+    return KindResult(status=status, evidence=[evidence])
+
+
+def evaluate_registry_exclusion_check(
+    rule_id: str, params: RegistryExclusionCheckParams, ctx: EvalContext
+) -> KindResult:
+    result = ctx.facts.registry_results.get(rule_id)
+    if result is None:
+        return _no_registry_result_yet(params.tool)
+    if result.possible_match is None:
         return KindResult(
             status="unknown",
-            evidence=[_doc_evidence(None, f"no registry result resolved yet for {params.tool}")],
+            evidence=[_doc_evidence(None, f"{params.tool} possible_match not yet checked")],
         )
 
-    evidence_quote: str
-    status: FindingStatus
-
-    if params.expect_status is not None:
-        evidence_quote = (
-            f"{params.tool} status = {result.status!r} (expected {params.expect_status!r})"
-        )
-        status = "pass" if result.status == params.expect_status else "fail"
-    elif params.expect is not None:
-        missing = [flag for flag in params.expect if not result.checks.get(flag)]
-        evidence_quote = f"{params.tool} checks = {result.checks!r} (required {params.expect!r})"
-        status = "fail" if missing else "pass"
-    else:
-        assert params.on_possible_match is not None  # guaranteed by schema validation
-        if result.possible_match is None:
-            return KindResult(
-                status="unknown",
-                evidence=[_doc_evidence(None, f"{params.tool} possible_match not yet checked")],
-            )
-        evidence_quote = f"{params.tool} possible_match = {result.possible_match}"
-        # A possible match can't be auto-resolved here — it goes to the
-        # reviewer (SPEC.md section 7.7), so this engine reports `unknown`
-        # rather than guessing pass or fail.
-        status = "unknown" if result.possible_match else "pass"
-
-    return KindResult(
-        status=status,
-        evidence=[
-            _registry_evidence(
-                result.registry, params.tool, result.record_hash, result.fetched_at, evidence_quote
-            )
-        ],
+    quote = f"{params.tool} possible_match = {result.possible_match}"
+    # A possible match can't be auto-resolved here — it goes to the reviewer
+    # (SPEC.md section 7.7), so this engine reports `unknown` rather than
+    # guessing pass or fail.
+    status: FindingStatus = "unknown" if result.possible_match else "pass"
+    evidence = _registry_evidence(
+        result.registry, params.tool, result.record_hash, result.fetched_at, quote
     )
+    return KindResult(status=status, evidence=[evidence])
 
 
 def evaluate_numeric_max(params: NumericMaxParams, ctx: EvalContext) -> KindResult:

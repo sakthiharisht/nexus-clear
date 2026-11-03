@@ -31,7 +31,9 @@ from app.rules.schema import (
     NumericMinPairParams,
     PathRouteParams,
     PresenceAllParams,
-    RegistryCheckParams,
+    RegistryExclusionCheckParams,
+    RegistryFlagsCheckParams,
+    RegistryStatusCheckParams,
     Rule,
     RulePack,
 )
@@ -85,9 +87,17 @@ def _evaluate_single(rule: Rule, ctx: EvalContext) -> KindResult:
             return kinds.evaluate_name_match(
                 rule.id, NameMatchParams.model_validate(rule.params), ctx
             )
-        case "registry_check":
-            return kinds.evaluate_registry_check(
-                rule.id, RegistryCheckParams.model_validate(rule.params), ctx
+        case "registry_status_check":
+            return kinds.evaluate_registry_status_check(
+                rule.id, RegistryStatusCheckParams.model_validate(rule.params), ctx
+            )
+        case "registry_flags_check":
+            return kinds.evaluate_registry_flags_check(
+                rule.id, RegistryFlagsCheckParams.model_validate(rule.params), ctx
+            )
+        case "registry_exclusion_check":
+            return kinds.evaluate_registry_exclusion_check(
+                rule.id, RegistryExclusionCheckParams.model_validate(rule.params), ctx
             )
         case "numeric_max":
             return kinds.evaluate_numeric_max(NumericMaxParams.model_validate(rule.params), ctx)

@@ -26,6 +26,11 @@ from typing import Any
 import yaml
 
 from app.eval.baseline_extraction import extract_baseline_facts
+from app.eval.baseline_reconcile import (
+    load_registry_fixtures,
+    reconcile_name_matches,
+    reconcile_registry_results,
+)
 from app.eval.metrics import compute_mode_metrics
 from app.eval.report import render_markdown_report
 from app.eval.types import ModeResult, PacketResult
@@ -69,11 +74,20 @@ def run_ceiling(pack: RulePack, ground_truth: dict[str, Any]) -> ModeResult:
 
 
 def run_baseline(pack: RulePack, ground_truth: dict[str, Any], fixtures_root: Path) -> ModeResult:
-    """Rules engine on CaseFacts built by non-LLM extraction from the
-    rendered packets — see app/eval/baseline_extraction.py."""
+    """Rules engine on CaseFacts built by non-LLM extraction
+    (app/eval/baseline_extraction.py) plus non-LLM reconcile (rapidfuzz
+    name matching + registry fixture lookups, app/eval/baseline_reconcile.py)
+    from the rendered packets."""
+    registry_fixtures = load_registry_fixtures(fixtures_root)
     packets: list[PacketResult] = []
     for packet in ground_truth["packets"]:
         facts, notes = extract_baseline_facts(packet, fixtures_root)
+        facts = facts.model_copy(
+            update={
+                "name_match_probabilities": reconcile_name_matches(pack, facts),
+                "registry_results": reconcile_registry_results(pack, facts, registry_fixtures),
+            }
+        )
         target_date = date.fromisoformat(packet["target_date"])
         findings = evaluate_rule_pack(pack, facts, target_date)
         packets.append(

@@ -1,18 +1,27 @@
 """Metrics for the M3 eval runner (SPEC.md section 14).
 
-Every finding mismatch is sorted into one of three buckets, not lumped
-together as "failures":
-  structural_no_reconcile - the rule is name_match/registry_* and baseline
-      has no Reconcile stage or MCP tools yet to resolve it (true at
-      every packet, not specific to this one).
-  structural_no_ocr       - the rule depends on a document slot baseline
-      couldn't read at all (a scanned/image document; no OCR capability).
-  overlap_explained       - same as structural_no_ocr, but the slot is
+Every finding mismatch is sorted into one of four buckets, not lumped
+together as "failures". Document readability is checked first, even for
+name_match/registry_* rules — R-LIC-004 depends on license.holder_name
+the same way R-LIC-002 depends on license.expiration_date, so an
+unreadable license document explains *both* misses the same way, not
+"no OCR" for one and "no Reconcile" for the other:
+  overlap_explained       - the rule depends on a document slot that's
       unreadable *because* another defect in this same packet degraded
       it (e.g. D10 renders the slot D09 misfiled as an illegible scan) -
       a defect-interaction, not a standalone baseline gap.
+  structural_no_ocr       - the rule depends on a document slot baseline
+      couldn't read at all, with no second defect to blame (a scanned/
+      image document; no OCR capability).
+  structural_no_reconcile - the rule is name_match/registry_* and the
+      *document* side was readable fine, but baseline reconcile
+      (app/eval/baseline_reconcile.py) still couldn't resolve it - an
+      ambiguous fuzzy name score, or no matching registry fixture entry.
   unexplained             - anything left over: a real, unaccounted-for
-      miss worth investigating.
+      miss worth investigating (this would also catch a *wrong* decided
+      answer from baseline reconcile, not just a missing one - the
+      thresholds in baseline_reconcile.py are chosen to avoid that, but
+      if it ever happens this is where it would show up).
 """
 
 from __future__ import annotations
@@ -80,6 +89,18 @@ class ModeMetrics(BaseModel):
     false_positives_on_clean_or_benign: int
     false_positive_rate_clean_benign: float
     unknown_rate: float
+    # Share of findings where the ground truth itself has a decidable
+    # answer (expected != "unknown") that baseline actually decided
+    # (didn't fall back to unknown). Excludes findings ground truth itself
+    # can't decide (e.g. D12's LEIE possible-match -> unknown + escalate)
+    # - matching that with unknown is success, not a coverage gap.
+    coverage: float
+    # Of the findings baseline *did* decide (actual != "unknown"), the
+    # share that matched expected. Complements coverage: coverage asks
+    # "how often does baseline commit to an answer", this asks "when it
+    # does, how often is it right" - the number that should stay high even
+    # as coverage improves, per "never guess".
+    accuracy_when_decided: float
     per_defect_detected: dict[str, bool]
     misses: list[MissExplanation]
     structural_miss_count: int
@@ -117,6 +138,20 @@ def _affected_slot(finding_id: str, rule_id: str, rule_namespaces: dict[str, str
     return namespace if namespace in ("license", "coi", "cv") else None
 
 
+def _slot_is_unreadable(packet: PacketResult, slot: str) -> bool:
+    """Evidence-based, not inferred: true only when baseline_extraction.py
+    actually recorded this slot as unreadable (extraction_notes), never
+    just because some finding touching it came back unknown - an unknown
+    name_match score, for instance, doesn't mean the document was
+    unreadable, just that reconcile couldn't commit to an answer."""
+    prefix = f"{slot}:"
+    return any(
+        note.startswith(prefix)
+        and ("no extractable text layer" in note or "no document uploaded" in note)
+        for note in packet.extraction_notes
+    )
+
+
 def _classify_miss(
     packet: PacketResult,
     finding_id: str,
@@ -129,21 +164,17 @@ def _classify_miss(
     rule_id = finding_id.split(":", 1)[0]
     kind = rule_kinds.get(rule_id)
 
-    if kind in STRUCTURAL_KINDS:
-        return MissExplanation(
-            packet_id=packet.packet_id,
-            finding_id=finding_id,
-            expected=expected,
-            actual=actual,
-            category="structural_no_reconcile",
-            explanation=(
-                f"{rule_id} is a {kind} rule; baseline has no Reconcile stage "
-                "or MCP tools yet to resolve it"
-            ),
-        )
-
+    # Document-readability first, even for name_match/registry_* kinds:
+    # R-LIC-004 depends on license.holder_name same as R-LIC-001/002/003
+    # do (via `left`, not `field`, but _rule_namespace handles both) - if
+    # the license document itself is unreadable, that's *why* R-LIC-004
+    # can't be decided, not a generic "no Reconcile stage" gap. Only fall
+    # back to the blanket structural_no_reconcile explanation below when
+    # there's no document-readability story to tell (the slot was fine;
+    # reconcile just didn't have enough signal, e.g. an ambiguous fuzzy
+    # name score, or a registry fixture with no matching entry).
     slot = _affected_slot(finding_id, rule_id, rule_namespaces)
-    if actual == "unknown" and slot is not None:
+    if actual == "unknown" and slot is not None and _slot_is_unreadable(packet, slot):
         count = slot_defect_counts.get((packet.packet_id, slot), 0)
         if count >= 2:
             other = [d for d in packet.defect_ids if DEFECT_SLOTS.get(d) == slot]
@@ -167,6 +198,20 @@ def _classify_miss(
             explanation=(
                 f"{slot} document has no extractable text layer (scanned image); "
                 "baseline has no OCR/vision capability"
+            ),
+        )
+
+    if kind in STRUCTURAL_KINDS:
+        return MissExplanation(
+            packet_id=packet.packet_id,
+            finding_id=finding_id,
+            expected=expected,
+            actual=actual,
+            category="structural_no_reconcile",
+            explanation=(
+                f"{rule_id} is a {kind} rule baseline reconcile couldn't resolve "
+                "(ambiguous fuzzy match or no matching registry fixture entry) - "
+                "not a document-readability problem"
             ),
         )
 
@@ -198,6 +243,10 @@ def compute_mode_metrics(result: ModeResult, pack: RulePack) -> ModeMetrics:
     unknown_findings = 0
     fp_clean_benign = 0
     total_clean_benign_findings = 0
+    decidable_findings = 0  # expected != "unknown"
+    decidable_and_decided = 0  # expected != "unknown" and actual != "unknown"
+    decided_findings = 0  # actual != "unknown"
+    decided_and_correct = 0  # actual != "unknown" and actual == expected
 
     for packet in result.packets:
         exact = True
@@ -206,6 +255,15 @@ def compute_mode_metrics(result: ModeResult, pack: RulePack) -> ModeMetrics:
             total_findings += 1
             if actual_status == "unknown":
                 unknown_findings += 1
+
+            if expected_status != "unknown":
+                decidable_findings += 1
+                if actual_status != "unknown":
+                    decidable_and_decided += 1
+            if actual_status is not None and actual_status != "unknown":
+                decided_findings += 1
+                if actual_status == expected_status:
+                    decided_and_correct += 1
 
             rule_id = finding_id.split(":", 1)[0]
             metrics = per_rule.setdefault(rule_id, RuleMetrics(rule_id=rule_id))
@@ -272,6 +330,12 @@ def compute_mode_metrics(result: ModeResult, pack: RulePack) -> ModeMetrics:
             fp_clean_benign / total_clean_benign_findings if total_clean_benign_findings else 0.0
         ),
         unknown_rate=(unknown_findings / total_findings if total_findings else 0.0),
+        coverage=(
+            decidable_and_decided / decidable_findings if decidable_findings else 1.0
+        ),
+        accuracy_when_decided=(
+            decided_and_correct / decided_findings if decided_findings else 1.0
+        ),
         per_defect_detected=per_defect_detected,
         misses=misses,
         structural_miss_count=sum(1 for m in misses if m.category.startswith("structural")),

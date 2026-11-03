@@ -70,6 +70,11 @@ class ProfileFacts(BaseModel):
 
 class SupervisionFacts(BaseModel):
     supervisor_count: int | None = None
+    # Intake-provided (like profile.*), not document-extracted: the
+    # Associate's application names their supervisor's license number.
+    # Used as the tx_license_lookup key for R-SUP-001 (see
+    # app/eval/baseline_reconcile.py); no rule reads it directly.
+    supervisor_license_number: str | None = None
 
 
 class RegistryResult(BaseModel):

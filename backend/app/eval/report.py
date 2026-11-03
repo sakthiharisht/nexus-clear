@@ -18,7 +18,9 @@ def _mode_table_row(mode: str, metrics: dict[str, Any]) -> str:
         f"| {_pct(metrics['primary_defect_detected_rate'])} "
         f"| {metrics['false_positives_on_clean_or_benign']} "
         f"({_pct(metrics['false_positive_rate_clean_benign'])}) "
-        f"| {_pct(metrics['unknown_rate'])} |"
+        f"| {_pct(metrics['unknown_rate'])} "
+        f"| {_pct(metrics['coverage'])} "
+        f"| {_pct(metrics['accuracy_when_decided'])} |"
     )
 
 
@@ -74,12 +76,29 @@ def render_markdown_report(result: dict[str, Any]) -> str:
         "## Mode comparison",
         "",
         "| mode | exact match | primary defect detected "
-        "| false positives (clean/benign) | unknown rate |",
-        "| --- | --- | --- | --- | --- |",
+        "| false positives (clean/benign) | unknown rate | coverage | accuracy when decided |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
     ]
     for mode in result["metrics"]:
         lines.append(_mode_table_row(mode, result["metrics"][mode]))
     lines.append("")
+
+    if "baseline" in result["metrics"]:
+        lines += [
+            "**Baseline caveats** - read these numbers as an upper bound on what "
+            "regex/fuzzy-matching can do, not a general benchmark:",
+            "- Field extraction (app/eval/baseline_extraction.py) is regex matched "
+            "against this project's own renderer's exact \"Label: value\" line "
+            "format. It will not generalize to real-world document layouts the "
+            "way an LLM-based extractor would.",
+            "- Name matching (app/eval/baseline_reconcile.py) is rapidfuzz "
+            "token_sort_ratio with no nickname table, so it only resolves clear "
+            "matches and clear mismatches - a genuine nickname pair (\"Jon\" vs "
+            "\"Jonathan\") scores in the ambiguous middle and stays unknown. See "
+            "the structural_no_reconcile misses below for exactly where this "
+            "shows up.",
+            "",
+        ]
 
     for mode, metrics in result["metrics"].items():
         lines.append(f"## {mode} - per-rule precision/recall")

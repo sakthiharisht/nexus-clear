@@ -93,11 +93,15 @@ def test_structural_no_reconcile_classification(pack: RulePack) -> None:
 def test_overlap_explained_classification(pack: RulePack) -> None:
     # Two defects (D09, D10) both target the "license" slot in this packet
     # -> any license-dependent finding that comes back unknown is
-    # overlap-explained, not a standalone baseline gap.
+    # overlap-explained, not a standalone baseline gap. extraction_notes is
+    # what actually tells the classifier the slot was unreadable - an
+    # unknown status alone isn't evidence of that (e.g. an unresolved
+    # fuzzy name score is also "unknown" on a readable document).
     packet = PacketResult(
         packet_id="defective-7", kind="defective", defect_ids=["D09", "D10", "D14"],
         actual={"R-LIC-001": "unknown", "R-DOC-001:doc-license": "unknown"},
         expected={"R-LIC-001": "pass", "R-DOC-001:doc-license": "fail"},
+        extraction_notes=["license: no extractable text layer (packets/defective-7/license.png)"],
     )
     metrics = compute_mode_metrics(_result("baseline", [packet]), pack)
     assert metrics.overlap_explained_miss_count == 2
@@ -112,9 +116,26 @@ def test_structural_no_ocr_classification_when_only_one_defect_on_the_slot(pack:
     packet = PacketResult(
         packet_id="p1", kind="defective", defect_ids=["D10"],
         actual={"R-DOC-002:doc-license": "unknown"}, expected={"R-DOC-002:doc-license": "fail"},
+        extraction_notes=["license: no extractable text layer (packets/p1/license.png)"],
     )
     metrics = compute_mode_metrics(_result("baseline", [packet]), pack)
     assert metrics.misses[0].category == "structural_no_ocr"
+
+
+def test_unknown_name_match_on_a_readable_document_is_not_mistaken_for_no_ocr(
+    pack: RulePack,
+) -> None:
+    # R-LIC-004 is slot-dependent (license) but there's no extraction_notes
+    # evidence the license document was unreadable - this must fall
+    # through to structural_no_reconcile, not structural_no_ocr, even
+    # though the finding_id's slot resolution machinery is shared with the
+    # per-document kinds.
+    packet = PacketResult(
+        packet_id="benign-1", kind="benign", defect_ids=[],
+        actual={"R-LIC-004": "unknown"}, expected={"R-LIC-004": "pass"},
+    )
+    metrics = compute_mode_metrics(_result("baseline", [packet]), pack)
+    assert metrics.misses[0].category == "structural_no_reconcile"
 
 
 def test_unexplained_classification_for_an_unaccounted_mismatch(pack: RulePack) -> None:
@@ -148,3 +169,40 @@ def test_unknown_rate(pack: RulePack) -> None:
     )
     metrics = compute_mode_metrics(_result("baseline", [packet]), pack)
     assert metrics.unknown_rate == 0.5
+
+
+def test_coverage_excludes_findings_ground_truth_itself_leaves_unknown(pack: RulePack) -> None:
+    # R-EXC-001 expected "unknown" (an LEIE possible-match that must
+    # escalate, not a decidable answer) shouldn't count against coverage
+    # even though baseline also reports unknown for it - matching an
+    # intentionally-unknown expectation is success, not a coverage gap.
+    packet = PacketResult(
+        packet_id="p1", kind="defective", defect_ids=["D12"],
+        actual={"R-LIC-001": "pass", "R-EXC-001": "unknown"},
+        expected={"R-LIC-001": "pass", "R-EXC-001": "unknown"},
+    )
+    metrics = compute_mode_metrics(_result("baseline", [packet]), pack)
+    assert metrics.coverage == 1.0  # the one decidable finding (R-LIC-001) was decided
+
+
+def test_coverage_counts_a_decidable_finding_baseline_left_unknown(pack: RulePack) -> None:
+    packet = PacketResult(
+        packet_id="p1", kind="clean", defect_ids=[],
+        actual={"R-LIC-001": "pass", "R-LIC-004": "unknown"},
+        expected={"R-LIC-001": "pass", "R-LIC-004": "pass"},
+    )
+    metrics = compute_mode_metrics(_result("baseline", [packet]), pack)
+    assert metrics.coverage == 0.5
+
+
+def test_accuracy_when_decided_ignores_undecided_findings(pack: RulePack) -> None:
+    packet = PacketResult(
+        packet_id="p1", kind="clean", defect_ids=[],
+        actual={"R-LIC-001": "pass", "R-LIC-002": "fail", "R-LIC-004": "unknown"},
+        expected={"R-LIC-001": "pass", "R-LIC-002": "pass", "R-LIC-004": "pass"},
+    )
+    metrics = compute_mode_metrics(_result("baseline", [packet]), pack)
+    # Two decided findings (R-LIC-001, R-LIC-002), one correct -> 0.5.
+    # R-LIC-004 (undecided) doesn't count in either the numerator or
+    # denominator.
+    assert metrics.accuracy_when_decided == 0.5

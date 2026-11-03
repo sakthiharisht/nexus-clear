@@ -56,6 +56,13 @@ class ProviderSpec:
     supervisor_count: int | None = None  # only meaningful for LPC Associates
     supervisor_license_status: str = "Active"  # only meaningful for Associates
 
+    @property
+    def supervisor_license_number(self) -> str:
+        """The tx_license.json fixture key for this provider's supervisor
+        (see packets.py's _registry_fixture_payload) - derived, not stored
+        separately, so the two can never drift apart."""
+        return f"{self.license_number}-SUPERVISOR"
+
 
 def build_provider(index: int, target_date: date, fake: Faker) -> ProviderSpec:
     """A clean, internally-consistent provider: valid license, valid COI,

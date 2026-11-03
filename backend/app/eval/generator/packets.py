@@ -145,7 +145,10 @@ def _case_facts(
             ],
         ),
         profile=ProfileFacts(legal_name=p.legal_name, practice_name=p.practice_name, npi=p.npi),
-        supervision=SupervisionFacts(supervisor_count=p.supervisor_count),
+        supervision=SupervisionFacts(
+            supervisor_count=p.supervisor_count,
+            supervisor_license_number=p.supervisor_license_number,
+        ),
         documents=documents,
         name_match_probabilities=dict(state.name_match_probabilities),
         registry_results=_registry_results(state),
@@ -194,7 +197,7 @@ def _registry_fixture_payload(state: PacketBuildState) -> dict[str, dict[str, di
         },
     }
     if p.license_type == "LPC Associate":
-        payload["tx_license"][f"{p.license_number}-SUPERVISOR"] = {
+        payload["tx_license"][p.supervisor_license_number] = {
             "status": state.supervisor_license_status,
             "holder_name": "Supervising LPC-S",
             "license_type": "LPC-S",
@@ -261,11 +264,20 @@ def _apply_benign_variation(spec: PacketSpec, state: PacketBuildState) -> None:
     if spec.packet_id == "benign-1-nickname":
         # The SPEC.md section 7.5 fixture example, verbatim: "Jon" vs
         # "Jonathan" must PASS. Hardcoded (not derived from the Faker name)
-        # so the nickname relationship is unambiguous.
+        # so the nickname relationship is unambiguous. coi_insured_name is
+        # overridden too (a provider fills out every form with the same
+        # preferred name) - build_provider() already set it from the
+        # pre-override legal_name, so leaving it alone here would silently
+        # make the COI's insured name an unrelated Faker name instead of a
+        # second instance of the same nickname relationship.
         state.provider = replace(
-            state.provider, legal_name="Jonathan Alvarez", license_holder_name="Jon Alvarez"
+            state.provider,
+            legal_name="Jonathan Alvarez",
+            license_holder_name="Jon Alvarez",
+            coi_insured_name="Jon Alvarez",
         )
         state.name_match_probabilities["R-LIC-004"] = 0.95
+        state.name_match_probabilities["R-COI-004"] = 0.95
     elif spec.packet_id == "benign-2-rotated-scan":
         state.license_scan_degradation = "benign"
         state.legible_score["license"] = 0.85

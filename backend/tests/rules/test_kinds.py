@@ -224,6 +224,22 @@ class TestDateExpiringSoon:
         ctx = _ctx(license=LicenseFacts(expiration_date=AS_OF + timedelta(days=91)))
         assert evaluate_date_expiring_soon(self.params, ctx).status == "pass"
 
+    def test_not_applicable_when_already_expired(self) -> None:
+        # Already-expired is R-LIC-002's (date_not_expired) blocker to
+        # report, not this warning — avoid double-reporting.
+        ctx = _ctx(license=LicenseFacts(expiration_date=AS_OF - timedelta(days=10)))
+        assert evaluate_date_expiring_soon(self.params, ctx).status == "not_applicable"
+
+    def test_boundary_fail_exactly_on_as_of(self) -> None:
+        # Expires today (0 days out): not yet past as_of, so still "fail"
+        # (expiring very soon), not not_applicable.
+        ctx = _ctx(license=LicenseFacts(expiration_date=AS_OF))
+        assert evaluate_date_expiring_soon(self.params, ctx).status == "fail"
+
+    def test_boundary_not_applicable_one_day_past_as_of(self) -> None:
+        ctx = _ctx(license=LicenseFacts(expiration_date=AS_OF - timedelta(days=1)))
+        assert evaluate_date_expiring_soon(self.params, ctx).status == "not_applicable"
+
 
 class TestNameMatch:
     params = NameMatchParams(

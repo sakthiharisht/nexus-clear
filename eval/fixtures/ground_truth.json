@@ -706,7 +706,7 @@
         "R-ID-002": "pass",
         "R-LIC-001": "pass",
         "R-LIC-002": "fail",
-        "R-LIC-003": "fail",
+        "R-LIC-003": "not_applicable",
         "R-LIC-004": "pass",
         "R-PATH-001": "pass",
         "R-SEC-001:doc-coi": "pass",

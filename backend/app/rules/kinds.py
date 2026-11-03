@@ -146,6 +146,17 @@ def evaluate_date_expiring_soon(params: DateExpiringSoonParams, ctx: EvalContext
     if expiration is None or not isinstance(expiration, date):
         return _unknown(params.field)
     days_until = (expiration - ctx.as_of).days
+
+    if days_until < 0:
+        # Already expired: that's R-LIC-002's (date_not_expired) blocker to
+        # report, not this warning — avoid double-reporting the same fact
+        # as two separate findings.
+        quote = (
+            f"{params.field} = {expiration.isoformat()} already expired "
+            f"as of {ctx.as_of.isoformat()}"
+        )
+        return KindResult(status="not_applicable", evidence=[_doc_evidence(None, quote)])
+
     quote = (
         f"{params.field} = {expiration.isoformat()}, {days_until} day(s) from as_of "
         f"(threshold {params.within_days})"

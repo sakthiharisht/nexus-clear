@@ -36,7 +36,7 @@ SINGLE_RULE_IDS = [
 # D06/D07 additionally flip R-SUP-001/002 off their not_applicable baseline
 # (handled in `baseline_expected_findings`, driven by `is_associate`).
 DEFECT_OVERRIDES: dict[str, dict[str, FindingStatus]] = {
-    "D01": {"R-LIC-002": "fail", "R-LIC-003": "fail"},
+    "D01": {"R-LIC-002": "fail", "R-LIC-003": "not_applicable"},
     "D02": {"R-LIC-003": "fail"},
     "D03": {"R-COI-001": "fail"},
     "D04": {"R-COI-002": "fail"},

@@ -13,6 +13,7 @@ dependencies = [
     "psycopg[binary]>=3.3.7",
     "pyyaml>=6.0.3",
     "cryptography>=50.0.2",
+    "python-multipart>=0.0.20",
 ]
 
 [dependency-groups]
@@ -40,6 +41,12 @@ extend-exclude = ["alembic/versions"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI's dependency injection requires `Depends(...)` (and friends) as
+# a parameter default; it's a factory call, not the mutable-default
+# footgun B008 exists to catch.
+extend-immutable-calls = ["fastapi.Depends", "fastapi.params.Depends"]
 
 [tool.mypy]
 python_version = "3.12"

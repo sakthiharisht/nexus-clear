@@ -22,8 +22,20 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/nexus_clear
+      # The image only ever contains ./backend's build context, so
+      # config.py's local-checkout default (parents[3] from
+      # app/core/config.py landing on the repo root) can't reach
+      # ../rules here - it resolves to the container's own /rules,
+      # which doesn't exist. Override explicitly to the bind mount
+      # below instead of baking the rule pack into the image, since
+      # it's data the loader reads at startup, not application code.
+      RULE_PACK_PATH: /app/rules/tx_bcbstx_lpc.yaml
     ports:
       - "8000:8000"
+    volumes:
+      - vault_data:/app/data/vault
+      - ./rules:/app/rules:ro
 
 volumes:
   pg_data:
+  vault_data:

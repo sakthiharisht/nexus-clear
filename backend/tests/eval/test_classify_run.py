@@ -20,8 +20,9 @@ def _packet(packet_id: str) -> dict:
 class _StubBackend:
     name = "claude"
 
-    def __init__(self) -> None:
+    def __init__(self, simulated: bool = False) -> None:
         self.inputs: list[ClassifyInput] = []
+        self._simulated = simulated
 
     def classify(self, classify_input: ClassifyInput) -> ClassificationResult:
         self.inputs.append(classify_input)
@@ -31,7 +32,29 @@ class _StubBackend:
             legible=0.9,
             slot_match=True,
             decided_by="claude",
+            simulated=self._simulated,
         )
+
+
+def _one_document_ground_truth() -> dict:
+    return {
+        "packets": [
+            {
+                "packet_id": "p1",
+                "documents": {"cv": "packets/p1/cv.pdf"},
+                "facts": {
+                    "documents": [
+                        {
+                            "slot": "cv",
+                            "expected_doc_type": "cv",
+                            "uploaded_doc_type": "cv",
+                            "legible_score": 0.9,
+                        }
+                    ]
+                },
+            }
+        ]
+    }
 
 
 def test_build_classify_input_extracts_real_page1_text_for_a_text_pdf() -> None:
@@ -113,6 +136,60 @@ def test_run_classify_skips_a_slot_with_no_uploaded_document() -> None:
     )
     assert result.documents == []
     assert backend.inputs == []
+
+
+def test_mode_label_is_unmarked_when_no_document_is_simulated() -> None:
+    backend = _StubBackend(simulated=False)
+    result = run_classify(
+        _one_document_ground_truth(),
+        FIXTURES_ROOT,
+        mode_name="test-mode",
+        primary=backend,
+        fallback=None,
+        tau_classify=0.85,
+        legible_threshold=0.7,
+    )
+    assert result.mode == "test-mode"
+    assert result.documents[0].simulated is False
+
+
+def test_mode_label_carries_simulated_when_the_result_is_simulated() -> None:
+    backend = _StubBackend(simulated=True)
+    result = run_classify(
+        _one_document_ground_truth(),
+        FIXTURES_ROOT,
+        mode_name="test-mode",
+        primary=backend,
+        fallback=None,
+        tau_classify=0.85,
+        legible_threshold=0.7,
+    )
+    assert result.mode == "test-mode-SIMULATED"
+    assert result.documents[0].simulated is True
+
+
+def test_mode_label_carries_simulated_when_only_the_fallback_result_is_simulated() -> None:
+    """M5.1 "eval honesty": even one simulated document taints the
+    whole mode label - a mode can't be reported as live just because
+    most of its documents were."""
+
+    class _AlwaysEscalating(_StubBackend):
+        def classify(self, classify_input: ClassifyInput) -> ClassificationResult:
+            result = super().classify(classify_input)
+            return result.model_copy(update={"probabilities": {"cv": 0.0}})
+
+    primary = _AlwaysEscalating(simulated=False)
+    fallback = _StubBackend(simulated=True)
+    result = run_classify(
+        _one_document_ground_truth(),
+        FIXTURES_ROOT,
+        mode_name="test-mode",
+        primary=primary,
+        fallback=fallback,
+        tau_classify=0.85,
+        legible_threshold=0.7,
+    )
+    assert result.mode == "test-mode-SIMULATED"
 
 
 def test_page1_text_returns_empty_for_a_corrupt_pdf(tmp_path: Path) -> None:

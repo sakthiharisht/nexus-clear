@@ -7,5 +7,6 @@
   "slot_match": true,
   "decided_by": "claude",
   "cost_usd": 0.0009,
-  "latency_ms": 650.0
+  "latency_ms": 650.0,
+  "simulated": true
 }

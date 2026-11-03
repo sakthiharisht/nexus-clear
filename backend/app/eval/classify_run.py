@@ -114,6 +114,12 @@ def run_classify(
                     decided_by=result.decided_by,
                     cost_usd=result.cost_usd,
                     latency_ms=result.latency_ms,
+                    simulated=result.simulated,
                 )
             )
-    return ClassifyModeResult(mode=mode_name, documents=documents)
+
+    # M5.1 "eval honesty": a mode with even one simulated document gets
+    # marked in the label itself, not just in a field a report could
+    # silently drop - see ClassifyModeResult's docstring.
+    final_mode = f"{mode_name}-SIMULATED" if any(d.simulated for d in documents) else mode_name
+    return ClassifyModeResult(mode=final_mode, documents=documents)

@@ -49,3 +49,10 @@ class ClassificationResult(BaseModel):
     decided_by: Literal["jev", "claude"]
     cost_usd: float = 0.0
     latency_ms: float = 0.0
+    # True only for app/eval/classify_fixture_seed.py's hand-derived
+    # placeholders. Real backends (ClaudeBackend, JevBackend) never set
+    # this - it defaults False, so any result that actually came from
+    # a live call is correctly marked real. Eval reporting (M5.1)
+    # propagates this into the mode label itself so a simulated number
+    # can never be read as a live one.
+    simulated: bool = False

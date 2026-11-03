@@ -25,8 +25,12 @@ class DocumentClassification(BaseModel):
     decided_by: str
     cost_usd: float
     latency_ms: float
+    simulated: bool
 
 
 class ClassifyModeResult(BaseModel):
-    mode: str  # e.g. "classify-jev", "classify-claude"
+    # "-SIMULATED" is appended (app/eval/classify_run.py's run_classify)
+    # whenever any document in this mode came from a simulated fixture
+    # - never left to a human to notice from the numbers alone.
+    mode: str  # e.g. "classify-jev", "classify-claude-haiku-SIMULATED"
     documents: list[DocumentClassification]

@@ -13,6 +13,7 @@ def _doc(
     escalated: bool = False,
     cost_usd: float = 0.001,
     latency_ms: float = 100.0,
+    simulated: bool = False,
 ) -> DocumentClassification:
     return DocumentClassification(
         packet_id="p1",
@@ -28,6 +29,7 @@ def _doc(
         decided_by="claude",
         cost_usd=cost_usd,
         latency_ms=latency_ms,
+        simulated=simulated,
     )
 
 

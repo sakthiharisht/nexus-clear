@@ -82,6 +82,7 @@ def _classify_section(result: dict[str, Any]) -> list[str]:
     classify_metrics = result.get("classify_metrics", {})
     if not classify_metrics:
         return []
+    simulated_modes = [mode for mode in classify_metrics if mode.endswith("-SIMULATED")]
     lines = [
         "## M5 Classify",
         "",
@@ -92,17 +93,23 @@ def _classify_section(result: dict[str, Any]) -> list[str]:
         "escalated or not - calibration is a property of what the model "
         "said, whether or not the policy trusted it.",
         "",
-        "**classify-jev and classify-claude run each backend alone with no "
-        "fallback - raw per-backend numbers. classify-policy-claude runs "
-        "the real DECISION_BACKEND=claude wiring "
+        "**classify-jev and classify-claude-* run each backend alone with "
+        "no fallback - raw per-backend numbers. classify-policy-claude "
+        "runs the real DECISION_BACKEND=claude wiring "
         "(app/backends/factory.py), proving CLAUDE.md invariant 6 with "
         "zero Jev involvement.**",
         "",
-        "**Every classify-jev and classify-claude number below comes from "
-        "simulated fixtures (app/eval/classify_fixture_seed.py), not real "
-        "model output - no JEV_API_KEY or ANTHROPIC_API_KEY was available "
-        "when this was built. See the M5 completion report.**",
-        "",
+    ]
+    if simulated_modes:
+        lines += [
+            "**A mode name ending in -SIMULATED (" + ", ".join(sorted(simulated_modes)) + ") "
+            "was built from app/eval/classify_fixture_seed.py's simulated fixtures, not "
+            "real model output - see the M5/M5.1 completion reports for why. Every other "
+            "mode below is a real recorded response "
+            "(app/eval/live_classify.py, MODEL_CACHE_MODE=record).**",
+            "",
+        ]
+    lines += [
         "| mode | n | accuracy | ECE | escalation rate | cost | mean latency (ms) |",
         "| --- | --- | --- | --- | --- | --- | --- |",
     ]

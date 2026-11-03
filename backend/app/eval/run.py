@@ -180,10 +180,16 @@ def run_eval(config: dict[str, Any], repo_root: Path = REPO_ROOT) -> dict[str, A
     if "baseline" in config["modes"]:
         mode_results["baseline"] = run_baseline(pack, ground_truth, fixtures_root)
 
-    classify_results: dict[str, ClassifyModeResult] = {
-        mode_name: run_classify_mode(mode_name, ground_truth, fixtures_root)
-        for mode_name in config.get("classify_modes", [])
-    }
+    # Keyed by result.mode, not the requested mode_name: run_classify
+    # appends "-SIMULATED" to the mode name itself when any document in
+    # it came from a simulated fixture (app/eval/classify_run.py), so
+    # the dict key here - which becomes the JSON key and the markdown
+    # table's row label - carries that marker too, not just the field
+    # inside each document.
+    classify_results: dict[str, ClassifyModeResult] = {}
+    for mode_name in config.get("classify_modes", []):
+        result = run_classify_mode(mode_name, ground_truth, fixtures_root)
+        classify_results[result.mode] = result
     classify_metrics: dict[str, ClassifyMetrics] = {
         mode_name: compute_classify_metrics(result)
         for mode_name, result in classify_results.items()

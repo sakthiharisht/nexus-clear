@@ -62,6 +62,7 @@ def _simulate(
         decided_by=backend_name,  # type: ignore[arg-type]
         cost_usd=0.0002 if backend_name == "jev" else 0.0009,
         latency_ms=180.0 if backend_name == "jev" else 650.0,
+        simulated=True,
     )
 
 

@@ -71,8 +71,19 @@ def test_classify_modes_run_against_the_real_committed_fixture_cache() -> None:
     config = load_config(REAL_CONFIG_PATH)
     result = run_eval(config, REPO_ROOT)
 
-    for mode in ("classify-jev", "classify-claude", "classify-policy-claude"):
-        assert mode in result["classify_metrics"]
+    def _find(base_mode: str) -> str:
+        """The mode key may or may not carry "-SIMULATED" depending on
+        whether the committed cache for it has been live-recorded yet
+        (M5.1) - resolve whichever is actually present rather than
+        hardcoding one, so this test doesn't need editing every time a
+        mode's fixtures flip from simulated to real or back."""
+        candidates = [base_mode, f"{base_mode}-SIMULATED"]
+        matches = [m for m in candidates if m in result["classify_metrics"]]
+        assert len(matches) == 1, f"expected exactly one of {candidates}, found {matches}"
+        return matches[0]
+
+    for base_mode in ("classify-jev", "classify-claude", "classify-policy-claude"):
+        mode = _find(base_mode)
         metrics = result["classify_metrics"][mode]
         assert metrics["n"] == 60  # 12 packets x 5 slots
         assert 0.0 <= metrics["accuracy"] <= 1.0
@@ -83,8 +94,8 @@ def test_classify_modes_run_against_the_real_committed_fixture_cache() -> None:
     # classify-policy-claude (the real factory wiring, forced to
     # decision_backend="claude") exercise the exact same backend/cache,
     # so they must agree exactly.
-    assert result["classify_metrics"]["classify-claude"] == (
-        result["classify_metrics"]["classify-policy-claude"]
+    assert result["classify_metrics"][_find("classify-claude")] == (
+        result["classify_metrics"][_find("classify-policy-claude")]
     )
 
 
@@ -133,4 +144,7 @@ def test_main_writes_a_json_run_file(tmp_path: Path, monkeypatch: pytest.MonkeyP
     written = json.loads(run_files[0].read_text(encoding="utf-8"))
     assert "ceiling" in written["metrics"]
     assert "baseline" in written["metrics"]
-    assert "classify-claude" in written["classify_metrics"]
+    assert any(
+        mode in ("classify-claude", "classify-claude-SIMULATED")
+        for mode in written["classify_metrics"]
+    )

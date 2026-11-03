@@ -52,5 +52,11 @@ jobs:
       - name: Migrate (smoke-checks "docker compose up ... migrates")
         run: uv run alembic upgrade head
 
+      - name: Generate eval fixtures
+        run: uv run python -m app.eval.generator.build
+
+      - name: Check eval fixtures are up to date
+        run: git diff --exit-code ../eval/fixtures/ground_truth.json ../eval/fixtures/registry/
+
       - name: Test (pytest)
         run: uv run pytest -q

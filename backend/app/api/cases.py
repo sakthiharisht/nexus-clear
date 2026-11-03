@@ -44,12 +44,37 @@ _MAGIC_BYTES: dict[str, bytes] = {
     "image/jpeg": b"\xff\xd8\xff",
 }
 
+_UPLOAD_CHUNK_SIZE = 64 * 1024
+
 
 def _sniff_content_type(content: bytes) -> str | None:
     for mime, magic in _MAGIC_BYTES.items():
         if content.startswith(magic):
             return mime
     return None
+
+
+def _oversize_error(max_bytes: int) -> HTTPException:
+    return HTTPException(
+        status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, f"file exceeds the {max_bytes}-byte limit"
+    )
+
+
+async def _read_bounded(file: UploadFile, max_bytes: int) -> bytes:
+    """Reads `file` in fixed-size chunks, raising 413 the moment the
+    running total exceeds `max_bytes` - a client claiming (or just
+    sending) far more than the limit is never buffered past one chunk
+    over it, unlike a single `await file.read()` which buffers the
+    entire body in memory before any size check can run."""
+    content = bytearray()
+    while True:
+        chunk = await file.read(_UPLOAD_CHUNK_SIZE)
+        if not chunk:
+            break
+        content.extend(chunk)
+        if len(content) > max_bytes:
+            raise _oversize_error(max_bytes)
+    return bytes(content)
 
 
 def _get_case_or_404(session: Session, case_id: UUID) -> Case:
@@ -137,19 +162,18 @@ async def upload_document(
     key_manager: KeyManager = Depends(get_key_manager),
     blob_store: BlobStore = Depends(get_blob_store),
 ) -> Document:
+    # MaxContentLengthMiddleware (app/main.py) already rejected a
+    # too-large Content-Length before this handler - and before
+    # Starlette's multipart parser read any of the body - for a client
+    # that reports its size honestly. _read_bounded below is the
+    # backstop for a body that understates or omits Content-Length.
     case = _get_case_or_404(session, case_id)
 
     known_slots = {required_slot.slot for required_slot in pack.required_slots}
     if slot not in known_slots:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, f"{slot!r} is not a checklist slot")
 
-    content = await file.read()
-
-    if len(content) > settings.max_upload_size_bytes:
-        raise HTTPException(
-            status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            f"file exceeds the {settings.max_upload_size_bytes}-byte limit",
-        )
+    content = await _read_bounded(file, settings.max_upload_size_bytes)
 
     if _sniff_content_type(content) is None:
         raise HTTPException(

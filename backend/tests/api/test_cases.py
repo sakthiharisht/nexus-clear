@@ -6,9 +6,14 @@ generator's rendered documents; this file is the API contract itself.
 
 from __future__ import annotations
 
+import asyncio
 from uuid import uuid4
 
+import pytest
+from fastapi import HTTPException
 from fastapi.testclient import TestClient
+
+from app.api import cases
 
 _MINIMAL_PDF = b"%PDF-1.4\n%synthetic test content, not a real document\n"
 _MINIMAL_PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 16
@@ -190,3 +195,62 @@ def test_upload_to_unknown_case_is_404(api_client: TestClient) -> None:
         files={"file": ("x.pdf", _MINIMAL_PDF, "application/pdf")},
     )
     assert response.status_code == 404
+
+
+class _EndlessUploadFile:
+    """Simulates a client that keeps sending bytes well past any sane
+    upload limit - standing in for an UploadFile backed by a stream
+    whose total length isn't known (or is lied about) up front."""
+
+    def __init__(self) -> None:
+        self.total_bytes_served = 0
+
+    async def read(self, size: int) -> bytes:
+        self.total_bytes_served += size
+        return b"0" * size  # never returns empty - an unbounded reader would hang/OOM
+
+
+def test_read_bounded_rejects_without_draining_an_endless_stream() -> None:
+    fake_file = _EndlessUploadFile()
+    max_bytes = 1000
+
+    with pytest.raises(HTTPException) as exc_info:
+        asyncio.run(cases._read_bounded(fake_file, max_bytes))  # type: ignore[arg-type]
+
+    assert exc_info.value.status_code == 413
+    # Stopped within one chunk of the limit, not after serving megabytes.
+    assert fake_file.total_bytes_served <= max_bytes + cases._UPLOAD_CHUNK_SIZE
+
+
+def test_middleware_rejects_on_content_length_before_the_body_is_parsed(
+    api_client: TestClient,
+) -> None:
+    """MaxContentLengthMiddleware (app/main.py) runs ahead of FastAPI's
+    routing/multipart parsing entirely, so a lying Content-Length with
+    no matching body still gets rejected - if anything downstream had
+    tried to read the (nonexistent) declared body first, this would
+    hang instead of failing fast."""
+    from app.core.config import settings
+
+    case = _create_case(api_client)
+    response = api_client.post(
+        f"/cases/{case['id']}/documents",
+        params={"slot": "license"},
+        content=b"",
+        headers={"content-length": str(settings.max_upload_size_bytes * 10)},
+    )
+    assert response.status_code == 413
+
+
+def test_middleware_ignores_a_malformed_content_length_header(api_client: TestClient) -> None:
+    case = _create_case(api_client)
+    response = api_client.post(
+        f"/cases/{case['id']}/documents",
+        params={"slot": "license"},
+        files={"file": ("license.pdf", _MINIMAL_PDF, "application/pdf")},
+        headers={"content-length": "not-a-number"},
+    )
+    # A header httpx itself would never send, but one a real HTTP client
+    # could - the middleware shouldn't crash on it, just decline to
+    # short-circuit and let the normal request flow handle it.
+    assert response.status_code == 201

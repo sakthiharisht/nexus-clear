@@ -1,7 +1,13 @@
 """M2 accept criterion: the manifest covers D01-D15."""
 
+import json
+from pathlib import Path
+
 from app.eval.generator.defects import DEFECT_CATALOG
 from app.eval.generator.packets import PACKET_SPECS
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+GROUND_TRUTH_PATH = REPO_ROOT / "eval" / "fixtures" / "ground_truth.json"
 
 
 def test_every_catalog_defect_appears_in_at_least_one_packet() -> None:
@@ -32,3 +38,10 @@ def test_defective_packets_plant_one_to_three_defects() -> None:
 def test_packet_ids_are_unique() -> None:
     ids = [spec.packet_id for spec in PACKET_SPECS]
     assert len(ids) == len(set(ids))
+
+
+def test_primary_defect_in_ground_truth_is_the_first_listed_defect() -> None:
+    ground_truth = json.loads(GROUND_TRUTH_PATH.read_text(encoding="utf-8"))
+    for packet in ground_truth["packets"]:
+        expected_primary = packet["defect_ids"][0] if packet["defect_ids"] else None
+        assert packet["primary_defect"] == expected_primary, packet["packet_id"]

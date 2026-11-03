@@ -43,6 +43,11 @@ def generate_all(seed: int, output_root: Path) -> dict[str, Any]:
                 "packet_id": built.packet_id,
                 "kind": built.kind,
                 "defect_ids": built.defect_ids,
+                # By convention (see app/eval/metrics.py's
+                # primary_defect_detected_rate), the first-listed defect is
+                # this packet's primary scenario; the rest are secondary/
+                # co-occurring. None for clean/benign packets.
+                "primary_defect": built.defect_ids[0] if built.defect_ids else None,
                 "description": built.description,
                 "target_date": built.target_date.isoformat(),
                 "documents": {

@@ -185,6 +185,7 @@
       },
       "kind": "clean",
       "packet_id": "clean-1",
+      "primary_defect": null,
       "target_date": "2026-11-17"
     },
     {
@@ -355,6 +356,7 @@
       },
       "kind": "clean",
       "packet_id": "clean-2",
+      "primary_defect": null,
       "target_date": "2026-11-17"
     },
     {
@@ -525,6 +527,7 @@
       },
       "kind": "benign",
       "packet_id": "benign-1-nickname",
+      "primary_defect": null,
       "target_date": "2026-11-17"
     },
     {
@@ -695,6 +698,7 @@
       },
       "kind": "benign",
       "packet_id": "benign-2-rotated-scan",
+      "primary_defect": null,
       "target_date": "2026-11-17"
     },
     {
@@ -868,6 +872,7 @@
       },
       "kind": "defective",
       "packet_id": "defective-1",
+      "primary_defect": "D01",
       "target_date": "2026-11-17"
     },
     {
@@ -1041,6 +1046,7 @@
       },
       "kind": "defective",
       "packet_id": "defective-2",
+      "primary_defect": "D02",
       "target_date": "2026-11-17"
     },
     {
@@ -1214,6 +1220,7 @@
       },
       "kind": "defective",
       "packet_id": "defective-3",
+      "primary_defect": "D03",
       "target_date": "2026-11-17"
     },
     {
@@ -1387,6 +1394,7 @@
       },
       "kind": "defective",
       "packet_id": "defective-4",
+      "primary_defect": "D05",
       "target_date": "2026-11-17"
     },
     {
@@ -1568,6 +1576,7 @@
       },
       "kind": "defective",
       "packet_id": "defective-5",
+      "primary_defect": "D06",
       "target_date": "2026-11-17"
     },
     {
@@ -1749,6 +1758,7 @@
       },
       "kind": "defective",
       "packet_id": "defective-6",
+      "primary_defect": "D07",
       "target_date": "2026-11-17"
     },
     {
@@ -1923,6 +1933,7 @@
       },
       "kind": "defective",
       "packet_id": "defective-7",
+      "primary_defect": "D09",
       "target_date": "2026-11-17"
     },
     {
@@ -2096,6 +2107,7 @@
       },
       "kind": "defective",
       "packet_id": "defective-8",
+      "primary_defect": "D12",
       "target_date": "2026-11-17"
     }
   ],

@@ -52,6 +52,24 @@ def _per_defect_table(metrics: dict[str, Any]) -> list[str]:
     return lines
 
 
+def _packets_table(result: dict[str, Any]) -> list[str]:
+    """One row per packet: kind, every planted defect, and which one is
+    primary (first-listed, by convention - see
+    app/eval/generator/build.py's primary_defect field and
+    app/eval/metrics.py's primary_defect_detected_rate)."""
+    any_mode = next(iter(result["modes"].values()))
+    lines = [
+        "| packet_id | kind | primary defect | all defects |",
+        "| --- | --- | --- | --- |",
+    ]
+    for packet in any_mode["packets"]:
+        defect_ids = packet["defect_ids"]
+        primary = defect_ids[0] if defect_ids else "-"
+        all_defects = ", ".join(defect_ids) if defect_ids else "-"
+        lines.append(f"| {packet['packet_id']} | {packet['kind']} | {primary} | {all_defects} |")
+    return lines
+
+
 def _misses_section(metrics: dict[str, Any], category: str, title: str) -> list[str]:
     rows = [m for m in metrics["misses"] if m["category"] == category]
     if not rows:
@@ -72,6 +90,12 @@ def render_markdown_report(result: dict[str, Any]) -> str:
         "",
         f"rule_pack_version: `{result['rule_pack_version']}`  "
         f"ground_truth_seed: `{result['ground_truth_seed']}`",
+        "",
+        "## Packets",
+        "",
+    ]
+    lines += _packets_table(result)
+    lines += [
         "",
         "## Mode comparison",
         "",

@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from datetime import date
 
 from app.core.contracts import EvidenceRef, FindingStatus
-from app.rules.context import CaseFacts, DocumentFact, get_path
+from app.rules.context import CaseFacts, DocumentFact, get_path, is_slot_readable
 from app.rules.schema import (
     ApplicationPath,
     ChecksumParams,
@@ -268,11 +268,33 @@ def evaluate_numeric_min_pair(params: NumericMinPairParams, ctx: EvalContext) ->
 
 
 def evaluate_presence_all(params: PresenceAllParams, ctx: EvalContext) -> KindResult:
+    """Unlike most kinds, a missing field here isn't automatically
+    `unknown` — presence_all's whole job is judging presence/absence, so a
+    field that's blank on a document we actually read is a confirmed
+    `fail`. Only when the owning document was never readable at all does
+    that field's absence collapse to `unknown` (CLAUDE.md invariant 2: no
+    guessing). `fail` wins over `unknown` when both occur in the same
+    rule, since a confirmed-missing field is decisive regardless of what
+    else couldn't be checked.
+    """
     values = {f: get_path(ctx.facts, f) for f in params.fields}
     missing = [f for f, v in values.items() if v is None or v == ""]
-    quote = f"present: {values!r}" if not missing else f"missing: {missing!r}"
-    status: FindingStatus = "fail" if missing else "pass"
-    return KindResult(status=status, evidence=[_doc_evidence(None, quote)])
+
+    confirmed_missing = [f for f in missing if is_slot_readable(ctx.facts, f.split(".", 1)[0])]
+    unreadable = [f for f in missing if f not in confirmed_missing]
+
+    if confirmed_missing:
+        quote = f"missing (document read): {confirmed_missing!r}"
+        if unreadable:
+            quote += f"; also unreadable: {unreadable!r}"
+        return KindResult(status="fail", evidence=[_doc_evidence(None, quote)])
+
+    if unreadable:
+        quote = f"cannot confirm presence - document(s) unreadable: {unreadable!r}"
+        return KindResult(status="unknown", evidence=[_doc_evidence(None, quote)])
+
+    quote = f"present: {values!r}"
+    return KindResult(status="pass", evidence=[_doc_evidence(None, quote)])
 
 
 def evaluate_history_gap(params: HistoryGapParams, ctx: EvalContext) -> KindResult:

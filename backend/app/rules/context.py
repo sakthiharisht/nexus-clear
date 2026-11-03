@@ -4,10 +4,14 @@ M1 scope boundary: this is NOT the final Extraction contract (SPEC.md section
 7.3 — value/confidence/page/quote per field, built in M6). It's the engine's
 own typed view of "whatever is known about this case right now," simple
 enough to construct by hand in tests without the Intake/Classify/Extract
-stages existing yet. `None` here means "we don't have this value" — it does
-not distinguish "not yet extracted" from "extraction ran and found nothing,"
-which the real Extraction contract will. Rule kinds that treat a missing
-value as `unknown` rather than `fail` do so because of this collapse.
+stages existing yet. `None` here means "we don't have this value" — on its
+own that's ambiguous between "not yet extracted" and "extraction ran and
+found nothing." `DocumentFact.readable` (see `is_slot_readable`) resolves
+that ambiguity for kinds that need it: a rule reading a value from an
+unreadable document reports `unknown`, and only reports a confirmed-absent
+`fail` when the document was actually read. Most kinds never need this —
+a single missing field is already `unknown` to them regardless of why —
+but `presence_all` does, since its whole job is judging presence/absence.
 
 Two fields are deliberately pre-resolved rather than computed by this
 engine: `name_match_probabilities` and `registry_results`. SPEC.md section
@@ -88,6 +92,15 @@ class DocumentFact(BaseModel):
     (doc_type_match, legibility, injection_flag — see app/rules/engine.py).
     Unlike the other *Facts models, a rule of one of these kinds produces one
     Finding per DocumentFact, not one Finding total.
+
+    `readable` distinguishes "this document was processed and a field came
+    back blank" from "this document couldn't be processed at all" (e.g. a
+    scanned image with no text layer, or classification failure) — see
+    `is_slot_readable` and CLAUDE.md invariant 2: a field with no supporting
+    evidence is `unknown`, never guessed. Defaults to True because most
+    CaseFacts in this codebase are hand-built ground truth (M1/M2 tests,
+    CEILING mode) where "was it readable" isn't a meaningful question — only
+    a real extractor (app/eval/baseline_extraction.py) sets it to False.
     """
 
     doc_id: str
@@ -96,6 +109,7 @@ class DocumentFact(BaseModel):
     uploaded_doc_type: str | None = None
     legible_score: float | None = None
     contains_injection_text: bool | None = None
+    readable: bool = True
 
 
 class CaseFacts(BaseModel):
@@ -120,3 +134,19 @@ def get_path(facts: CaseFacts, path: str) -> object | None:
     for part in path.split("."):
         obj = getattr(obj, part, None)
     return obj
+
+
+def is_slot_readable(facts: CaseFacts, slot: str) -> bool:
+    """Was the document at this slot actually processed? Used by kinds that
+    need to tell "confirmed absent" (fail) apart from "we don't know"
+    (unknown) when a field is missing — see DocumentFact.readable.
+
+    Defaults to True when there's no matching DocumentFact: namespaces that
+    aren't document-backed at all (profile, supervision) should never be
+    treated as "unreadable", and CaseFacts built without an explicit
+    documents list (most hand-built ground truth) shouldn't either.
+    """
+    for doc in facts.documents:
+        if doc.slot == slot:
+            return doc.readable
+    return True

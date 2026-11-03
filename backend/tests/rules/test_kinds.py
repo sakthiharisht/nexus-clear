@@ -401,6 +401,34 @@ class TestPresenceAll:
         )
         assert evaluate_presence_all(self.params, ctx).status == "fail"
 
+    def test_unknown_when_the_document_is_unreadable(self) -> None:
+        # Every field is missing, but only because the COI document itself
+        # was never readable (e.g. a scanned image) - we don't know whether
+        # it would have had these fields, so this isn't a confirmed fail.
+        ctx = _ctx(
+            coi=CoiFacts(),
+            documents=[DocumentFact(doc_id="doc-coi", slot="coi", readable=False)],
+        )
+        assert evaluate_presence_all(self.params, ctx).status == "unknown"
+
+    def test_fail_wins_when_one_field_is_confirmed_missing_and_another_is_unreadable(
+        self,
+    ) -> None:
+        # Mixed scenario shouldn't happen with this pack's rules (all of a
+        # presence_all rule's fields live on the same document slot), but
+        # the kind itself should still resolve unambiguously: a confirmed
+        # miss is decisive regardless of what else couldn't be checked.
+        params = PresenceAllParams(fields=["coi.carrier", "license.license_number"])
+        ctx = _ctx(
+            coi=CoiFacts(carrier=None),
+            license=LicenseFacts(license_number=None),
+            documents=[
+                DocumentFact(doc_id="doc-coi", slot="coi", readable=True),
+                DocumentFact(doc_id="doc-license", slot="license", readable=False),
+            ],
+        )
+        assert evaluate_presence_all(params, ctx).status == "fail"
+
 
 class TestHistoryGap:
     params = HistoryGapParams(min_years=5, max_gap_months=6, field="cv.positions")

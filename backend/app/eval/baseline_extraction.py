@@ -138,7 +138,9 @@ def extract_baseline_facts(
         if rel_path is None:
             notes.append(f"{slot}: no document uploaded")
             documents.append(
-                DocumentFact(doc_id=doc_id, slot=slot, expected_doc_type=expected_doc_type)
+                DocumentFact(
+                    doc_id=doc_id, slot=slot, expected_doc_type=expected_doc_type, readable=False
+                )
             )
             continue
 
@@ -146,7 +148,9 @@ def extract_baseline_facts(
         if text is None:
             notes.append(f"{slot}: no extractable text layer ({rel_path}) — unknown")
             documents.append(
-                DocumentFact(doc_id=doc_id, slot=slot, expected_doc_type=expected_doc_type)
+                DocumentFact(
+                    doc_id=doc_id, slot=slot, expected_doc_type=expected_doc_type, readable=False
+                )
             )
             continue
 
@@ -162,6 +166,7 @@ def extract_baseline_facts(
                 uploaded_doc_type=uploaded_doc_type,
                 legible_score=0.95 if uploaded_doc_type is not None else None,
                 contains_injection_text=_contains_injection(text),
+                readable=True,
             )
         )
 

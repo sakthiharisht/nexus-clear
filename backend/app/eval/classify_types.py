@@ -23,6 +23,8 @@ class DocumentClassification(BaseModel):
     accepted: bool
     escalated: bool
     decided_by: str
+    input_tokens: int
+    output_tokens: int
     cost_usd: float
     latency_ms: float
     simulated: bool

@@ -112,6 +112,8 @@ def run_classify(
                     accepted=classify_decision.accepted,
                     escalated=classify_decision.escalated,
                     decided_by=result.decided_by,
+                    input_tokens=result.input_tokens,
+                    output_tokens=result.output_tokens,
                     cost_usd=result.cost_usd,
                     latency_ms=result.latency_ms,
                     simulated=result.simulated,

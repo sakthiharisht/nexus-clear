@@ -6,6 +6,8 @@
   "legible": 0.82,
   "slot_match": true,
   "decided_by": "jev",
+  "input_tokens": 350,
+  "output_tokens": 20,
   "cost_usd": 0.0002,
   "latency_ms": 180.0,
   "simulated": true

@@ -15,16 +15,33 @@ def _client(handler) -> httpx.Client:  # type: ignore[no-untyped-def]
 
 
 def _fake_response_body(**overrides: object) -> dict[str, object]:
+    # Shape confirmed against the real live API (M5.1, 2026-11-04) -
+    # see jev_backend.py's module docstring.
     body: dict[str, object] = {
-        "doc_type": {
-            "type": "choice",
-            "choice": "cv",
-            "probability": {"cv": 0.9, "other": 0.1},
-            "confidence": 0.9,
+        "model": "jev-1.14.0",
+        "answers": {
+            "doc_type": {
+                "type": "choice",
+                "choice": "cv",
+                "confidence": 1.0,
+                "probabilities": {"cv": 0.9, "other": 0.1},
+            },
+            "legible": {
+                "type": "score",
+                "score": 3.0,  # index 3 of 5 levels -> 3/4 = 0.75
+                "confidence": 0.9,
+                "legend": {
+                    "0": "illegible",
+                    "1": "poor",
+                    "2": "fair",
+                    "3": "good",
+                    "4": "excellent",
+                },
+                "probabilities": {"0": 0.0, "1": 0.0, "2": 0.05, "3": 0.9, "4": 0.05},
+            },
+            "slot_match": {"type": "noul", "noul": 0.8},
         },
-        "legible": {"type": "score", "score": 0.75, "choice": "good"},
-        "slot_match": {"type": "noul", "probability": 0.8, "confidence": 0.8},
-        "usage": {"cost": "0.00045"},
+        "usage": {"input_tokens": 311, "output_tokens": 21},
     }
     body.update(overrides)
     return body
@@ -50,10 +67,33 @@ def test_classify_sends_the_pinned_model_and_parses_the_response() -> None:
 
     assert result.doc_type == "cv"
     assert result.probabilities == {"cv": 0.9, "other": 0.1}
-    assert result.legible == 0.75
+    assert result.legible == pytest.approx(0.75)
     assert result.slot_match is True
     assert result.decided_by == "jev"
-    assert result.cost_usd == pytest.approx(0.00045)
+    assert result.input_tokens == 311
+    assert result.output_tokens == 21
+    # Jev's direct-API pricing isn't verified (see module docstring) -
+    # cost is deliberately 0.0, not a guessed number.
+    assert result.cost_usd == 0.0
+
+
+def test_request_sends_criteria_as_a_dict_for_choice_and_a_list_for_score() -> None:
+    """The real API 422s on the reverse of either (confirmed live,
+    M5.1): `choice.criteria` must be a dict (option -> description),
+    `score.criteria` must be a list of ordered labels."""
+    captured: dict[str, object] = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["body"] = json.loads(request.content)
+        return httpx.Response(200, json=_fake_response_body())
+
+    backend = JevBackend(api_key="test-key", model="jev-1.14.0", client=_client(handler))
+    backend.classify(ClassifyInput(slot="cv", filename="resume.pdf", allowed_doc_types=["cv"]))
+
+    questions = captured["body"]["questions"]  # type: ignore[index]
+    assert isinstance(questions["doc_type"]["criteria"], dict)
+    assert isinstance(questions["legible"]["criteria"], list)
+    assert "instructions" in questions["slot_match"]
 
 
 def test_classify_raises_on_a_non_2xx_response() -> None:
@@ -118,14 +158,11 @@ def test_classify_attaches_an_image_block_when_an_image_is_provided() -> None:
     assert image_blocks[0]["image_url"]["url"] == "data:image/png;base64,Zm9v"
 
 
-def test_legible_from_score_answer_prefers_the_score_key() -> None:
-    assert _legible_from_score_answer({"score": 0.75, "choice": "good"}) == 0.75
+def test_legible_from_score_answer_normalizes_the_raw_index() -> None:
+    # index 4 of 5 levels (illegible=0 .. excellent=4) -> 4/4 = 1.0
+    assert _legible_from_score_answer({"score": 4.0}) == 1.0
 
 
-def test_legible_from_score_answer_falls_back_to_choice_level_index() -> None:
-    # "good" is index 3 of 5 levels (illegible, poor, fair, good, excellent) -> 3/4
-    assert _legible_from_score_answer({"choice": "good"}) == pytest.approx(0.75)
-
-
-def test_legible_from_score_answer_unknown_choice_is_zero() -> None:
-    assert _legible_from_score_answer({"choice": "nonsense"}) == 0.0
+def test_legible_from_score_answer_handles_a_fractional_score() -> None:
+    # the real API returns fractional positions, e.g. 3.95 - confirmed live.
+    assert _legible_from_score_answer({"score": 3.95}) == pytest.approx(3.95 / 4)

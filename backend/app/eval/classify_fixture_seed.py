@@ -60,6 +60,8 @@ def _simulate(
         legible=legible,
         slot_match=predicted_doc_type != "other",
         decided_by=backend_name,  # type: ignore[arg-type]
+        input_tokens=350 if backend_name == "jev" else 450,
+        output_tokens=20 if backend_name == "jev" else 60,
         cost_usd=0.0002 if backend_name == "jev" else 0.0009,
         latency_ms=180.0 if backend_name == "jev" else 650.0,
         simulated=True,

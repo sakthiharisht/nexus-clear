@@ -47,6 +47,8 @@ class ClassificationResult(BaseModel):
     legible: float
     slot_match: bool
     decided_by: Literal["jev", "claude"]
+    input_tokens: int = 0
+    output_tokens: int = 0
     cost_usd: float = 0.0
     latency_ms: float = 0.0
     # True only for app/eval/classify_fixture_seed.py's hand-derived

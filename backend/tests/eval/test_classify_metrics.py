@@ -14,6 +14,8 @@ def _doc(
     cost_usd: float = 0.001,
     latency_ms: float = 100.0,
     simulated: bool = False,
+    input_tokens: int = 100,
+    output_tokens: int = 20,
 ) -> DocumentClassification:
     return DocumentClassification(
         packet_id="p1",
@@ -27,6 +29,8 @@ def _doc(
         accepted=accepted,
         escalated=escalated,
         decided_by="claude",
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
         cost_usd=cost_usd,
         latency_ms=latency_ms,
         simulated=simulated,
@@ -87,3 +91,13 @@ def test_total_cost_and_mean_latency_are_summed_and_averaged() -> None:
     metrics = compute_classify_metrics(ClassifyModeResult(mode="x", documents=documents))
     assert metrics.total_cost_usd == 0.03
     assert metrics.mean_latency_ms == 200.0
+
+
+def test_total_tokens_are_summed_across_documents() -> None:
+    documents = [
+        _doc(input_tokens=300, output_tokens=40),
+        _doc(input_tokens=500, output_tokens=60),
+    ]
+    metrics = compute_classify_metrics(ClassifyModeResult(mode="x", documents=documents))
+    assert metrics.total_input_tokens == 800
+    assert metrics.total_output_tokens == 100

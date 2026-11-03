@@ -124,6 +124,8 @@ class ClaudeBackend:
             legible=parsed.legible,
             slot_match=parsed.slot_match,
             decided_by="claude",
+            input_tokens=response.usage.input_tokens,
+            output_tokens=response.usage.output_tokens,
             cost_usd=cost_usd,
             latency_ms=latency_ms,
         )

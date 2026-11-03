@@ -24,6 +24,8 @@ class ClassifyMetrics(BaseModel):
     # every prediction the model made, not just the accepted ones.
     ece: float
     escalation_rate: float
+    total_input_tokens: int
+    total_output_tokens: int
     total_cost_usd: float
     mean_latency_ms: float
 
@@ -33,7 +35,14 @@ def compute_classify_metrics(result: ClassifyModeResult) -> ClassifyMetrics:
     n = len(documents)
     if n == 0:
         return ClassifyMetrics(
-            n=0, accuracy=0.0, ece=0.0, escalation_rate=0.0, total_cost_usd=0.0, mean_latency_ms=0.0
+            n=0,
+            accuracy=0.0,
+            ece=0.0,
+            escalation_rate=0.0,
+            total_input_tokens=0,
+            total_output_tokens=0,
+            total_cost_usd=0.0,
+            mean_latency_ms=0.0,
         )
 
     accepted = [d for d in documents if not d.escalated]
@@ -63,6 +72,8 @@ def compute_classify_metrics(result: ClassifyModeResult) -> ClassifyMetrics:
         accuracy=accuracy,
         ece=ece,
         escalation_rate=escalated_count / n,
+        total_input_tokens=sum(d.input_tokens for d in documents),
+        total_output_tokens=sum(d.output_tokens for d in documents),
         total_cost_usd=sum(d.cost_usd for d in documents),
         mean_latency_ms=sum(d.latency_ms for d in documents) / n,
     )

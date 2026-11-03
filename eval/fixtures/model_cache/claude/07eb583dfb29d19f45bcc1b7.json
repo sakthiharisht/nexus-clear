@@ -6,6 +6,8 @@
   "legible": 0.87,
   "slot_match": true,
   "decided_by": "claude",
+  "input_tokens": 450,
+  "output_tokens": 60,
   "cost_usd": 0.0009,
   "latency_ms": 650.0,
   "simulated": true

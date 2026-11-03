@@ -71,10 +71,11 @@ def _packets_table(result: dict[str, Any]) -> list[str]:
 
 
 def _classify_table_row(mode: str, metrics: dict[str, Any]) -> str:
+    tokens = f"{metrics['total_input_tokens']}/{metrics['total_output_tokens']}"
     return (
         f"| {mode} | {metrics['n']} | {_pct(metrics['accuracy'])} "
         f"| {metrics['ece']:.3f} | {_pct(metrics['escalation_rate'])} "
-        f"| ${metrics['total_cost_usd']:.4f} | {metrics['mean_latency_ms']:.0f} |"
+        f"| {tokens} | ${metrics['total_cost_usd']:.4f} | {metrics['mean_latency_ms']:.0f} |"
     )
 
 
@@ -110,8 +111,9 @@ def _classify_section(result: dict[str, Any]) -> list[str]:
             "",
         ]
     lines += [
-        "| mode | n | accuracy | ECE | escalation rate | cost | mean latency (ms) |",
-        "| --- | --- | --- | --- | --- | --- | --- |",
+        "| mode | n | accuracy | ECE | escalation rate | tokens (in/out) "
+        "| cost | mean latency (ms) |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     for mode, metrics in classify_metrics.items():
         lines.append(_classify_table_row(mode, metrics))

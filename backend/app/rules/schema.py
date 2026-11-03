@@ -91,6 +91,22 @@ class RegistryCheckParams(_StrictModel):
     expect: list[str] | None = None
     on_possible_match: str | None = None
 
+    @model_validator(mode="after")
+    def _exactly_one_decision_mode(self) -> "RegistryCheckParams":
+        # `subject` is supplementary metadata for the expect_status mode, not
+        # a decision mode of its own — see app/rules/kinds.py.
+        modes = [
+            self.expect_status is not None,
+            self.expect is not None,
+            self.on_possible_match is not None,
+        ]
+        if sum(modes) != 1:
+            raise ValueError(
+                "registry_check params must set exactly one of "
+                "expect_status, expect, or on_possible_match"
+            )
+        return self
+
 
 class NumericMaxParams(_StrictModel):
     field: str

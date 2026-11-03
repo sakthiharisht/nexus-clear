@@ -179,6 +179,26 @@ def test_numeric_min_pair_fields_and_mins_length_mismatch(tmp_path: Path) -> Non
         load_rule_pack(_write_pack(tmp_path, data))
 
 
+def test_registry_check_with_no_decision_mode_is_rejected(tmp_path: Path) -> None:
+    data = _minimal_pack_dict()
+    data["rules"][0]["kind"] = "registry_check"
+    data["rules"][0]["params"] = {"tool": "nppes_lookup"}  # none of the 3 modes set
+    with pytest.raises(RulePackError):
+        load_rule_pack(_write_pack(tmp_path, data))
+
+
+def test_registry_check_with_two_decision_modes_is_rejected(tmp_path: Path) -> None:
+    data = _minimal_pack_dict()
+    data["rules"][0]["kind"] = "registry_check"
+    data["rules"][0]["params"] = {
+        "tool": "nppes_lookup",
+        "expect_status": "Active",
+        "expect": ["exists"],
+    }
+    with pytest.raises(RulePackError):
+        load_rule_pack(_write_pack(tmp_path, data))
+
+
 def test_unknown_top_level_key_is_rejected(tmp_path: Path) -> None:
     data = _minimal_pack_dict()
     data["totally_made_up_field"] = 123

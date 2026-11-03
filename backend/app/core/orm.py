@@ -14,7 +14,16 @@ is ever written.
 import uuid
 from datetime import date, datetime
 
-from sqlalchemy import Date, DateTime, ForeignKey, Numeric, String, func
+from sqlalchemy import (
+    Date,
+    DateTime,
+    ForeignKey,
+    LargeBinary,
+    Numeric,
+    String,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column
@@ -37,6 +46,10 @@ class Case(Base):
     # One of: created, documents_uploaded, extracted, validated, reconciled,
     # reported, in_review, ready, attested (SPEC.md section 5).
     state: Mapped[str] = mapped_column(String, nullable=False, default="created")
+    # Envelope encryption (SPEC.md section 7.1): this case's own data
+    # encryption key, generated once and wrapped under the KeyManager's
+    # master key (app/vault/key_manager.py) — never stored unwrapped.
+    wrapped_data_key: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -44,6 +57,12 @@ class Case(Base):
 
 class Document(Base):
     __tablename__ = "documents"
+    __table_args__ = (
+        # SPEC.md section 7.1: "Duplicate hash in same case -> reject as
+        # duplicate" — enforced at the API layer (app/api/cases.py) for a
+        # clean error message, and here as a DB-level backstop.
+        UniqueConstraint("case_id", "sha256", name="uq_documents_case_sha256"),
+    )
 
     id: Mapped[uuid.UUID] = _uuid_pk()
     case_id: Mapped[uuid.UUID] = mapped_column(
@@ -52,6 +71,9 @@ class Document(Base):
     slot: Mapped[str] = mapped_column(String, nullable=False)
     doc_type: Mapped[str | None] = mapped_column(String, nullable=True)
     sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    # Which KeyManager/scheme wrapped this case's data key (e.g.
+    # "local-v1") — metadata for future key rotation, not key material
+    # itself (that's cases.wrapped_data_key, one per case).
     key_id: Mapped[str] = mapped_column(String, nullable=False)
     storage_ref: Mapped[str] = mapped_column(String, nullable=False)
     uploaded_at: Mapped[datetime] = mapped_column(

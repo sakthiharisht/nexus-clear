@@ -23,9 +23,14 @@ class LocalBlobStore:
         self._root.mkdir(parents=True, exist_ok=True)
 
     def _path_for(self, key: str) -> Path:
-        # Keys are always a sha256 hex digest in practice; reject anything
-        # that could be a path-traversal attempt regardless.
-        if not key or "/" in key or "\\" in key or ".." in key:
+        # Keys are always a sha256 hex digest or a document UUID in
+        # practice; reject anything that could be a path-traversal
+        # attempt regardless. ":" matters on Windows specifically: a
+        # key like "D:secret" has no "/" or "\\" but pathlib's `/`
+        # still treats the drive-letter prefix as anchored and
+        # discards root entirely (confirmed empirically - root / "D:x"
+        # returns "D:x", not a path under root).
+        if not key or "/" in key or "\\" in key or ".." in key or ":" in key:
             raise ValueError(f"invalid blob key: {key!r}")
         return self._root / key
 

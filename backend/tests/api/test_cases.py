@@ -14,6 +14,7 @@ from fastapi import HTTPException
 from fastapi.testclient import TestClient
 
 from app.api import cases
+from tests.api.conftest import VaultComponents
 
 _MINIMAL_PDF = b"%PDF-1.4\n%synthetic test content, not a real document\n"
 _MINIMAL_PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 16
@@ -240,6 +241,35 @@ def test_middleware_rejects_on_content_length_before_the_body_is_parsed(
         headers={"content-length": str(settings.max_upload_size_bytes * 10)},
     )
     assert response.status_code == 413
+
+
+@pytest.mark.parametrize(
+    "malicious_filename",
+    ["../../../../etc/passwd", "..\\..\\..\\windows\\system32\\evil.pdf", "C:\\Windows\\evil.pdf"],
+)
+def test_malicious_client_filenames_never_reach_a_storage_path(
+    api_client: TestClient, vault_components: VaultComponents, malicious_filename: str
+) -> None:
+    """The server never derives a storage path from the client-supplied
+    filename at all - it's only ever used for the multipart form field,
+    never passed to BlobStore. Uploading one of these shouldn't error,
+    create anything outside the blob root, or create a file whose name
+    echoes the attacker's filename."""
+    case = _create_case(api_client)
+    response = api_client.post(
+        f"/cases/{case['id']}/documents",
+        params={"slot": "license"},
+        files={"file": (malicious_filename, _MINIMAL_PDF, "application/pdf")},
+    )
+    assert response.status_code == 201, response.text
+
+    blob_root = vault_components.blob_store._root  # type: ignore[attr-defined]
+    stored_names = [p.name for p in blob_root.iterdir()]
+    assert stored_names == [response.json()["id"]]
+    for name in stored_names:
+        assert "passwd" not in name
+        assert "evil" not in name
+        assert ".." not in name
 
 
 def test_middleware_ignores_a_malformed_content_length_header(api_client: TestClient) -> None:

@@ -29,3 +29,9 @@ node_modules/
 # Project runtime/output dirs
 eval/runs/
 data/
+
+# Generated synthetic documents (regenerate with `uv run python -m
+# app.eval.generator.build`, deterministic from the committed seed).
+# ground_truth.json and the registry/*.json fixtures ARE tracked — they're
+# the small, reviewable contract other code depends on.
+eval/fixtures/packets/

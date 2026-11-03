@@ -1,0 +1,16 @@
+# Config for `uv run python -m app.eval.run --config eval/config.yaml`
+# (run from the repo root; see backend/app/eval/run.py). Paths are relative
+# to the repo root regardless of the invocation's working directory.
+
+rule_pack: rules/tx_bcbstx_lpc.yaml
+ground_truth: eval/fixtures/ground_truth.json
+fixtures_root: eval/fixtures
+output_dir: eval/runs
+
+# ceiling: rules engine run directly on ground-truth CaseFacts. Must be
+#   100% — a sanity check on the engine and the ground truth, not a real
+#   measurement.
+# baseline: rules engine run on CaseFacts built by non-LLM extraction
+#   (PDF text layer + regex/heuristics) from the rendered packets. This is
+#   the number any future LLM-backed stage has to beat.
+modes: [ceiling, baseline]

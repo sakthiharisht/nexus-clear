@@ -1,0 +1,74 @@
+{
+  "1000000004": {
+    "exists": true,
+    "name": "Christopher Lee",
+    "name_consistent": true,
+    "taxonomy_counselor": true
+  },
+  "1000000012": {
+    "exists": true,
+    "name": "Gina Wiley",
+    "name_consistent": true,
+    "taxonomy_counselor": true
+  },
+  "1000000020": {
+    "exists": true,
+    "name": "Jonathan Alvarez",
+    "name_consistent": true,
+    "taxonomy_counselor": true
+  },
+  "1000000038": {
+    "exists": true,
+    "name": "Ashley Warren",
+    "name_consistent": true,
+    "taxonomy_counselor": true
+  },
+  "1000000046": {
+    "exists": true,
+    "name": "Scott West",
+    "name_consistent": true,
+    "taxonomy_counselor": true
+  },
+  "1000000053": {
+    "exists": true,
+    "name": "Victoria Richardson",
+    "name_consistent": true,
+    "taxonomy_counselor": true
+  },
+  "1000000061": {
+    "exists": true,
+    "name": "Denise Thompson",
+    "name_consistent": true,
+    "taxonomy_counselor": true
+  },
+  "1000000079": {
+    "exists": true,
+    "name": "Melanie Sullivan MD",
+    "name_consistent": false,
+    "taxonomy_counselor": false
+  },
+  "1000000087": {
+    "exists": true,
+    "name": "Joseph Sullivan",
+    "name_consistent": true,
+    "taxonomy_counselor": true
+  },
+  "1000000095": {
+    "exists": true,
+    "name": "Antonio Murray",
+    "name_consistent": true,
+    "taxonomy_counselor": true
+  },
+  "1000000103": {
+    "exists": true,
+    "name": "Alicia Bailey",
+    "name_consistent": true,
+    "taxonomy_counselor": true
+  },
+  "1000000112": {
+    "exists": true,
+    "name": "Katherine Robinson",
+    "name_consistent": true,
+    "taxonomy_counselor": true
+  }
+}

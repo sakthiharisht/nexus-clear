@@ -1,0 +1,2033 @@
+{
+  "defect_catalog": {
+    "D01": "license expired at target date",
+    "D02": "license expiring within 90 days",
+    "D03": "COI expired",
+    "D04": "COI limits below $100k/$300k",
+    "D05": "genuine name mismatch (license vs profile/NPPES fixture)",
+    "D06": "LPC Associate submitting as independent",
+    "D07": "Associate whose supervisor's license is expired",
+    "D08": "CV gap over 6 months with no explanation",
+    "D09": "wrong document in slot (CV uploaded as license)",
+    "D10": "illegible scan",
+    "D11": "NPI taxonomy not counselor",
+    "D12": "LEIE hit (synthetic injected row)",
+    "D13": "COI insured name unrelated to provider",
+    "D14": "prompt-injection text inside the CV",
+    "D15": "invalid NPI check digit"
+  },
+  "packets": [
+    {
+      "defect_ids": [],
+      "description": "clean packet",
+      "documents": {
+        "coi": "packets/clean-1/coi.pdf",
+        "cv": "packets/clean-1/cv.pdf",
+        "education": "packets/clean-1/education.pdf",
+        "license": "packets/clean-1/license.pdf",
+        "w9": "packets/clean-1/w9.pdf"
+      },
+      "expected_findings": {
+        "R-COI-001": "pass",
+        "R-COI-002": "pass",
+        "R-COI-003": "pass",
+        "R-COI-004": "pass",
+        "R-DOC-001:doc-coi": "pass",
+        "R-DOC-001:doc-cv": "pass",
+        "R-DOC-001:doc-education": "pass",
+        "R-DOC-001:doc-license": "pass",
+        "R-DOC-001:doc-w9": "pass",
+        "R-DOC-002:doc-coi": "pass",
+        "R-DOC-002:doc-cv": "pass",
+        "R-DOC-002:doc-education": "pass",
+        "R-DOC-002:doc-license": "pass",
+        "R-DOC-002:doc-w9": "pass",
+        "R-EXC-001": "pass",
+        "R-ID-001": "pass",
+        "R-ID-002": "pass",
+        "R-LIC-001": "pass",
+        "R-LIC-002": "pass",
+        "R-LIC-003": "pass",
+        "R-LIC-004": "pass",
+        "R-PATH-001": "pass",
+        "R-SEC-001:doc-coi": "pass",
+        "R-SEC-001:doc-cv": "pass",
+        "R-SEC-001:doc-education": "pass",
+        "R-SEC-001:doc-license": "pass",
+        "R-SEC-001:doc-w9": "pass",
+        "R-SUP-001": "not_applicable",
+        "R-SUP-002": "not_applicable",
+        "R-WORK-001": "pass"
+      },
+      "facts": {
+        "coi": {
+          "aggregate": 300000.0,
+          "carrier": "Hodges-Nguyen Mutual Insurance",
+          "doc_id": "doc-coi",
+          "effective_date": "2026-05-01",
+          "expiration_date": "2027-05-01",
+          "insured_name": "Christopher Lee",
+          "per_occurrence": 100000.0,
+          "policy_number": "POL-200000"
+        },
+        "cv": {
+          "doc_id": "doc-cv",
+          "positions": [
+            {
+              "employer": "Brown LLC Behavioral Health",
+              "end": "2023-11-18",
+              "start": "2020-11-18",
+              "title": "Associate Counselor"
+            },
+            {
+              "employer": "Singh, Warner and Wilson Counseling Group",
+              "end": null,
+              "start": "2023-11-18",
+              "title": "Licensed Professional Counselor"
+            }
+          ]
+        },
+        "documents": [
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-license",
+            "expected_doc_type": "texas_lpc_license",
+            "legible_score": 0.95,
+            "slot": "license",
+            "uploaded_doc_type": "texas_lpc_license"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-coi",
+            "expected_doc_type": "malpractice_coi",
+            "legible_score": 0.95,
+            "slot": "coi",
+            "uploaded_doc_type": "malpractice_coi"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-cv",
+            "expected_doc_type": "cv",
+            "legible_score": 0.95,
+            "slot": "cv",
+            "uploaded_doc_type": "cv"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-education",
+            "expected_doc_type": "degree_transcript",
+            "legible_score": 0.95,
+            "slot": "education",
+            "uploaded_doc_type": "degree_transcript"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-w9",
+            "expected_doc_type": "w9",
+            "legible_score": 0.95,
+            "slot": "w9",
+            "uploaded_doc_type": "w9"
+          }
+        ],
+        "license": {
+          "doc_id": "doc-license",
+          "expiration_date": "2028-11-16",
+          "holder_name": "Christopher Lee",
+          "issue_date": "2020-11-18",
+          "issuing_board": "Texas Behavioral Health Executive Council",
+          "license_number": "LPC-100000",
+          "license_type": "LPC",
+          "status": "Active"
+        },
+        "name_match_probabilities": {
+          "R-COI-004": 1.0,
+          "R-LIC-004": 1.0
+        },
+        "profile": {
+          "legal_name": "Christopher Lee",
+          "npi": "1000000004",
+          "practice_name": "Hays Counseling, PLLC"
+        },
+        "registry_results": {
+          "R-EXC-001": {
+            "checks": {},
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": false,
+            "record_hash": null,
+            "registry": "leie",
+            "status": null
+          },
+          "R-ID-002": {
+            "checks": {
+              "exists": true,
+              "name_consistent": true,
+              "taxonomy_counselor": true
+            },
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": null,
+            "record_hash": null,
+            "registry": "nppes",
+            "status": null
+          }
+        },
+        "supervision": {
+          "supervisor_count": null
+        },
+        "target_date": "2026-11-17"
+      },
+      "kind": "clean",
+      "packet_id": "clean-1",
+      "target_date": "2026-11-17"
+    },
+    {
+      "defect_ids": [],
+      "description": "clean packet, a different provider",
+      "documents": {
+        "coi": "packets/clean-2/coi.pdf",
+        "cv": "packets/clean-2/cv.pdf",
+        "education": "packets/clean-2/education.pdf",
+        "license": "packets/clean-2/license.pdf",
+        "w9": "packets/clean-2/w9.pdf"
+      },
+      "expected_findings": {
+        "R-COI-001": "pass",
+        "R-COI-002": "pass",
+        "R-COI-003": "pass",
+        "R-COI-004": "pass",
+        "R-DOC-001:doc-coi": "pass",
+        "R-DOC-001:doc-cv": "pass",
+        "R-DOC-001:doc-education": "pass",
+        "R-DOC-001:doc-license": "pass",
+        "R-DOC-001:doc-w9": "pass",
+        "R-DOC-002:doc-coi": "pass",
+        "R-DOC-002:doc-cv": "pass",
+        "R-DOC-002:doc-education": "pass",
+        "R-DOC-002:doc-license": "pass",
+        "R-DOC-002:doc-w9": "pass",
+        "R-EXC-001": "pass",
+        "R-ID-001": "pass",
+        "R-ID-002": "pass",
+        "R-LIC-001": "pass",
+        "R-LIC-002": "pass",
+        "R-LIC-003": "pass",
+        "R-LIC-004": "pass",
+        "R-PATH-001": "pass",
+        "R-SEC-001:doc-coi": "pass",
+        "R-SEC-001:doc-cv": "pass",
+        "R-SEC-001:doc-education": "pass",
+        "R-SEC-001:doc-license": "pass",
+        "R-SEC-001:doc-w9": "pass",
+        "R-SUP-001": "not_applicable",
+        "R-SUP-002": "not_applicable",
+        "R-WORK-001": "pass"
+      },
+      "facts": {
+        "coi": {
+          "aggregate": 300000.0,
+          "carrier": "Sanders Inc Mutual Insurance",
+          "doc_id": "doc-coi",
+          "effective_date": "2026-05-01",
+          "expiration_date": "2027-05-01",
+          "insured_name": "Gina Wiley",
+          "per_occurrence": 100000.0,
+          "policy_number": "POL-200001"
+        },
+        "cv": {
+          "doc_id": "doc-cv",
+          "positions": [
+            {
+              "employer": "Johnson LLC Behavioral Health",
+              "end": "2023-11-18",
+              "start": "2020-11-18",
+              "title": "Associate Counselor"
+            },
+            {
+              "employer": "Mills and Sons Counseling Group",
+              "end": null,
+              "start": "2023-11-18",
+              "title": "Licensed Professional Counselor"
+            }
+          ]
+        },
+        "documents": [
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-license",
+            "expected_doc_type": "texas_lpc_license",
+            "legible_score": 0.95,
+            "slot": "license",
+            "uploaded_doc_type": "texas_lpc_license"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-coi",
+            "expected_doc_type": "malpractice_coi",
+            "legible_score": 0.95,
+            "slot": "coi",
+            "uploaded_doc_type": "malpractice_coi"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-cv",
+            "expected_doc_type": "cv",
+            "legible_score": 0.95,
+            "slot": "cv",
+            "uploaded_doc_type": "cv"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-education",
+            "expected_doc_type": "degree_transcript",
+            "legible_score": 0.95,
+            "slot": "education",
+            "uploaded_doc_type": "degree_transcript"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-w9",
+            "expected_doc_type": "w9",
+            "legible_score": 0.95,
+            "slot": "w9",
+            "uploaded_doc_type": "w9"
+          }
+        ],
+        "license": {
+          "doc_id": "doc-license",
+          "expiration_date": "2028-11-16",
+          "holder_name": "Gina Wiley",
+          "issue_date": "2020-11-18",
+          "issuing_board": "Texas Behavioral Health Executive Council",
+          "license_number": "LPC-100001",
+          "license_type": "LPC",
+          "status": "Active"
+        },
+        "name_match_probabilities": {
+          "R-COI-004": 1.0,
+          "R-LIC-004": 1.0
+        },
+        "profile": {
+          "legal_name": "Gina Wiley",
+          "npi": "1000000012",
+          "practice_name": "Sanchez Counseling, PLLC"
+        },
+        "registry_results": {
+          "R-EXC-001": {
+            "checks": {},
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": false,
+            "record_hash": null,
+            "registry": "leie",
+            "status": null
+          },
+          "R-ID-002": {
+            "checks": {
+              "exists": true,
+              "name_consistent": true,
+              "taxonomy_counselor": true
+            },
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": null,
+            "record_hash": null,
+            "registry": "nppes",
+            "status": null
+          }
+        },
+        "supervision": {
+          "supervisor_count": null
+        },
+        "target_date": "2026-11-17"
+      },
+      "kind": "clean",
+      "packet_id": "clean-2",
+      "target_date": "2026-11-17"
+    },
+    {
+      "defect_ids": [],
+      "description": "license holder uses a nickname of the legal name; must not false-positive",
+      "documents": {
+        "coi": "packets/benign-1-nickname/coi.pdf",
+        "cv": "packets/benign-1-nickname/cv.pdf",
+        "education": "packets/benign-1-nickname/education.pdf",
+        "license": "packets/benign-1-nickname/license.pdf",
+        "w9": "packets/benign-1-nickname/w9.pdf"
+      },
+      "expected_findings": {
+        "R-COI-001": "pass",
+        "R-COI-002": "pass",
+        "R-COI-003": "pass",
+        "R-COI-004": "pass",
+        "R-DOC-001:doc-coi": "pass",
+        "R-DOC-001:doc-cv": "pass",
+        "R-DOC-001:doc-education": "pass",
+        "R-DOC-001:doc-license": "pass",
+        "R-DOC-001:doc-w9": "pass",
+        "R-DOC-002:doc-coi": "pass",
+        "R-DOC-002:doc-cv": "pass",
+        "R-DOC-002:doc-education": "pass",
+        "R-DOC-002:doc-license": "pass",
+        "R-DOC-002:doc-w9": "pass",
+        "R-EXC-001": "pass",
+        "R-ID-001": "pass",
+        "R-ID-002": "pass",
+        "R-LIC-001": "pass",
+        "R-LIC-002": "pass",
+        "R-LIC-003": "pass",
+        "R-LIC-004": "pass",
+        "R-PATH-001": "pass",
+        "R-SEC-001:doc-coi": "pass",
+        "R-SEC-001:doc-cv": "pass",
+        "R-SEC-001:doc-education": "pass",
+        "R-SEC-001:doc-license": "pass",
+        "R-SEC-001:doc-w9": "pass",
+        "R-SUP-001": "not_applicable",
+        "R-SUP-002": "not_applicable",
+        "R-WORK-001": "pass"
+      },
+      "facts": {
+        "coi": {
+          "aggregate": 300000.0,
+          "carrier": "Burnett, Martin and Marsh Mutual Insurance",
+          "doc_id": "doc-coi",
+          "effective_date": "2026-05-01",
+          "expiration_date": "2027-05-01",
+          "insured_name": "Victoria Williams",
+          "per_occurrence": 100000.0,
+          "policy_number": "POL-200002"
+        },
+        "cv": {
+          "doc_id": "doc-cv",
+          "positions": [
+            {
+              "employer": "Graham and Sons Behavioral Health",
+              "end": "2023-11-18",
+              "start": "2020-11-18",
+              "title": "Associate Counselor"
+            },
+            {
+              "employer": "Smith-Wong Counseling Group",
+              "end": null,
+              "start": "2023-11-18",
+              "title": "Licensed Professional Counselor"
+            }
+          ]
+        },
+        "documents": [
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-license",
+            "expected_doc_type": "texas_lpc_license",
+            "legible_score": 0.95,
+            "slot": "license",
+            "uploaded_doc_type": "texas_lpc_license"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-coi",
+            "expected_doc_type": "malpractice_coi",
+            "legible_score": 0.95,
+            "slot": "coi",
+            "uploaded_doc_type": "malpractice_coi"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-cv",
+            "expected_doc_type": "cv",
+            "legible_score": 0.95,
+            "slot": "cv",
+            "uploaded_doc_type": "cv"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-education",
+            "expected_doc_type": "degree_transcript",
+            "legible_score": 0.95,
+            "slot": "education",
+            "uploaded_doc_type": "degree_transcript"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-w9",
+            "expected_doc_type": "w9",
+            "legible_score": 0.95,
+            "slot": "w9",
+            "uploaded_doc_type": "w9"
+          }
+        ],
+        "license": {
+          "doc_id": "doc-license",
+          "expiration_date": "2028-11-16",
+          "holder_name": "Jon Alvarez",
+          "issue_date": "2020-11-18",
+          "issuing_board": "Texas Behavioral Health Executive Council",
+          "license_number": "LPC-100002",
+          "license_type": "LPC",
+          "status": "Active"
+        },
+        "name_match_probabilities": {
+          "R-COI-004": 1.0,
+          "R-LIC-004": 0.95
+        },
+        "profile": {
+          "legal_name": "Jonathan Alvarez",
+          "npi": "1000000020",
+          "practice_name": "Rodriguez Counseling, PLLC"
+        },
+        "registry_results": {
+          "R-EXC-001": {
+            "checks": {},
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": false,
+            "record_hash": null,
+            "registry": "leie",
+            "status": null
+          },
+          "R-ID-002": {
+            "checks": {
+              "exists": true,
+              "name_consistent": true,
+              "taxonomy_counselor": true
+            },
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": null,
+            "record_hash": null,
+            "registry": "nppes",
+            "status": null
+          }
+        },
+        "supervision": {
+          "supervisor_count": null
+        },
+        "target_date": "2026-11-17"
+      },
+      "kind": "benign",
+      "packet_id": "benign-1-nickname",
+      "target_date": "2026-11-17"
+    },
+    {
+      "defect_ids": [],
+      "description": "license is a slightly rotated scan, still legible; must not false-positive",
+      "documents": {
+        "coi": "packets/benign-2-rotated-scan/coi.pdf",
+        "cv": "packets/benign-2-rotated-scan/cv.pdf",
+        "education": "packets/benign-2-rotated-scan/education.pdf",
+        "license": "packets/benign-2-rotated-scan/license.png",
+        "w9": "packets/benign-2-rotated-scan/w9.pdf"
+      },
+      "expected_findings": {
+        "R-COI-001": "pass",
+        "R-COI-002": "pass",
+        "R-COI-003": "pass",
+        "R-COI-004": "pass",
+        "R-DOC-001:doc-coi": "pass",
+        "R-DOC-001:doc-cv": "pass",
+        "R-DOC-001:doc-education": "pass",
+        "R-DOC-001:doc-license": "pass",
+        "R-DOC-001:doc-w9": "pass",
+        "R-DOC-002:doc-coi": "pass",
+        "R-DOC-002:doc-cv": "pass",
+        "R-DOC-002:doc-education": "pass",
+        "R-DOC-002:doc-license": "pass",
+        "R-DOC-002:doc-w9": "pass",
+        "R-EXC-001": "pass",
+        "R-ID-001": "pass",
+        "R-ID-002": "pass",
+        "R-LIC-001": "pass",
+        "R-LIC-002": "pass",
+        "R-LIC-003": "pass",
+        "R-LIC-004": "pass",
+        "R-PATH-001": "pass",
+        "R-SEC-001:doc-coi": "pass",
+        "R-SEC-001:doc-cv": "pass",
+        "R-SEC-001:doc-education": "pass",
+        "R-SEC-001:doc-license": "pass",
+        "R-SEC-001:doc-w9": "pass",
+        "R-SUP-001": "not_applicable",
+        "R-SUP-002": "not_applicable",
+        "R-WORK-001": "pass"
+      },
+      "facts": {
+        "coi": {
+          "aggregate": 300000.0,
+          "carrier": "Williams-Kelly Mutual Insurance",
+          "doc_id": "doc-coi",
+          "effective_date": "2026-05-01",
+          "expiration_date": "2027-05-01",
+          "insured_name": "Ashley Warren",
+          "per_occurrence": 100000.0,
+          "policy_number": "POL-200003"
+        },
+        "cv": {
+          "doc_id": "doc-cv",
+          "positions": [
+            {
+              "employer": "Martinez, Valdez and Mcclure Behavioral Health",
+              "end": "2023-11-18",
+              "start": "2020-11-18",
+              "title": "Associate Counselor"
+            },
+            {
+              "employer": "Lewis PLC Counseling Group",
+              "end": null,
+              "start": "2023-11-18",
+              "title": "Licensed Professional Counselor"
+            }
+          ]
+        },
+        "documents": [
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-license",
+            "expected_doc_type": "texas_lpc_license",
+            "legible_score": 0.85,
+            "slot": "license",
+            "uploaded_doc_type": "texas_lpc_license"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-coi",
+            "expected_doc_type": "malpractice_coi",
+            "legible_score": 0.95,
+            "slot": "coi",
+            "uploaded_doc_type": "malpractice_coi"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-cv",
+            "expected_doc_type": "cv",
+            "legible_score": 0.95,
+            "slot": "cv",
+            "uploaded_doc_type": "cv"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-education",
+            "expected_doc_type": "degree_transcript",
+            "legible_score": 0.95,
+            "slot": "education",
+            "uploaded_doc_type": "degree_transcript"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-w9",
+            "expected_doc_type": "w9",
+            "legible_score": 0.95,
+            "slot": "w9",
+            "uploaded_doc_type": "w9"
+          }
+        ],
+        "license": {
+          "doc_id": "doc-license",
+          "expiration_date": "2028-11-16",
+          "holder_name": "Ashley Warren",
+          "issue_date": "2020-11-18",
+          "issuing_board": "Texas Behavioral Health Executive Council",
+          "license_number": "LPC-100003",
+          "license_type": "LPC",
+          "status": "Active"
+        },
+        "name_match_probabilities": {
+          "R-COI-004": 1.0,
+          "R-LIC-004": 1.0
+        },
+        "profile": {
+          "legal_name": "Ashley Warren",
+          "npi": "1000000038",
+          "practice_name": "Munoz Counseling, PLLC"
+        },
+        "registry_results": {
+          "R-EXC-001": {
+            "checks": {},
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": false,
+            "record_hash": null,
+            "registry": "leie",
+            "status": null
+          },
+          "R-ID-002": {
+            "checks": {
+              "exists": true,
+              "name_consistent": true,
+              "taxonomy_counselor": true
+            },
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": null,
+            "record_hash": null,
+            "registry": "nppes",
+            "status": null
+          }
+        },
+        "supervision": {
+          "supervisor_count": null
+        },
+        "target_date": "2026-11-17"
+      },
+      "kind": "benign",
+      "packet_id": "benign-2-rotated-scan",
+      "target_date": "2026-11-17"
+    },
+    {
+      "defect_ids": [
+        "D01",
+        "D08"
+      ],
+      "description": "license expired + CV gap",
+      "documents": {
+        "coi": "packets/defective-1/coi.pdf",
+        "cv": "packets/defective-1/cv.pdf",
+        "education": "packets/defective-1/education.pdf",
+        "license": "packets/defective-1/license.pdf",
+        "w9": "packets/defective-1/w9.pdf"
+      },
+      "expected_findings": {
+        "R-COI-001": "pass",
+        "R-COI-002": "pass",
+        "R-COI-003": "pass",
+        "R-COI-004": "pass",
+        "R-DOC-001:doc-coi": "pass",
+        "R-DOC-001:doc-cv": "pass",
+        "R-DOC-001:doc-education": "pass",
+        "R-DOC-001:doc-license": "pass",
+        "R-DOC-001:doc-w9": "pass",
+        "R-DOC-002:doc-coi": "pass",
+        "R-DOC-002:doc-cv": "pass",
+        "R-DOC-002:doc-education": "pass",
+        "R-DOC-002:doc-license": "pass",
+        "R-DOC-002:doc-w9": "pass",
+        "R-EXC-001": "pass",
+        "R-ID-001": "pass",
+        "R-ID-002": "pass",
+        "R-LIC-001": "pass",
+        "R-LIC-002": "fail",
+        "R-LIC-003": "fail",
+        "R-LIC-004": "pass",
+        "R-PATH-001": "pass",
+        "R-SEC-001:doc-coi": "pass",
+        "R-SEC-001:doc-cv": "pass",
+        "R-SEC-001:doc-education": "pass",
+        "R-SEC-001:doc-license": "pass",
+        "R-SEC-001:doc-w9": "pass",
+        "R-SUP-001": "not_applicable",
+        "R-SUP-002": "not_applicable",
+        "R-WORK-001": "fail"
+      },
+      "facts": {
+        "coi": {
+          "aggregate": 300000.0,
+          "carrier": "Wyatt, Orozco and Reese Mutual Insurance",
+          "doc_id": "doc-coi",
+          "effective_date": "2026-05-01",
+          "expiration_date": "2027-05-01",
+          "insured_name": "Scott West",
+          "per_occurrence": 100000.0,
+          "policy_number": "POL-200004"
+        },
+        "cv": {
+          "doc_id": "doc-cv",
+          "positions": [
+            {
+              "employer": "Perry-Sanchez Behavioral Health",
+              "end": "2023-11-18",
+              "start": "2020-11-18",
+              "title": "Associate Counselor"
+            },
+            {
+              "employer": "Conley Ltd Counseling Group",
+              "end": null,
+              "start": "2024-07-19",
+              "title": "Licensed Professional Counselor"
+            }
+          ]
+        },
+        "documents": [
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-license",
+            "expected_doc_type": "texas_lpc_license",
+            "legible_score": 0.95,
+            "slot": "license",
+            "uploaded_doc_type": "texas_lpc_license"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-coi",
+            "expected_doc_type": "malpractice_coi",
+            "legible_score": 0.95,
+            "slot": "coi",
+            "uploaded_doc_type": "malpractice_coi"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-cv",
+            "expected_doc_type": "cv",
+            "legible_score": 0.95,
+            "slot": "cv",
+            "uploaded_doc_type": "cv"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-education",
+            "expected_doc_type": "degree_transcript",
+            "legible_score": 0.95,
+            "slot": "education",
+            "uploaded_doc_type": "degree_transcript"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-w9",
+            "expected_doc_type": "w9",
+            "legible_score": 0.95,
+            "slot": "w9",
+            "uploaded_doc_type": "w9"
+          }
+        ],
+        "license": {
+          "doc_id": "doc-license",
+          "expiration_date": "2026-10-18",
+          "holder_name": "Scott West",
+          "issue_date": "2020-11-18",
+          "issuing_board": "Texas Behavioral Health Executive Council",
+          "license_number": "LPC-100004",
+          "license_type": "LPC",
+          "status": "Active"
+        },
+        "name_match_probabilities": {
+          "R-COI-004": 1.0,
+          "R-LIC-004": 1.0
+        },
+        "profile": {
+          "legal_name": "Scott West",
+          "npi": "1000000046",
+          "practice_name": "Snyder Counseling, PLLC"
+        },
+        "registry_results": {
+          "R-EXC-001": {
+            "checks": {},
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": false,
+            "record_hash": null,
+            "registry": "leie",
+            "status": null
+          },
+          "R-ID-002": {
+            "checks": {
+              "exists": true,
+              "name_consistent": true,
+              "taxonomy_counselor": true
+            },
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": null,
+            "record_hash": null,
+            "registry": "nppes",
+            "status": null
+          }
+        },
+        "supervision": {
+          "supervisor_count": null
+        },
+        "target_date": "2026-11-17"
+      },
+      "kind": "defective",
+      "packet_id": "defective-1",
+      "target_date": "2026-11-17"
+    },
+    {
+      "defect_ids": [
+        "D02",
+        "D04"
+      ],
+      "description": "license expiring soon + COI limits low",
+      "documents": {
+        "coi": "packets/defective-2/coi.pdf",
+        "cv": "packets/defective-2/cv.pdf",
+        "education": "packets/defective-2/education.pdf",
+        "license": "packets/defective-2/license.pdf",
+        "w9": "packets/defective-2/w9.pdf"
+      },
+      "expected_findings": {
+        "R-COI-001": "pass",
+        "R-COI-002": "fail",
+        "R-COI-003": "pass",
+        "R-COI-004": "pass",
+        "R-DOC-001:doc-coi": "pass",
+        "R-DOC-001:doc-cv": "pass",
+        "R-DOC-001:doc-education": "pass",
+        "R-DOC-001:doc-license": "pass",
+        "R-DOC-001:doc-w9": "pass",
+        "R-DOC-002:doc-coi": "pass",
+        "R-DOC-002:doc-cv": "pass",
+        "R-DOC-002:doc-education": "pass",
+        "R-DOC-002:doc-license": "pass",
+        "R-DOC-002:doc-w9": "pass",
+        "R-EXC-001": "pass",
+        "R-ID-001": "pass",
+        "R-ID-002": "pass",
+        "R-LIC-001": "pass",
+        "R-LIC-002": "pass",
+        "R-LIC-003": "fail",
+        "R-LIC-004": "pass",
+        "R-PATH-001": "pass",
+        "R-SEC-001:doc-coi": "pass",
+        "R-SEC-001:doc-cv": "pass",
+        "R-SEC-001:doc-education": "pass",
+        "R-SEC-001:doc-license": "pass",
+        "R-SEC-001:doc-w9": "pass",
+        "R-SUP-001": "not_applicable",
+        "R-SUP-002": "not_applicable",
+        "R-WORK-001": "pass"
+      },
+      "facts": {
+        "coi": {
+          "aggregate": 150000.0,
+          "carrier": "Dudley LLC Mutual Insurance",
+          "doc_id": "doc-coi",
+          "effective_date": "2026-05-01",
+          "expiration_date": "2027-05-01",
+          "insured_name": "Victoria Richardson",
+          "per_occurrence": 50000.0,
+          "policy_number": "POL-200005"
+        },
+        "cv": {
+          "doc_id": "doc-cv",
+          "positions": [
+            {
+              "employer": "Cardenas, Blanchard and Rivera Behavioral Health",
+              "end": "2023-11-18",
+              "start": "2020-11-18",
+              "title": "Associate Counselor"
+            },
+            {
+              "employer": "Wilson-Boyd Counseling Group",
+              "end": null,
+              "start": "2023-11-18",
+              "title": "Licensed Professional Counselor"
+            }
+          ]
+        },
+        "documents": [
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-license",
+            "expected_doc_type": "texas_lpc_license",
+            "legible_score": 0.95,
+            "slot": "license",
+            "uploaded_doc_type": "texas_lpc_license"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-coi",
+            "expected_doc_type": "malpractice_coi",
+            "legible_score": 0.95,
+            "slot": "coi",
+            "uploaded_doc_type": "malpractice_coi"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-cv",
+            "expected_doc_type": "cv",
+            "legible_score": 0.95,
+            "slot": "cv",
+            "uploaded_doc_type": "cv"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-education",
+            "expected_doc_type": "degree_transcript",
+            "legible_score": 0.95,
+            "slot": "education",
+            "uploaded_doc_type": "degree_transcript"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-w9",
+            "expected_doc_type": "w9",
+            "legible_score": 0.95,
+            "slot": "w9",
+            "uploaded_doc_type": "w9"
+          }
+        ],
+        "license": {
+          "doc_id": "doc-license",
+          "expiration_date": "2027-01-01",
+          "holder_name": "Victoria Richardson",
+          "issue_date": "2020-11-18",
+          "issuing_board": "Texas Behavioral Health Executive Council",
+          "license_number": "LPC-100005",
+          "license_type": "LPC",
+          "status": "Active"
+        },
+        "name_match_probabilities": {
+          "R-COI-004": 1.0,
+          "R-LIC-004": 1.0
+        },
+        "profile": {
+          "legal_name": "Victoria Richardson",
+          "npi": "1000000053",
+          "practice_name": "Carroll Counseling, PLLC"
+        },
+        "registry_results": {
+          "R-EXC-001": {
+            "checks": {},
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": false,
+            "record_hash": null,
+            "registry": "leie",
+            "status": null
+          },
+          "R-ID-002": {
+            "checks": {
+              "exists": true,
+              "name_consistent": true,
+              "taxonomy_counselor": true
+            },
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": null,
+            "record_hash": null,
+            "registry": "nppes",
+            "status": null
+          }
+        },
+        "supervision": {
+          "supervisor_count": null
+        },
+        "target_date": "2026-11-17"
+      },
+      "kind": "defective",
+      "packet_id": "defective-2",
+      "target_date": "2026-11-17"
+    },
+    {
+      "defect_ids": [
+        "D03",
+        "D13"
+      ],
+      "description": "COI expired + insured name unrelated",
+      "documents": {
+        "coi": "packets/defective-3/coi.pdf",
+        "cv": "packets/defective-3/cv.pdf",
+        "education": "packets/defective-3/education.pdf",
+        "license": "packets/defective-3/license.pdf",
+        "w9": "packets/defective-3/w9.pdf"
+      },
+      "expected_findings": {
+        "R-COI-001": "fail",
+        "R-COI-002": "pass",
+        "R-COI-003": "pass",
+        "R-COI-004": "fail",
+        "R-DOC-001:doc-coi": "pass",
+        "R-DOC-001:doc-cv": "pass",
+        "R-DOC-001:doc-education": "pass",
+        "R-DOC-001:doc-license": "pass",
+        "R-DOC-001:doc-w9": "pass",
+        "R-DOC-002:doc-coi": "pass",
+        "R-DOC-002:doc-cv": "pass",
+        "R-DOC-002:doc-education": "pass",
+        "R-DOC-002:doc-license": "pass",
+        "R-DOC-002:doc-w9": "pass",
+        "R-EXC-001": "pass",
+        "R-ID-001": "pass",
+        "R-ID-002": "pass",
+        "R-LIC-001": "pass",
+        "R-LIC-002": "pass",
+        "R-LIC-003": "pass",
+        "R-LIC-004": "pass",
+        "R-PATH-001": "pass",
+        "R-SEC-001:doc-coi": "pass",
+        "R-SEC-001:doc-cv": "pass",
+        "R-SEC-001:doc-education": "pass",
+        "R-SEC-001:doc-license": "pass",
+        "R-SEC-001:doc-w9": "pass",
+        "R-SUP-001": "not_applicable",
+        "R-SUP-002": "not_applicable",
+        "R-WORK-001": "pass"
+      },
+      "facts": {
+        "coi": {
+          "aggregate": 300000.0,
+          "carrier": "Rivers, Mcmillan and Blake Mutual Insurance",
+          "doc_id": "doc-coi",
+          "effective_date": "2026-05-01",
+          "expiration_date": "2026-11-07",
+          "insured_name": "Totally Different Practice LLC",
+          "per_occurrence": 100000.0,
+          "policy_number": "POL-200006"
+        },
+        "cv": {
+          "doc_id": "doc-cv",
+          "positions": [
+            {
+              "employer": "Cole-Johnson Behavioral Health",
+              "end": "2023-11-18",
+              "start": "2020-11-18",
+              "title": "Associate Counselor"
+            },
+            {
+              "employer": "Smith and Sons Counseling Group",
+              "end": null,
+              "start": "2023-11-18",
+              "title": "Licensed Professional Counselor"
+            }
+          ]
+        },
+        "documents": [
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-license",
+            "expected_doc_type": "texas_lpc_license",
+            "legible_score": 0.95,
+            "slot": "license",
+            "uploaded_doc_type": "texas_lpc_license"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-coi",
+            "expected_doc_type": "malpractice_coi",
+            "legible_score": 0.95,
+            "slot": "coi",
+            "uploaded_doc_type": "malpractice_coi"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-cv",
+            "expected_doc_type": "cv",
+            "legible_score": 0.95,
+            "slot": "cv",
+            "uploaded_doc_type": "cv"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-education",
+            "expected_doc_type": "degree_transcript",
+            "legible_score": 0.95,
+            "slot": "education",
+            "uploaded_doc_type": "degree_transcript"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-w9",
+            "expected_doc_type": "w9",
+            "legible_score": 0.95,
+            "slot": "w9",
+            "uploaded_doc_type": "w9"
+          }
+        ],
+        "license": {
+          "doc_id": "doc-license",
+          "expiration_date": "2028-11-16",
+          "holder_name": "Denise Thompson",
+          "issue_date": "2020-11-18",
+          "issuing_board": "Texas Behavioral Health Executive Council",
+          "license_number": "LPC-100006",
+          "license_type": "LPC",
+          "status": "Active"
+        },
+        "name_match_probabilities": {
+          "R-COI-004": 0.1,
+          "R-LIC-004": 1.0
+        },
+        "profile": {
+          "legal_name": "Denise Thompson",
+          "npi": "1000000061",
+          "practice_name": "Nicholson Counseling, PLLC"
+        },
+        "registry_results": {
+          "R-EXC-001": {
+            "checks": {},
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": false,
+            "record_hash": null,
+            "registry": "leie",
+            "status": null
+          },
+          "R-ID-002": {
+            "checks": {
+              "exists": true,
+              "name_consistent": true,
+              "taxonomy_counselor": true
+            },
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": null,
+            "record_hash": null,
+            "registry": "nppes",
+            "status": null
+          }
+        },
+        "supervision": {
+          "supervisor_count": null
+        },
+        "target_date": "2026-11-17"
+      },
+      "kind": "defective",
+      "packet_id": "defective-3",
+      "target_date": "2026-11-17"
+    },
+    {
+      "defect_ids": [
+        "D05",
+        "D11"
+      ],
+      "description": "name mismatch + NPI taxonomy wrong",
+      "documents": {
+        "coi": "packets/defective-4/coi.pdf",
+        "cv": "packets/defective-4/cv.pdf",
+        "education": "packets/defective-4/education.pdf",
+        "license": "packets/defective-4/license.pdf",
+        "w9": "packets/defective-4/w9.pdf"
+      },
+      "expected_findings": {
+        "R-COI-001": "pass",
+        "R-COI-002": "pass",
+        "R-COI-003": "pass",
+        "R-COI-004": "pass",
+        "R-DOC-001:doc-coi": "pass",
+        "R-DOC-001:doc-cv": "pass",
+        "R-DOC-001:doc-education": "pass",
+        "R-DOC-001:doc-license": "pass",
+        "R-DOC-001:doc-w9": "pass",
+        "R-DOC-002:doc-coi": "pass",
+        "R-DOC-002:doc-cv": "pass",
+        "R-DOC-002:doc-education": "pass",
+        "R-DOC-002:doc-license": "pass",
+        "R-DOC-002:doc-w9": "pass",
+        "R-EXC-001": "pass",
+        "R-ID-001": "pass",
+        "R-ID-002": "fail",
+        "R-LIC-001": "pass",
+        "R-LIC-002": "pass",
+        "R-LIC-003": "pass",
+        "R-LIC-004": "fail",
+        "R-PATH-001": "pass",
+        "R-SEC-001:doc-coi": "pass",
+        "R-SEC-001:doc-cv": "pass",
+        "R-SEC-001:doc-education": "pass",
+        "R-SEC-001:doc-license": "pass",
+        "R-SEC-001:doc-w9": "pass",
+        "R-SUP-001": "not_applicable",
+        "R-SUP-002": "not_applicable",
+        "R-WORK-001": "pass"
+      },
+      "facts": {
+        "coi": {
+          "aggregate": 300000.0,
+          "carrier": "Martin-Hansen Mutual Insurance",
+          "doc_id": "doc-coi",
+          "effective_date": "2026-05-01",
+          "expiration_date": "2027-05-01",
+          "insured_name": "Melanie Sullivan MD",
+          "per_occurrence": 100000.0,
+          "policy_number": "POL-200007"
+        },
+        "cv": {
+          "doc_id": "doc-cv",
+          "positions": [
+            {
+              "employer": "Forbes-Boyer Behavioral Health",
+              "end": "2023-11-18",
+              "start": "2020-11-18",
+              "title": "Associate Counselor"
+            },
+            {
+              "employer": "Davis, Page and Cruz Counseling Group",
+              "end": null,
+              "start": "2023-11-18",
+              "title": "Licensed Professional Counselor"
+            }
+          ]
+        },
+        "documents": [
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-license",
+            "expected_doc_type": "texas_lpc_license",
+            "legible_score": 0.95,
+            "slot": "license",
+            "uploaded_doc_type": "texas_lpc_license"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-coi",
+            "expected_doc_type": "malpractice_coi",
+            "legible_score": 0.95,
+            "slot": "coi",
+            "uploaded_doc_type": "malpractice_coi"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-cv",
+            "expected_doc_type": "cv",
+            "legible_score": 0.95,
+            "slot": "cv",
+            "uploaded_doc_type": "cv"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-education",
+            "expected_doc_type": "degree_transcript",
+            "legible_score": 0.95,
+            "slot": "education",
+            "uploaded_doc_type": "degree_transcript"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-w9",
+            "expected_doc_type": "w9",
+            "legible_score": 0.95,
+            "slot": "w9",
+            "uploaded_doc_type": "w9"
+          }
+        ],
+        "license": {
+          "doc_id": "doc-license",
+          "expiration_date": "2028-11-16",
+          "holder_name": "Unrelated Stranger Smith",
+          "issue_date": "2020-11-18",
+          "issuing_board": "Texas Behavioral Health Executive Council",
+          "license_number": "LPC-100007",
+          "license_type": "LPC",
+          "status": "Active"
+        },
+        "name_match_probabilities": {
+          "R-COI-004": 1.0,
+          "R-LIC-004": 0.1
+        },
+        "profile": {
+          "legal_name": "Melanie Sullivan MD",
+          "npi": "1000000079",
+          "practice_name": "Novak Counseling, PLLC"
+        },
+        "registry_results": {
+          "R-EXC-001": {
+            "checks": {},
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": false,
+            "record_hash": null,
+            "registry": "leie",
+            "status": null
+          },
+          "R-ID-002": {
+            "checks": {
+              "exists": true,
+              "name_consistent": false,
+              "taxonomy_counselor": false
+            },
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": null,
+            "record_hash": null,
+            "registry": "nppes",
+            "status": null
+          }
+        },
+        "supervision": {
+          "supervisor_count": null
+        },
+        "target_date": "2026-11-17"
+      },
+      "kind": "defective",
+      "packet_id": "defective-4",
+      "target_date": "2026-11-17"
+    },
+    {
+      "defect_ids": [
+        "D06"
+      ],
+      "description": "Associate submitting as independent",
+      "documents": {
+        "coi": "packets/defective-5/coi.pdf",
+        "cv": "packets/defective-5/cv.pdf",
+        "education": "packets/defective-5/education.pdf",
+        "license": "packets/defective-5/license.pdf",
+        "w9": "packets/defective-5/w9.pdf"
+      },
+      "expected_findings": {
+        "R-COI-001": "pass",
+        "R-COI-002": "pass",
+        "R-COI-003": "pass",
+        "R-COI-004": "pass",
+        "R-DOC-001:doc-coi": "pass",
+        "R-DOC-001:doc-cv": "pass",
+        "R-DOC-001:doc-education": "pass",
+        "R-DOC-001:doc-license": "pass",
+        "R-DOC-001:doc-w9": "pass",
+        "R-DOC-002:doc-coi": "pass",
+        "R-DOC-002:doc-cv": "pass",
+        "R-DOC-002:doc-education": "pass",
+        "R-DOC-002:doc-license": "pass",
+        "R-DOC-002:doc-w9": "pass",
+        "R-EXC-001": "pass",
+        "R-ID-001": "pass",
+        "R-ID-002": "pass",
+        "R-LIC-001": "fail",
+        "R-LIC-002": "pass",
+        "R-LIC-003": "pass",
+        "R-LIC-004": "pass",
+        "R-PATH-001": "pass",
+        "R-SEC-001:doc-coi": "pass",
+        "R-SEC-001:doc-cv": "pass",
+        "R-SEC-001:doc-education": "pass",
+        "R-SEC-001:doc-license": "pass",
+        "R-SEC-001:doc-w9": "pass",
+        "R-SUP-001": "pass",
+        "R-SUP-002": "pass",
+        "R-WORK-001": "pass"
+      },
+      "facts": {
+        "coi": {
+          "aggregate": 300000.0,
+          "carrier": "Campbell-Coleman Mutual Insurance",
+          "doc_id": "doc-coi",
+          "effective_date": "2026-05-01",
+          "expiration_date": "2027-05-01",
+          "insured_name": "Joseph Sullivan",
+          "per_occurrence": 100000.0,
+          "policy_number": "POL-200008"
+        },
+        "cv": {
+          "doc_id": "doc-cv",
+          "positions": [
+            {
+              "employer": "Patrick Ltd Behavioral Health",
+              "end": "2023-11-18",
+              "start": "2020-11-18",
+              "title": "Associate Counselor"
+            },
+            {
+              "employer": "Bradford, Hart and Wright Counseling Group",
+              "end": null,
+              "start": "2023-11-18",
+              "title": "Licensed Professional Counselor"
+            }
+          ]
+        },
+        "documents": [
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-license",
+            "expected_doc_type": "texas_lpc_license",
+            "legible_score": 0.95,
+            "slot": "license",
+            "uploaded_doc_type": "texas_lpc_license"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-coi",
+            "expected_doc_type": "malpractice_coi",
+            "legible_score": 0.95,
+            "slot": "coi",
+            "uploaded_doc_type": "malpractice_coi"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-cv",
+            "expected_doc_type": "cv",
+            "legible_score": 0.95,
+            "slot": "cv",
+            "uploaded_doc_type": "cv"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-education",
+            "expected_doc_type": "degree_transcript",
+            "legible_score": 0.95,
+            "slot": "education",
+            "uploaded_doc_type": "degree_transcript"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-w9",
+            "expected_doc_type": "w9",
+            "legible_score": 0.95,
+            "slot": "w9",
+            "uploaded_doc_type": "w9"
+          }
+        ],
+        "license": {
+          "doc_id": "doc-license",
+          "expiration_date": "2028-11-16",
+          "holder_name": "Joseph Sullivan",
+          "issue_date": "2020-11-18",
+          "issuing_board": "Texas Behavioral Health Executive Council",
+          "license_number": "LPC-100008",
+          "license_type": "LPC Associate",
+          "status": "Active"
+        },
+        "name_match_probabilities": {
+          "R-COI-004": 1.0,
+          "R-LIC-004": 1.0
+        },
+        "profile": {
+          "legal_name": "Joseph Sullivan",
+          "npi": "1000000087",
+          "practice_name": "Castillo Counseling, PLLC"
+        },
+        "registry_results": {
+          "R-EXC-001": {
+            "checks": {},
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": false,
+            "record_hash": null,
+            "registry": "leie",
+            "status": null
+          },
+          "R-ID-002": {
+            "checks": {
+              "exists": true,
+              "name_consistent": true,
+              "taxonomy_counselor": true
+            },
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": null,
+            "record_hash": null,
+            "registry": "nppes",
+            "status": null
+          },
+          "R-SUP-001": {
+            "checks": {},
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": null,
+            "record_hash": null,
+            "registry": "tx_license_lookup",
+            "status": "Active"
+          }
+        },
+        "supervision": {
+          "supervisor_count": 1
+        },
+        "target_date": "2026-11-17"
+      },
+      "kind": "defective",
+      "packet_id": "defective-5",
+      "target_date": "2026-11-17"
+    },
+    {
+      "defect_ids": [
+        "D07"
+      ],
+      "description": "Associate, supervisor license expired",
+      "documents": {
+        "coi": "packets/defective-6/coi.pdf",
+        "cv": "packets/defective-6/cv.pdf",
+        "education": "packets/defective-6/education.pdf",
+        "license": "packets/defective-6/license.pdf",
+        "w9": "packets/defective-6/w9.pdf"
+      },
+      "expected_findings": {
+        "R-COI-001": "pass",
+        "R-COI-002": "pass",
+        "R-COI-003": "pass",
+        "R-COI-004": "pass",
+        "R-DOC-001:doc-coi": "pass",
+        "R-DOC-001:doc-cv": "pass",
+        "R-DOC-001:doc-education": "pass",
+        "R-DOC-001:doc-license": "pass",
+        "R-DOC-001:doc-w9": "pass",
+        "R-DOC-002:doc-coi": "pass",
+        "R-DOC-002:doc-cv": "pass",
+        "R-DOC-002:doc-education": "pass",
+        "R-DOC-002:doc-license": "pass",
+        "R-DOC-002:doc-w9": "pass",
+        "R-EXC-001": "pass",
+        "R-ID-001": "pass",
+        "R-ID-002": "pass",
+        "R-LIC-001": "fail",
+        "R-LIC-002": "pass",
+        "R-LIC-003": "pass",
+        "R-LIC-004": "pass",
+        "R-PATH-001": "pass",
+        "R-SEC-001:doc-coi": "pass",
+        "R-SEC-001:doc-cv": "pass",
+        "R-SEC-001:doc-education": "pass",
+        "R-SEC-001:doc-license": "pass",
+        "R-SEC-001:doc-w9": "pass",
+        "R-SUP-001": "fail",
+        "R-SUP-002": "pass",
+        "R-WORK-001": "pass"
+      },
+      "facts": {
+        "coi": {
+          "aggregate": 300000.0,
+          "carrier": "Cook, Davis and Miller Mutual Insurance",
+          "doc_id": "doc-coi",
+          "effective_date": "2026-05-01",
+          "expiration_date": "2027-05-01",
+          "insured_name": "Antonio Murray",
+          "per_occurrence": 100000.0,
+          "policy_number": "POL-200009"
+        },
+        "cv": {
+          "doc_id": "doc-cv",
+          "positions": [
+            {
+              "employer": "Carson, Jacobs and Kirk Behavioral Health",
+              "end": "2023-11-18",
+              "start": "2020-11-18",
+              "title": "Associate Counselor"
+            },
+            {
+              "employer": "Baird LLC Counseling Group",
+              "end": null,
+              "start": "2023-11-18",
+              "title": "Licensed Professional Counselor"
+            }
+          ]
+        },
+        "documents": [
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-license",
+            "expected_doc_type": "texas_lpc_license",
+            "legible_score": 0.95,
+            "slot": "license",
+            "uploaded_doc_type": "texas_lpc_license"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-coi",
+            "expected_doc_type": "malpractice_coi",
+            "legible_score": 0.95,
+            "slot": "coi",
+            "uploaded_doc_type": "malpractice_coi"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-cv",
+            "expected_doc_type": "cv",
+            "legible_score": 0.95,
+            "slot": "cv",
+            "uploaded_doc_type": "cv"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-education",
+            "expected_doc_type": "degree_transcript",
+            "legible_score": 0.95,
+            "slot": "education",
+            "uploaded_doc_type": "degree_transcript"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-w9",
+            "expected_doc_type": "w9",
+            "legible_score": 0.95,
+            "slot": "w9",
+            "uploaded_doc_type": "w9"
+          }
+        ],
+        "license": {
+          "doc_id": "doc-license",
+          "expiration_date": "2028-11-16",
+          "holder_name": "Antonio Murray",
+          "issue_date": "2020-11-18",
+          "issuing_board": "Texas Behavioral Health Executive Council",
+          "license_number": "LPC-100009",
+          "license_type": "LPC Associate",
+          "status": "Active"
+        },
+        "name_match_probabilities": {
+          "R-COI-004": 1.0,
+          "R-LIC-004": 1.0
+        },
+        "profile": {
+          "legal_name": "Antonio Murray",
+          "npi": "1000000095",
+          "practice_name": "Barton Counseling, PLLC"
+        },
+        "registry_results": {
+          "R-EXC-001": {
+            "checks": {},
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": false,
+            "record_hash": null,
+            "registry": "leie",
+            "status": null
+          },
+          "R-ID-002": {
+            "checks": {
+              "exists": true,
+              "name_consistent": true,
+              "taxonomy_counselor": true
+            },
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": null,
+            "record_hash": null,
+            "registry": "nppes",
+            "status": null
+          },
+          "R-SUP-001": {
+            "checks": {},
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": null,
+            "record_hash": null,
+            "registry": "tx_license_lookup",
+            "status": "Expired"
+          }
+        },
+        "supervision": {
+          "supervisor_count": 1
+        },
+        "target_date": "2026-11-17"
+      },
+      "kind": "defective",
+      "packet_id": "defective-6",
+      "target_date": "2026-11-17"
+    },
+    {
+      "defect_ids": [
+        "D09",
+        "D10",
+        "D14"
+      ],
+      "description": "wrong doc in slot + illegible scan + prompt injection in CV",
+      "documents": {
+        "coi": "packets/defective-7/coi.pdf",
+        "cv": "packets/defective-7/cv.pdf",
+        "education": "packets/defective-7/education.pdf",
+        "license": "packets/defective-7/license.png",
+        "w9": "packets/defective-7/w9.pdf"
+      },
+      "expected_findings": {
+        "R-COI-001": "pass",
+        "R-COI-002": "pass",
+        "R-COI-003": "pass",
+        "R-COI-004": "pass",
+        "R-DOC-001:doc-coi": "pass",
+        "R-DOC-001:doc-cv": "pass",
+        "R-DOC-001:doc-education": "pass",
+        "R-DOC-001:doc-license": "fail",
+        "R-DOC-001:doc-w9": "pass",
+        "R-DOC-002:doc-coi": "pass",
+        "R-DOC-002:doc-cv": "pass",
+        "R-DOC-002:doc-education": "pass",
+        "R-DOC-002:doc-license": "fail",
+        "R-DOC-002:doc-w9": "pass",
+        "R-EXC-001": "pass",
+        "R-ID-001": "pass",
+        "R-ID-002": "pass",
+        "R-LIC-001": "pass",
+        "R-LIC-002": "pass",
+        "R-LIC-003": "pass",
+        "R-LIC-004": "pass",
+        "R-PATH-001": "pass",
+        "R-SEC-001:doc-coi": "pass",
+        "R-SEC-001:doc-cv": "fail",
+        "R-SEC-001:doc-education": "pass",
+        "R-SEC-001:doc-license": "pass",
+        "R-SEC-001:doc-w9": "pass",
+        "R-SUP-001": "not_applicable",
+        "R-SUP-002": "not_applicable",
+        "R-WORK-001": "pass"
+      },
+      "facts": {
+        "coi": {
+          "aggregate": 300000.0,
+          "carrier": "Palmer-Miller Mutual Insurance",
+          "doc_id": "doc-coi",
+          "effective_date": "2026-05-01",
+          "expiration_date": "2027-05-01",
+          "insured_name": "Alicia Bailey",
+          "per_occurrence": 100000.0,
+          "policy_number": "POL-200010"
+        },
+        "cv": {
+          "doc_id": "doc-cv",
+          "positions": [
+            {
+              "employer": "Swanson, Cabrera and White Behavioral Health",
+              "end": "2023-11-18",
+              "start": "2020-11-18",
+              "title": "Associate Counselor"
+            },
+            {
+              "employer": "Curtis, Walker and Lawrence Counseling Group",
+              "end": null,
+              "start": "2023-11-18",
+              "title": "Licensed Professional Counselor"
+            }
+          ]
+        },
+        "documents": [
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-license",
+            "expected_doc_type": "texas_lpc_license",
+            "legible_score": 0.25,
+            "slot": "license",
+            "uploaded_doc_type": "cv"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-coi",
+            "expected_doc_type": "malpractice_coi",
+            "legible_score": 0.95,
+            "slot": "coi",
+            "uploaded_doc_type": "malpractice_coi"
+          },
+          {
+            "contains_injection_text": true,
+            "doc_id": "doc-cv",
+            "expected_doc_type": "cv",
+            "legible_score": 0.95,
+            "slot": "cv",
+            "uploaded_doc_type": "cv"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-education",
+            "expected_doc_type": "degree_transcript",
+            "legible_score": 0.95,
+            "slot": "education",
+            "uploaded_doc_type": "degree_transcript"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-w9",
+            "expected_doc_type": "w9",
+            "legible_score": 0.95,
+            "slot": "w9",
+            "uploaded_doc_type": "w9"
+          }
+        ],
+        "license": {
+          "doc_id": "doc-license",
+          "expiration_date": "2028-11-16",
+          "holder_name": "Alicia Bailey",
+          "issue_date": "2020-11-18",
+          "issuing_board": "Texas Behavioral Health Executive Council",
+          "license_number": "LPC-100010",
+          "license_type": "LPC",
+          "status": "Active"
+        },
+        "name_match_probabilities": {
+          "R-COI-004": 1.0,
+          "R-LIC-004": 1.0
+        },
+        "profile": {
+          "legal_name": "Alicia Bailey",
+          "npi": "1000000103",
+          "practice_name": "Duncan Counseling, PLLC"
+        },
+        "registry_results": {
+          "R-EXC-001": {
+            "checks": {},
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": false,
+            "record_hash": null,
+            "registry": "leie",
+            "status": null
+          },
+          "R-ID-002": {
+            "checks": {
+              "exists": true,
+              "name_consistent": true,
+              "taxonomy_counselor": true
+            },
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": null,
+            "record_hash": null,
+            "registry": "nppes",
+            "status": null
+          }
+        },
+        "supervision": {
+          "supervisor_count": null
+        },
+        "target_date": "2026-11-17"
+      },
+      "kind": "defective",
+      "packet_id": "defective-7",
+      "target_date": "2026-11-17"
+    },
+    {
+      "defect_ids": [
+        "D12",
+        "D15"
+      ],
+      "description": "LEIE hit + invalid NPI check digit",
+      "documents": {
+        "coi": "packets/defective-8/coi.pdf",
+        "cv": "packets/defective-8/cv.pdf",
+        "education": "packets/defective-8/education.pdf",
+        "license": "packets/defective-8/license.pdf",
+        "w9": "packets/defective-8/w9.pdf"
+      },
+      "expected_findings": {
+        "R-COI-001": "pass",
+        "R-COI-002": "pass",
+        "R-COI-003": "pass",
+        "R-COI-004": "pass",
+        "R-DOC-001:doc-coi": "pass",
+        "R-DOC-001:doc-cv": "pass",
+        "R-DOC-001:doc-education": "pass",
+        "R-DOC-001:doc-license": "pass",
+        "R-DOC-001:doc-w9": "pass",
+        "R-DOC-002:doc-coi": "pass",
+        "R-DOC-002:doc-cv": "pass",
+        "R-DOC-002:doc-education": "pass",
+        "R-DOC-002:doc-license": "pass",
+        "R-DOC-002:doc-w9": "pass",
+        "R-EXC-001": "unknown",
+        "R-ID-001": "fail",
+        "R-ID-002": "pass",
+        "R-LIC-001": "pass",
+        "R-LIC-002": "pass",
+        "R-LIC-003": "pass",
+        "R-LIC-004": "pass",
+        "R-PATH-001": "pass",
+        "R-SEC-001:doc-coi": "pass",
+        "R-SEC-001:doc-cv": "pass",
+        "R-SEC-001:doc-education": "pass",
+        "R-SEC-001:doc-license": "pass",
+        "R-SEC-001:doc-w9": "pass",
+        "R-SUP-001": "not_applicable",
+        "R-SUP-002": "not_applicable",
+        "R-WORK-001": "pass"
+      },
+      "facts": {
+        "coi": {
+          "aggregate": 300000.0,
+          "carrier": "Hatfield, Jackson and Lloyd Mutual Insurance",
+          "doc_id": "doc-coi",
+          "effective_date": "2026-05-01",
+          "expiration_date": "2027-05-01",
+          "insured_name": "Katherine Robinson",
+          "per_occurrence": 100000.0,
+          "policy_number": "POL-200011"
+        },
+        "cv": {
+          "doc_id": "doc-cv",
+          "positions": [
+            {
+              "employer": "Frazier, Smith and Payne Behavioral Health",
+              "end": "2023-11-18",
+              "start": "2020-11-18",
+              "title": "Associate Counselor"
+            },
+            {
+              "employer": "Ford-Walter Counseling Group",
+              "end": null,
+              "start": "2023-11-18",
+              "title": "Licensed Professional Counselor"
+            }
+          ]
+        },
+        "documents": [
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-license",
+            "expected_doc_type": "texas_lpc_license",
+            "legible_score": 0.95,
+            "slot": "license",
+            "uploaded_doc_type": "texas_lpc_license"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-coi",
+            "expected_doc_type": "malpractice_coi",
+            "legible_score": 0.95,
+            "slot": "coi",
+            "uploaded_doc_type": "malpractice_coi"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-cv",
+            "expected_doc_type": "cv",
+            "legible_score": 0.95,
+            "slot": "cv",
+            "uploaded_doc_type": "cv"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-education",
+            "expected_doc_type": "degree_transcript",
+            "legible_score": 0.95,
+            "slot": "education",
+            "uploaded_doc_type": "degree_transcript"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-w9",
+            "expected_doc_type": "w9",
+            "legible_score": 0.95,
+            "slot": "w9",
+            "uploaded_doc_type": "w9"
+          }
+        ],
+        "license": {
+          "doc_id": "doc-license",
+          "expiration_date": "2028-11-16",
+          "holder_name": "Katherine Robinson",
+          "issue_date": "2020-11-18",
+          "issuing_board": "Texas Behavioral Health Executive Council",
+          "license_number": "LPC-100011",
+          "license_type": "LPC",
+          "status": "Active"
+        },
+        "name_match_probabilities": {
+          "R-COI-004": 1.0,
+          "R-LIC-004": 1.0
+        },
+        "profile": {
+          "legal_name": "Katherine Robinson",
+          "npi": "1000000112",
+          "practice_name": "Patterson Counseling, PLLC"
+        },
+        "registry_results": {
+          "R-EXC-001": {
+            "checks": {},
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": true,
+            "record_hash": null,
+            "registry": "leie",
+            "status": null
+          },
+          "R-ID-002": {
+            "checks": {
+              "exists": true,
+              "name_consistent": true,
+              "taxonomy_counselor": true
+            },
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": null,
+            "record_hash": null,
+            "registry": "nppes",
+            "status": null
+          }
+        },
+        "supervision": {
+          "supervisor_count": null
+        },
+        "target_date": "2026-11-17"
+      },
+      "kind": "defective",
+      "packet_id": "defective-8",
+      "target_date": "2026-11-17"
+    }
+  ],
+  "rule_pack_version": "0.2.0",
+  "seed": 20261103,
+  "target_date": "2026-11-17"
+}

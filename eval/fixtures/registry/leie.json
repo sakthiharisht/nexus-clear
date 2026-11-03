@@ -1,0 +1,50 @@
+{
+  "Alicia Bailey": {
+    "npi": "1000000103",
+    "possible_match": false
+  },
+  "Antonio Murray": {
+    "npi": "1000000095",
+    "possible_match": false
+  },
+  "Ashley Warren": {
+    "npi": "1000000038",
+    "possible_match": false
+  },
+  "Christopher Lee": {
+    "npi": "1000000004",
+    "possible_match": false
+  },
+  "Denise Thompson": {
+    "npi": "1000000061",
+    "possible_match": false
+  },
+  "Gina Wiley": {
+    "npi": "1000000012",
+    "possible_match": false
+  },
+  "Jonathan Alvarez": {
+    "npi": "1000000020",
+    "possible_match": false
+  },
+  "Joseph Sullivan": {
+    "npi": "1000000087",
+    "possible_match": false
+  },
+  "Katherine Robinson": {
+    "npi": "1000000112",
+    "possible_match": true
+  },
+  "Melanie Sullivan MD": {
+    "npi": "1000000079",
+    "possible_match": false
+  },
+  "Scott West": {
+    "npi": "1000000046",
+    "possible_match": false
+  },
+  "Victoria Richardson": {
+    "npi": "1000000053",
+    "possible_match": false
+  }
+}

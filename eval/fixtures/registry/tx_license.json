@@ -1,0 +1,72 @@
+{
+  "LPC-100000": {
+    "holder_name": "Christopher Lee",
+    "license_type": "LPC",
+    "status": "Active"
+  },
+  "LPC-100001": {
+    "holder_name": "Gina Wiley",
+    "license_type": "LPC",
+    "status": "Active"
+  },
+  "LPC-100002": {
+    "holder_name": "Jon Alvarez",
+    "license_type": "LPC",
+    "status": "Active"
+  },
+  "LPC-100003": {
+    "holder_name": "Ashley Warren",
+    "license_type": "LPC",
+    "status": "Active"
+  },
+  "LPC-100004": {
+    "holder_name": "Scott West",
+    "license_type": "LPC",
+    "status": "Active"
+  },
+  "LPC-100005": {
+    "holder_name": "Victoria Richardson",
+    "license_type": "LPC",
+    "status": "Active"
+  },
+  "LPC-100006": {
+    "holder_name": "Denise Thompson",
+    "license_type": "LPC",
+    "status": "Active"
+  },
+  "LPC-100007": {
+    "holder_name": "Unrelated Stranger Smith",
+    "license_type": "LPC",
+    "status": "Active"
+  },
+  "LPC-100008": {
+    "holder_name": "Joseph Sullivan",
+    "license_type": "LPC Associate",
+    "status": "Active"
+  },
+  "LPC-100008-SUPERVISOR": {
+    "holder_name": "Supervising LPC-S",
+    "license_type": "LPC-S",
+    "status": "Active"
+  },
+  "LPC-100009": {
+    "holder_name": "Antonio Murray",
+    "license_type": "LPC Associate",
+    "status": "Active"
+  },
+  "LPC-100009-SUPERVISOR": {
+    "holder_name": "Supervising LPC-S",
+    "license_type": "LPC-S",
+    "status": "Expired"
+  },
+  "LPC-100010": {
+    "holder_name": "Alicia Bailey",
+    "license_type": "LPC",
+    "status": "Active"
+  },
+  "LPC-100011": {
+    "holder_name": "Katherine Robinson",
+    "license_type": "LPC",
+    "status": "Active"
+  }
+}

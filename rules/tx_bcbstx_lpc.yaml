@@ -1,0 +1,226 @@
+# Seed rule pack: Texas / BCBSTX (commercial) / Licensed Professional Counselor.
+# Move to rules/tx_bcbstx_lpc.yaml in the repo.
+#
+# Every rule carries provenance. needs_verification: true means the rule came from a
+# source I could not confirm applies to this exact path (see notes). The gap report must
+# show source + doc_date + last_verified for each finding, and surface needs_verification.
+# severity: blocker | warning | info.  kind: see SPEC.md section 6.
+
+pack_id: tx-bcbstx-lpc
+version: 0.1.0
+jurisdiction: TX
+payer: BCBSTX
+provider_type: LPC
+application_path: CAQH
+target_date_default_offset_days: 14
+
+sources:
+  bcbstx_process:
+    url: "https://www.bcbstx.com/content/dam/hcsc/docs/provider/tx/provider-medicaid/network/initial_credentialing_and_recredentialing_process.pdf"
+    doc_date: null
+    last_verified: "2026-11-03"
+    notes: >
+      States professional providers on the CAQH Approved Provider Types list (includes
+      Professional Counselor, MFT, Clinical Social Worker, Clinical Psychologist) apply via
+      the CAQH Provider Data Portal; TSCA is for types not on the list. The PDF sits under a
+      BCBSTX Medicaid-network path and mentions the Medicaid CVO, so confirm it matches the
+      commercial policy. BCBSTX commercial page bcbstx.com/provider/network/network/credentialing-office-phys-pro
+      states the same CAQH requirement.
+  bcbstx_tsca_checklist:
+    url: "https://employerportal.bcbstx.com/provider/pdf/tx-initial-credentialing-checklist.pdf"
+    doc_date: "2021-02-18"
+    last_verified: "2026-11-03"
+    notes: >
+      Checklist for the Texas Standardized Credentialing Application (TSCA path). LPCs use
+      CAQH, so rules sourced here are applied as warnings and flagged needs_verification
+      unless noted. Document is from 2021; re-verify before relying on it.
+  tac_681_91:
+    url: "https://law.cornell.edu/regulations/texas/22-Tex-Admin-Code-SS-681-91"
+    doc_date: null
+    last_verified: "2026-11-03"
+    notes: LPC Associate license rules (no independent practice, max two supervisors, billing documents must show supervision).
+  tac_681_93:
+    url: "https://law.cornell.edu/regulations/texas/22-Tex-Admin-Code-SS-681-93"
+    doc_date: null
+    last_verified: "2026-11-03"
+    notes: Supervisor requirements (a supervisor whose license has expired is no longer an approved supervisor).
+  bhec_verify:
+    url: "https://bhec.texas.gov/?p=980"
+    doc_date: null
+    last_verified: "2026-11-03"
+    notes: BHEC Online Search/Verify a License portal reflects public license data. Programmatic access and terms not verified; use fixtures.
+  oig_leie:
+    url: "https://www.oig.hhs.gov/exclusions/leie-database-supplement-downloads/"
+    doc_date: null
+    last_verified: "2026-11-03"
+    notes: Full LEIE CSV updated monthly. Many older records lack NPI, so name + DOB matching needs a probability and reviewer escalation.
+  internal_policy:
+    url: null
+    doc_date: null
+    last_verified: "2026-11-03"
+    notes: Thresholds chosen by this project, not by a payer. Tunable.
+
+required_slots:
+  - {slot: license, doc_type: texas_lpc_license, required: true, source: bcbstx_tsca_checklist, needs_verification: false}
+  - {slot: coi, doc_type: malpractice_coi, required: true, source: bcbstx_tsca_checklist, needs_verification: false}
+  - {slot: cv, doc_type: cv, required: true, source: bcbstx_tsca_checklist, needs_verification: true}
+  - {slot: education, doc_type: degree_transcript, required: true, source: bcbstx_tsca_checklist, needs_verification: true}
+  - {slot: w9, doc_type: w9, required: false, source: internal_policy, needs_verification: true}
+
+rules:
+  - id: R-DOC-001
+    title: Uploaded document matches the checklist slot
+    severity: blocker
+    kind: doc_type_match
+    params: {}
+    source: internal_policy
+    needs_verification: false
+
+  - id: R-DOC-002
+    title: Document is legible enough to read
+    severity: warning
+    kind: legibility
+    params: {min_score: 0.7}
+    source: internal_policy
+    needs_verification: false
+
+  - id: R-LIC-001
+    title: License is a full LPC (not an LPC Associate)
+    severity: blocker
+    kind: enum_match
+    params:
+      field: license.license_type
+      allowed: [LPC, LPC-S]
+      rejected: [LPC Associate]
+    source: tac_681_91
+    needs_verification: false
+    note: >
+      Associates may not practice independently (sourced). That payers exclude associates from
+      panels and require billing under the supervisor or group is from a secondary blog;
+      verify against payer policy before stating it as payer rule.
+
+  - id: R-LIC-002
+    title: License is active and not expired at the target date
+    severity: blocker
+    kind: date_not_expired
+    params: {field: license.expiration_date, as_of: target_date, status_field: license.status, active_values: [Active]}
+    source: bhec_verify
+    needs_verification: false
+
+  - id: R-LIC-003
+    title: License does not expire within 90 days of the target date
+    severity: warning
+    kind: date_expiring_soon
+    params: {field: license.expiration_date, as_of: target_date, within_days: 90}
+    source: internal_policy
+    needs_verification: false
+
+  - id: R-LIC-004
+    title: License holder name matches the provider profile
+    severity: blocker
+    kind: name_match
+    params: {left: license.holder_name, right: profile.legal_name, min_probability: 0.9}
+    source: internal_policy
+    needs_verification: false
+
+  - id: R-SUP-001
+    title: Supervisor license is active (Associates only)
+    severity: blocker
+    kind: registry_check
+    params: {tool: tx_license_lookup, subject: supervisor, expect_status: Active}
+    applies_when: {field: license.license_type, equals: "LPC Associate"}
+    source: tac_681_93
+    needs_verification: false
+
+  - id: R-SUP-002
+    title: Associate has at most two supervisors (Associates only)
+    severity: info
+    kind: numeric_max
+    params: {field: supervision.supervisor_count, max: 2}
+    applies_when: {field: license.license_type, equals: "LPC Associate"}
+    source: tac_681_91
+    needs_verification: false
+
+  - id: R-COI-001
+    title: Malpractice certificate is current at the target date
+    severity: blocker
+    kind: date_not_expired
+    params: {field: coi.expiration_date, as_of: target_date}
+    source: bcbstx_tsca_checklist
+    needs_verification: false
+
+  - id: R-COI-002
+    title: Coverage meets BCBSTX minimum ($100k per occurrence / $300k aggregate)
+    severity: blocker
+    kind: numeric_min_pair
+    params: {fields: [coi.per_occurrence, coi.aggregate], mins: [100000, 300000]}
+    source: bcbstx_tsca_checklist
+    needs_verification: true
+    note: Minimum reduced effective 2021-03-01 per the 2021 checklist; confirm current value.
+
+  - id: R-COI-003
+    title: Certificate shows carrier, policy number, effective and expiration dates
+    severity: warning
+    kind: presence_all
+    params: {fields: [coi.carrier, coi.policy_number, coi.effective_date, coi.expiration_date]}
+    source: bcbstx_tsca_checklist
+    needs_verification: false
+
+  - id: R-COI-004
+    title: Insured name on the certificate matches the provider or their practice entity
+    severity: warning
+    kind: name_match
+    params: {left: coi.insured_name, right: profile.legal_name, alt_right: profile.practice_name, min_probability: 0.9}
+    source: internal_policy
+    needs_verification: false
+
+  - id: R-WORK-001
+    title: Work history covers 5 years with no unexplained gap over 6 months
+    severity: warning
+    kind: history_gap
+    params: {min_years: 5, max_gap_months: 6, field: cv.positions}
+    source: bcbstx_tsca_checklist
+    needs_verification: true
+    note: Rule comes from the TSCA checklist; LPCs apply via CAQH. Confirm the CAQH-path gap rule before making this a blocker.
+
+  - id: R-ID-001
+    title: NPI is well formed (10 digits, valid check digit)
+    severity: blocker
+    kind: checksum
+    params: {field: profile.npi, algorithm: npi_luhn_80840}
+    source: internal_policy
+    needs_verification: false
+    note: CMS NPI check digit uses Luhn with the 80840 prefix; confirm against CMS documentation.
+
+  - id: R-ID-002
+    title: NPPES record exists and its name and taxonomy fit a counselor
+    severity: warning
+    kind: registry_check
+    params: {tool: nppes_lookup, expect: [exists, name_consistent, taxonomy_counselor]}
+    source: internal_policy
+    needs_verification: false
+
+  - id: R-EXC-001
+    title: No match on the OIG exclusion list
+    severity: blocker
+    kind: registry_check
+    params: {tool: leie_check, on_possible_match: escalate_to_reviewer}
+    source: oig_leie
+    needs_verification: false
+    note: A clean result means no NPI-matched exclusion, not that the person was never excluded.
+
+  - id: R-PATH-001
+    title: Application path is CAQH for this provider type
+    severity: info
+    kind: path_route
+    params: {path: CAQH, fallback: TSCA}
+    source: bcbstx_process
+    needs_verification: true
+
+  - id: R-SEC-001
+    title: Document contains instruction-like text aimed at the system
+    severity: info
+    kind: injection_flag
+    params: {}
+    source: internal_policy
+    needs_verification: false

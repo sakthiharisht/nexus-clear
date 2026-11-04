@@ -1,0 +1,52 @@
+{
+  "name_match_conclusions": [
+    {
+      "rule_id": "R-LIC-004",
+      "probability": 0.9
+    },
+    {
+      "rule_id": "R-COI-004",
+      "probability": 0.9
+    }
+  ],
+  "registry_conclusions": [
+    {
+      "rule_id": "R-ID-002",
+      "exists": false,
+      "status": null,
+      "checks": {},
+      "possible_match": null,
+      "registry": "NPPES",
+      "record_hash": null,
+      "fetched_at": null
+    },
+    {
+      "rule_id": "R-EXC-001",
+      "exists": null,
+      "status": null,
+      "checks": {},
+      "possible_match": false,
+      "registry": "LEIE",
+      "record_hash": null,
+      "fetched_at": null
+    }
+  ],
+  "audit_log": [
+    {
+      "tool_name": "nppes_lookup",
+      "query": "9999999997",
+      "record_hash": "4ae057f5106130da09fb7534162cbeb5e0bf9c789c81c44daed277462453c459",
+      "fetched_at": "2026-11-04T22:46:50.478354+13:00",
+      "mode": "fixture"
+    },
+    {
+      "tool_name": "leie_check",
+      "query": "Christopher Donovan",
+      "record_hash": "99fd39425a6a49cb3e0b0043101b6d4e9e85cbd12eeb949ce3fb4682d47219ca",
+      "fetched_at": "2026-11-04T22:46:50.499532+13:00",
+      "mode": "fixture"
+    }
+  ],
+  "tool_calls_made": 2,
+  "aborted_reason": null
+}

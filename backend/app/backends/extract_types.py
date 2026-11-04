@@ -157,3 +157,13 @@ class ExtractionResult(BaseModel):
     cost_known: bool = True
     latency_ms: float = 0.0
     simulated: bool = False
+    # None on a normal successful parse. Set when the model's
+    # structured output was truncated (stop_reason == "max_tokens") or
+    # came back malformed (a pydantic ValidationError while parsing
+    # it) - `fields` is the schema's all-empty default in that case, so
+    # every field already reports "unknown" downstream with no special
+    # handling needed; this is the audit trail for WHY, never a signal
+    # anything else branches on (M6.1: these two failure modes must
+    # become an unknown-with-reason result, never a raised exception -
+    # one bad document's garbled output must not crash a batch run).
+    extraction_error: str | None = None

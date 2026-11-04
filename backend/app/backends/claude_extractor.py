@@ -25,6 +25,7 @@ import time
 from typing import cast
 
 import anthropic
+from pydantic import ValidationError
 
 from app.backends.extract_types import (
     CoiExtraction,
@@ -124,39 +125,74 @@ class ClaudeExtractor:
         schema = _SCHEMA_BY_KIND[extract_input.kind]
         content = _build_content(extract_input)
         started = time.monotonic()
-        response = self._client.messages.parse(
-            model=self._model,
-            # Same risk as ClaudeBackend.classify (its docstring:
-            # extended thinking can exhaust a tight budget before the
-            # structured answer is ever emitted), confirmed live here
-            # too - a cv extraction (list of positions, each with its
-            # own quote) hit stop_reason="max_tokens" at 1024 and came
-            # back as truncated, unparseable JSON. 2048 leaves room for
-            # thinking plus a multi-position CV's full structured
-            # output.
-            max_tokens=2048,
-            messages=[{"role": "user", "content": content}],  # type: ignore[list-item,misc]
-            output_format=schema,
-        )
+        try:
+            response = self._client.messages.parse(
+                model=self._model,
+                # Same risk as ClaudeBackend.classify (its docstring:
+                # extended thinking can exhaust a tight budget before
+                # the structured answer is ever emitted), confirmed
+                # live here too - a cv extraction (list of positions,
+                # each with its own quote) hit stop_reason="max_tokens"
+                # at 1024 and came back as truncated, unparseable JSON.
+                # 2048 leaves room for thinking plus a multi-position
+                # CV's full structured output. M6.1 hardens the
+                # residual cases below rather than relying on this
+                # margin alone.
+                max_tokens=2048,
+                messages=[{"role": "user", "content": content}],  # type: ignore[list-item,misc]
+                output_format=schema,
+            )
+        except ValidationError as exc:
+            # The SDK raises this directly (never returns a response
+            # object) when the model's text content isn't valid JSON -
+            # in practice, output cut off mid-object by max_tokens.
+            # Since there's no response here, usage/cost are unknown
+            # for this call, not a measured zero - one bad document's
+            # garbled output must not crash a batch run (CLAUDE.md
+            # invariant 2: no supporting quote means unknown, never
+            # guessed - this is the same principle one level up, for
+            # the whole document rather than one field).
+            return ExtractionResult(
+                kind=extract_input.kind,
+                fields=schema(),
+                decided_by="claude",
+                latency_ms=(time.monotonic() - started) * 1000,
+                extraction_error=f"structured output failed to parse: {exc}",
+            )
         latency_ms = (time.monotonic() - started) * 1000
+
+        cost_usd = estimate_cost_usd(
+            self._model, response.usage.input_tokens, response.usage.output_tokens
+        )
+        common = {
+            "kind": extract_input.kind,
+            "decided_by": "claude",
+            "input_tokens": response.usage.input_tokens,
+            "output_tokens": response.usage.output_tokens,
+            "cost_usd": cost_usd,
+            "latency_ms": latency_ms,
+        }
+
+        if response.stop_reason == "max_tokens":
+            # Unconditional on stop_reason alone, even if parsed_output
+            # happens to be non-None: a response cut off mid-generation
+            # is never trustworthy enough to treat as a complete
+            # answer, whether or not it happened to parse.
+            return ExtractionResult(
+                fields=schema(),
+                extraction_error="response truncated: stop_reason=max_tokens",
+                **common,  # type: ignore[arg-type]
+            )
 
         parsed = response.parsed_output
         if parsed is None:
             raise ValueError("Claude did not return a parsed structured output")
 
-        cost_usd = estimate_cost_usd(
-            self._model, response.usage.input_tokens, response.usage.output_tokens
-        )
         return ExtractionResult(
-            kind=extract_input.kind,
             # `schema` is looked up from `extract_input.kind` via the
             # same dict, so `parsed`'s runtime type always matches one
             # of ExtractionFields's members - mypy can't narrow that
             # from a dict lookup on its own.
             fields=cast(ExtractionFields, parsed),
-            decided_by="claude",
-            input_tokens=response.usage.input_tokens,
-            output_tokens=response.usage.output_tokens,
-            cost_usd=cost_usd,
-            latency_ms=latency_ms,
+            **common,  # type: ignore[arg-type]
         )

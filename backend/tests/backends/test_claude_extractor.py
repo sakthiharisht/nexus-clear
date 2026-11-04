@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any
 
 import pytest
+from pydantic import BaseModel, ValidationError
 
 from app.backends.claude_extractor import ClaudeExtractor
 from app.backends.extract_types import (
@@ -27,6 +28,7 @@ class _FakeUsage:
 class _FakeParsedMessage:
     parsed_output: Any
     usage: _FakeUsage
+    stop_reason: str = "end_turn"
 
 
 class _FakeMessagesAPI:
@@ -79,6 +81,88 @@ def test_extract_raises_if_claude_returns_no_parsed_output() -> None:
         extractor.extract(
             ExtractInput(doc_id="doc-1", kind="coi", filename="coi.pdf", document_text="text")
         )
+
+
+def test_extract_returns_unknown_with_reason_when_stop_reason_is_max_tokens() -> None:
+    """M6.1: a response cut off by max_tokens must become an
+    unknown-with-reason ExtractionResult, never a raised exception -
+    one bad document's garbled output must not crash a batch run."""
+    fake_client = _FakeClient(
+        _FakeParsedMessage(
+            parsed_output=None, usage=_FakeUsage(500, 2048), stop_reason="max_tokens"
+        )
+    )
+    extractor = ClaudeExtractor(model="claude-haiku-5-5", client=fake_client)  # type: ignore[arg-type]
+
+    result = extractor.extract(
+        ExtractInput(doc_id="doc-1", kind="license", filename="license.pdf", document_text="text")
+    )
+
+    assert result.extraction_error is not None
+    assert "max_tokens" in result.extraction_error
+    assert isinstance(result.fields, LicenseExtraction)
+    assert result.fields.holder_name.value is None
+
+
+def test_extract_treats_max_tokens_as_unreliable_even_if_it_happened_to_parse() -> None:
+    """stop_reason == "max_tokens" is checked unconditionally, even
+    when parsed_output is (surprisingly) non-None - a truncated
+    response is never trustworthy enough to treat as complete."""
+    parsed = LicenseExtraction(
+        holder_name=ExtractedField(value="Jane Doe", confidence=0.9, page=1, quote="Jane Doe")
+    )
+    fake_client = _FakeClient(
+        _FakeParsedMessage(
+            parsed_output=parsed, usage=_FakeUsage(500, 2048), stop_reason="max_tokens"
+        )
+    )
+    extractor = ClaudeExtractor(model="claude-haiku-5-5", client=fake_client)  # type: ignore[arg-type]
+
+    result = extractor.extract(
+        ExtractInput(doc_id="doc-1", kind="license", filename="license.pdf", document_text="text")
+    )
+
+    assert result.extraction_error is not None
+    assert isinstance(result.fields, LicenseExtraction)
+    assert result.fields.holder_name.value is None  # discarded, not the parsed value
+
+
+def test_extract_returns_unknown_with_reason_on_a_validation_error() -> None:
+    """M6.1: the SDK raises pydantic.ValidationError directly (no
+    response object at all) when the model's text content isn't valid
+    JSON - in practice, truncated mid-object. Must also become
+    unknown-with-reason, not propagate."""
+
+    class _DummyModel(BaseModel):
+        value: int
+
+    try:
+        _DummyModel.model_validate_json('{"value": "not-an-int-and-truncat')
+        pytest.fail("expected a real pydantic.ValidationError to construct this fixture")
+    except ValidationError as real_validation_error:
+        captured_error = real_validation_error
+
+    class _RaisingMessagesAPI:
+        def parse(self, **kwargs: Any) -> Any:
+            raise captured_error
+
+    class _RaisingClient:
+        messages = _RaisingMessagesAPI()
+
+    extractor = ClaudeExtractor(model="claude-haiku-5-5", client=_RaisingClient())  # type: ignore[arg-type]
+
+    result = extractor.extract(
+        ExtractInput(doc_id="doc-1", kind="coi", filename="coi.pdf", document_text="text")
+    )
+
+    assert result.extraction_error is not None
+    assert "failed to parse" in result.extraction_error
+    assert isinstance(result.fields, CoiExtraction)
+    assert result.fields.insured_name.value is None
+    # No response object ever came back - usage/cost are genuinely
+    # unknown for this call, not a measured zero.
+    assert result.input_tokens == 0
+    assert result.output_tokens == 0
 
 
 def test_extract_uses_the_schema_matching_the_requested_kind() -> None:

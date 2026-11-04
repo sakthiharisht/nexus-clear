@@ -30,6 +30,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import time
 from datetime import datetime
 from typing import Any, Literal, Protocol
 
@@ -37,6 +38,8 @@ import anthropic
 from mcp.server.mcpserver import MCPServer
 from mcp.types import CallToolResult
 from pydantic import BaseModel, ValidationError
+
+from app.backends.pricing import estimate_cost_usd
 
 logger = logging.getLogger(__name__)
 
@@ -100,6 +103,14 @@ class InvestigationResult(BaseModel):
     # ever calling submit_conclusions (the forced tool_choice should
     # always prevent this - a defensive fallback, not the expected path).
     aborted_reason: str | None = None
+    # Summed across every model turn in the loop (an investigation is
+    # usually 2+ messages.create() calls, not one) - mirrors
+    # ExtractionResult's accounting so a live run's budget can treat
+    # extraction and investigation costs uniformly.
+    input_tokens: int = 0
+    output_tokens: int = 0
+    cost_usd: float = 0.0
+    latency_ms: float = 0.0
 
 
 class InvestigatorLike(Protocol):
@@ -225,6 +236,9 @@ class Investigator:
         audit_log: list[ToolCallAuditEntry] = []
         tool_calls_made = 0
         force_submit = False
+        input_tokens = 0
+        output_tokens = 0
+        started = time.monotonic()
 
         for _ in range(self._max_tool_calls + 2):
             tool_choice: dict[str, Any] = (
@@ -240,6 +254,8 @@ class Investigator:
                 tools=tools,
                 tool_choice=tool_choice,
             )
+            input_tokens += response.usage.input_tokens
+            output_tokens += response.usage.output_tokens
             tool_use_blocks = [b for b in response.content if b.type == "tool_use"]
             if not tool_use_blocks:
                 break
@@ -303,6 +319,10 @@ class Investigator:
             if submitted is not None:
                 submitted.audit_log = audit_log
                 submitted.tool_calls_made = tool_calls_made
+                submitted.input_tokens = input_tokens
+                submitted.output_tokens = output_tokens
+                submitted.cost_usd = estimate_cost_usd(self._model, input_tokens, output_tokens)
+                submitted.latency_ms = (time.monotonic() - started) * 1000
                 return submitted
 
         return InvestigationResult(
@@ -312,4 +332,8 @@ class Investigator:
                 f"investigator did not submit conclusions within "
                 f"{self._max_tool_calls} tool calls"
             ),
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+            cost_usd=estimate_cost_usd(self._model, input_tokens, output_tokens),
+            latency_ms=(time.monotonic() - started) * 1000,
         )

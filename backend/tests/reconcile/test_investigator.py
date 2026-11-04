@@ -34,8 +34,15 @@ class _FakeBlock:
 
 
 @dataclass
+class _FakeUsage:
+    input_tokens: int = 10
+    output_tokens: int = 10
+
+
+@dataclass
 class _FakeResponse:
     content: list[_FakeBlock]
+    usage: _FakeUsage = field(default_factory=_FakeUsage)
 
 
 @pytest.fixture

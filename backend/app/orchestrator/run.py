@@ -36,6 +36,7 @@ from __future__ import annotations
 import io
 import logging
 from base64 import b64encode
+from typing import Literal
 from uuid import UUID
 
 import pypdf
@@ -90,7 +91,9 @@ class RunResult(BaseModel):
     extraction_notes: list[str]
 
 
-def _classify_bits(content: bytes) -> tuple[str, str | None, str | None]:
+def _classify_bits(
+    content: bytes,
+) -> tuple[str, str | None, Literal["image/png", "image/jpeg"] | None]:
     """(page1_text, image_b64, image_media_type) for one document's raw
     bytes. Unlike app/eval/classify_run.py's deliberate "no image"
     scope (cross-platform cache-key reproducibility isn't a concern
@@ -174,7 +177,7 @@ def run_case(
             allowed_doc_types=list(DOC_TYPES),
             page1_text=page1_text,
             page1_image_b64=image_b64,
-            page1_image_media_type=image_media_type,  # type: ignore[arg-type]
+            page1_image_media_type=image_media_type,
         )
         try:
             classify_decision = decide(
@@ -231,9 +234,21 @@ def run_case(
             # (see app/eval/extract_run.py's own docstring) - so there's
             # nothing to gain from spending a live call here.
             continue
-        if not full_text:
-            extraction_notes.append(f"{document.slot}: no extractable text layer - left unknown")
+        if not full_text and image_b64 is None:
+            extraction_notes.append(
+                f"{document.slot}: no extractable text layer or image - left unknown"
+            )
             continue
+
+        # None (not "") when there's no text layer at all - a document
+        # with a *real* empty text layer should still fail quote
+        # verification against "" (app/core/citations.py's verify_field
+        # docstring), but an image has no text layer to check against in
+        # the first place, which is a different, unverifiable-by-code
+        # situation (quote_verified stays False, never promoted to True
+        # or demoted to "unknown" just because there's nothing to compare
+        # against).
+        verify_against_text = full_text if image_b64 is None else None
 
         extract_input_doc_id = f"doc-{document.slot}"
         try:
@@ -241,6 +256,13 @@ def run_case(
                 ExtractInput(
                     doc_id=extract_input_doc_id, kind=extract_kind,
                     filename=f"{document.sha256}/{document.slot}", document_text=full_text,
+                    # A document with no text layer still has a chance to
+                    # be read via vision (e.g. a scanned/rotated license) -
+                    # cached on the image's own sha256, not case-id/upload-
+                    # order (app/backends/extract_cache.py), so re-uploading
+                    # the same bytes elsewhere still hits the same fixture.
+                    image_b64=image_b64 if not full_text else None,
+                    image_media_type=image_media_type if not full_text else None,
                 )
             )
         except ValueError as exc:
@@ -249,31 +271,31 @@ def run_case(
 
         if extract_kind == "license":
             assert isinstance(extraction_result.fields, LicenseExtraction)
-            verified_dict = verify_license_extraction(extraction_result.fields, full_text)
+            verified_dict = verify_license_extraction(extraction_result.fields, verify_against_text)
             verified_fields = list(verified_dict.values())
             verified_payload: dict[str, object] = {
                 name: field.model_dump(mode="json") for name, field in verified_dict.items()
             }
             facts = apply_license_extraction(
-                facts, extract_input_doc_id, extraction_result.fields, full_text
+                facts, extract_input_doc_id, extraction_result.fields, verify_against_text
             )
             namespace = "license"
         elif extract_kind == "coi":
             assert isinstance(extraction_result.fields, CoiExtraction)
-            verified_dict = verify_coi_extraction(extraction_result.fields, full_text)
+            verified_dict = verify_coi_extraction(extraction_result.fields, verify_against_text)
             verified_fields = list(verified_dict.values())
             verified_payload = {
                 name: field.model_dump(mode="json") for name, field in verified_dict.items()
             }
             facts = apply_coi_extraction(
-                facts, extract_input_doc_id, extraction_result.fields, full_text
+                facts, extract_input_doc_id, extraction_result.fields, verify_against_text
             )
             namespace = "coi"
         elif extract_kind == "cv":
             assert isinstance(extraction_result.fields, CvExtraction)
-            verified_cv = verify_cv_extraction(extraction_result.fields, full_text)
+            verified_cv = verify_cv_extraction(extraction_result.fields, verify_against_text)
             facts = apply_cv_extraction(
-                facts, extract_input_doc_id, extraction_result.fields, full_text
+                facts, extract_input_doc_id, extraction_result.fields, verify_against_text
             )
             namespace = "cv"
             verified_fields = [verified_cv["name"], *verified_cv["education"]]

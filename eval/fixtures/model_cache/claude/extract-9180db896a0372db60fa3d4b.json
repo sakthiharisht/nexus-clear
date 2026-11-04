@@ -1,0 +1,74 @@
+{
+  "kind": "cv",
+  "fields": {
+    "name": {
+      "value": "Ashley Warren",
+      "confidence": 0.97,
+      "page": 1,
+      "quote": "Name: Ashley Warren"
+    },
+    "positions": [
+      {
+        "title": {
+          "value": "Associate Counselor",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Associate Counselor, Martinez, Valdez and Mcclure Behavioral Health (2020-11-18 - 2023-11-18)"
+        },
+        "employer": {
+          "value": "Martinez, Valdez and Mcclure Behavioral Health",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Associate Counselor, Martinez, Valdez and Mcclure Behavioral Health (2020-11-18 - 2023-11-18)"
+        },
+        "start": {
+          "value": "2020-11-18",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Associate Counselor, Martinez, Valdez and Mcclure Behavioral Health (2020-11-18 - 2023-11-18)"
+        },
+        "end": {
+          "value": "2023-11-18",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Associate Counselor, Martinez, Valdez and Mcclure Behavioral Health (2020-11-18 - 2023-11-18)"
+        }
+      },
+      {
+        "title": {
+          "value": "Licensed Professional Counselor",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Licensed Professional Counselor, Lewis PLC Counseling Group (2023-11-18 - present)"
+        },
+        "employer": {
+          "value": "Lewis PLC Counseling Group",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Licensed Professional Counselor, Lewis PLC Counseling Group (2023-11-18 - present)"
+        },
+        "start": {
+          "value": "2023-11-18",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Licensed Professional Counselor, Lewis PLC Counseling Group (2023-11-18 - present)"
+        },
+        "end": {
+          "value": null,
+          "confidence": null,
+          "page": null,
+          "quote": null
+        }
+      }
+    ],
+    "education": []
+  },
+  "decided_by": "claude",
+  "input_tokens": 1514,
+  "output_tokens": 1046,
+  "cost_usd": 0.0006744,
+  "cost_known": true,
+  "latency_ms": 4469.000000040978,
+  "simulated": false,
+  "extraction_error": null
+}

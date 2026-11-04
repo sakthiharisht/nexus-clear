@@ -74,3 +74,16 @@ extract_modes_vision:
     extract-claude-sonnet-vision,
     extract-claude-opus-vision,
   ]
+
+# M6.1 #4: ~30 documents that break the main corpus's "Label: value",
+# single-page, unambiguous-date assumptions (noisy layouts, narrative
+# prose, multi-page, unusual CV formatting, ambiguous MM/DD dates,
+# name suffixes - app/eval/generator/hard_extraction_set.py). Its own
+# corpus entirely (not a subset of the 12 packets), so it needs its
+# own ground-truth/fixtures_root load like classify's hard set above.
+# n=30 across 6 categories - too small to rank tiers against each
+# other; see the report's own caveat text.
+extract_modes_hard:
+  [extract-claude-haiku-hard, extract-claude-sonnet-hard, extract-claude-opus-hard]
+hard_extraction_ground_truth: eval/fixtures/hard_extraction_ground_truth.json
+hard_extraction_fixtures_root: eval/fixtures

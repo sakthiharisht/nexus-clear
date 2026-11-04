@@ -1,0 +1,55 @@
+{
+  "kind": "license",
+  "fields": {
+    "holder_name": {
+      "value": "Sarah O'Brien",
+      "confidence": 0.95,
+      "page": 1,
+      "quote": "Sarah O'Brien"
+    },
+    "license_number": {
+      "value": "LPC-700004",
+      "confidence": 0.95,
+      "page": 1,
+      "quote": "LPC-700004"
+    },
+    "license_type": {
+      "value": "Licensed Professional Counselor",
+      "confidence": 0.9,
+      "page": 1,
+      "quote": "Licensed Professional Counselor"
+    },
+    "status": {
+      "value": null,
+      "confidence": null,
+      "page": 1,
+      "quote": null
+    },
+    "issue_date": {
+      "value": "2021-01-05",
+      "confidence": 0.95,
+      "page": 1,
+      "quote": "2021-01-05"
+    },
+    "expiration_date": {
+      "value": "2027-01-05",
+      "confidence": 0.95,
+      "page": 1,
+      "quote": "2027-01-05"
+    },
+    "issuing_board": {
+      "value": null,
+      "confidence": null,
+      "page": 1,
+      "quote": null
+    }
+  },
+  "decided_by": "claude",
+  "input_tokens": 1296,
+  "output_tokens": 297,
+  "cost_usd": 0.005562,
+  "cost_known": true,
+  "latency_ms": 2265.000000130385,
+  "simulated": false,
+  "extraction_error": null
+}

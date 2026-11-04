@@ -1,0 +1,55 @@
+{
+  "kind": "coi",
+  "fields": {
+    "insured_name": {
+      "value": "Yuki Tanaka",
+      "confidence": 0.95,
+      "page": 1,
+      "quote": "malpractice coverage for Yuki Tanaka under policy POL-700013"
+    },
+    "carrier": {
+      "value": "Lakeside Mutual Insurance",
+      "confidence": 0.95,
+      "page": 1,
+      "quote": "Lakeside Mutual Insurance, with per-occurrence coverage of one million dollars"
+    },
+    "policy_number": {
+      "value": "POL-700013",
+      "confidence": 0.95,
+      "page": 1,
+      "quote": "under policy POL-700013"
+    },
+    "effective_date": {
+      "value": null,
+      "confidence": null,
+      "page": null,
+      "quote": null
+    },
+    "expiration_date": {
+      "value": null,
+      "confidence": null,
+      "page": null,
+      "quote": null
+    },
+    "per_occurrence": {
+      "value": "$1,000,000",
+      "confidence": 0.9,
+      "page": 1,
+      "quote": "per-occurrence coverage of one million dollars"
+    },
+    "aggregate": {
+      "value": "$3,000,000",
+      "confidence": 0.9,
+      "page": 1,
+      "quote": "an aggregate of three million dollars"
+    }
+  },
+  "decided_by": "claude",
+  "input_tokens": 1322,
+  "output_tokens": 877,
+  "cost_usd": 0.0005707,
+  "cost_known": true,
+  "latency_ms": 4312.999999849126,
+  "simulated": false,
+  "extraction_error": null
+}

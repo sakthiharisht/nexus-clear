@@ -46,6 +46,7 @@ from app.eval.extract_metrics import ExtractMetrics, compute_extract_metrics
 from app.eval.extract_run import run_extract
 from app.eval.extract_types import ExtractModeResult
 from app.eval.extract_vision_run import run_extract_vision, run_extract_vision_baseline
+from app.eval.hard_extract_run import load_hard_extraction_cases, run_hard_extract
 from app.eval.metrics import compute_mode_metrics
 from app.eval.report import render_markdown_report
 from app.eval.types import ModeResult, PacketResult
@@ -243,6 +244,22 @@ def run_extract_mode(
     raise ValueError(f"unknown extract mode: {mode_name!r}")
 
 
+def run_hard_extract_mode(
+    mode_name: str, hard_cases: list[dict[str, Any]], hard_fixtures_root: Path
+) -> ExtractModeResult:
+    """M6.1 #4: dispatches an `extract_modes_hard` entry - same tiers,
+    same models as EXTRACT_TIER_MODELS, a trailing "-hard" stripped
+    before the dict lookup and kept in the mode name the result
+    actually carries, mirroring run_classify_mode's hard-set
+    handling."""
+    base_mode_name = mode_name.removesuffix("-hard")
+    if base_mode_name not in EXTRACT_TIER_MODELS:
+        raise ValueError(f"unknown hard extract mode: {mode_name!r}")
+    model = EXTRACT_TIER_MODELS[base_mode_name]
+    backend = _cached_extractor(ClaudeExtractor(model=model), model)
+    return run_hard_extract(hard_cases, hard_fixtures_root, mode_name=mode_name, backend=backend)
+
+
 def run_eval(config: dict[str, Any], repo_root: Path = REPO_ROOT) -> dict[str, Any]:
     rule_pack_path = _resolve(config["rule_pack"], repo_root)
     ground_truth_path = _resolve(config["ground_truth"], repo_root)
@@ -299,6 +316,20 @@ def run_eval(config: dict[str, Any], repo_root: Path = REPO_ROOT) -> dict[str, A
     for mode_name in config.get("extract_modes_vision", []):
         extract_result = run_extract_mode(mode_name, ground_truth, fixtures_root)
         extract_results[extract_result.mode] = extract_result
+
+    # M6.1 #4: the hard extraction set is its own corpus entirely
+    # (app/eval/generator/hard_extraction_set.py), not a subset of the
+    # 12 packets - needs its own ground-truth/fixtures_root load, same
+    # as classify's hard set.
+    if "extract_modes_hard" in config:
+        hard_extract_path = _resolve(config["hard_extraction_ground_truth"], repo_root)
+        hard_extract_fixtures_root = _resolve(config["hard_extraction_fixtures_root"], repo_root)
+        hard_extract_cases = load_hard_extraction_cases(hard_extract_path)
+        for mode_name in config["extract_modes_hard"]:
+            extract_result = run_hard_extract_mode(
+                mode_name, hard_extract_cases, hard_extract_fixtures_root
+            )
+            extract_results[extract_result.mode] = extract_result
 
     extract_metrics: dict[str, ExtractMetrics] = {
         mode_name: compute_extract_metrics(result)

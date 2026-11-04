@@ -1,0 +1,55 @@
+{
+  "kind": "coi",
+  "fields": {
+    "insured_name": {
+      "value": "Clara Dubois",
+      "confidence": 0.98,
+      "page": 1,
+      "quote": "Insured: Clara Dubois"
+    },
+    "carrier": {
+      "value": "Lakeside Mutual Insurance",
+      "confidence": 0.98,
+      "page": 1,
+      "quote": "Carrier: Lakeside Mutual Insurance"
+    },
+    "policy_number": {
+      "value": "POL-700034",
+      "confidence": 0.98,
+      "page": 1,
+      "quote": "Policy number: POL-700034"
+    },
+    "effective_date": {
+      "value": "01.06.2025",
+      "confidence": 0.6,
+      "page": 1,
+      "quote": "Effective date: 01.06.2025"
+    },
+    "expiration_date": {
+      "value": null,
+      "confidence": 0.0,
+      "page": null,
+      "quote": null
+    },
+    "per_occurrence": {
+      "value": null,
+      "confidence": 0.0,
+      "page": null,
+      "quote": null
+    },
+    "aggregate": {
+      "value": null,
+      "confidence": 0.0,
+      "page": null,
+      "quote": null
+    }
+  },
+  "decided_by": "claude",
+  "input_tokens": 1315,
+  "output_tokens": 312,
+  "cost_usd": 0.00575,
+  "cost_known": true,
+  "latency_ms": 2311.9999999180436,
+  "simulated": false,
+  "extraction_error": null
+}

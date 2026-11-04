@@ -201,6 +201,52 @@ def _is_vision_mode(mode: str) -> bool:
     return mode.removesuffix("-SIMULATED").endswith("-vision") or mode == "extract-vision-baseline"
 
 
+def _is_hard_extract_mode(mode: str) -> bool:
+    return mode.removesuffix("-SIMULATED").endswith("-hard") and not _is_vision_mode(mode)
+
+
+def _hard_extract_category_table(result: dict[str, Any], modes: dict[str, Any]) -> list[str]:
+    """Per-category accuracy (app/eval/generator/hard_extraction_set.py's
+    6 categories, stored as DocumentExtraction.slot for hard-mode rows)
+    - a model's narrative-reading ability and its multi-page handling
+    are different capabilities that would otherwise average out in
+    the single per-field table."""
+    extract_modes_raw = result.get("extract_modes", {})
+    categories: list[str] = []
+    seen = set()
+    rows: dict[str, dict[str, tuple[int, int]]] = {}  # mode -> category -> (correct, total)
+
+    for mode in modes:
+        raw = extract_modes_raw.get(mode)
+        if raw is None:
+            continue
+        per_category: dict[str, tuple[int, int]] = {}
+        for doc in raw["documents"]:
+            category = doc["slot"]
+            if category not in seen:
+                seen.add(category)
+                categories.append(category)
+            decidable = [f for f in doc["field_results"] if f["expected"] is not None]
+            correct = sum(1 for f in decidable if f["correct"])
+            total = len(decidable)
+            prev_correct, prev_total = per_category.get(category, (0, 0))
+            per_category[category] = (prev_correct + correct, prev_total + total)
+        rows[mode] = per_category
+
+    lines = [
+        "| category | " + " | ".join(modes) + " |",
+        "| --- | " + " | ".join("---" for _ in modes) + " |",
+    ]
+    for category in sorted(categories):
+        cells = []
+        for mode in modes:
+            correct, total = rows.get(mode, {}).get(category, (0, 0))
+            cells.append(f"{_pct(correct / total) if total else 'n/a'} ({correct}/{total})")
+        lines.append(f"| {category} | " + " | ".join(cells) + " |")
+    lines.append("")
+    return lines
+
+
 def _extract_mode_table(modes: dict[str, Any]) -> list[str]:
     lines = [
         "| mode | n documents | coverage | accuracy when known "
@@ -217,8 +263,11 @@ def _extract_section(result: dict[str, Any]) -> list[str]:
     extract_metrics = result.get("extract_metrics", {})
     if not extract_metrics:
         return []
-    main_modes = {m: v for m, v in extract_metrics.items() if not _is_vision_mode(m)}
     vision_modes = {m: v for m, v in extract_metrics.items() if _is_vision_mode(m)}
+    hard_modes = {m: v for m, v in extract_metrics.items() if _is_hard_extract_mode(m)}
+    main_modes = {
+        m: v for m, v in extract_metrics.items() if m not in vision_modes and m not in hard_modes
+    }
 
     lines = [
         "## M6 Extract",
@@ -261,6 +310,25 @@ def _extract_section(result: dict[str, Any]) -> list[str]:
         lines += _extract_mode_table(vision_modes)
         lines += ["### Vision per-field coverage / accuracy", ""]
         lines += _extract_field_table(vision_modes)
+
+    if hard_modes:
+        any_n = next(iter(hard_modes.values()))["n_documents"]
+        lines += [
+            f"### Hard extraction set (n={any_n} - "
+            "app/eval/generator/hard_extraction_set.py)",
+            "",
+            f"**n={any_n} across 6 categories (noisy layouts, narrative prose, "
+            "multi-page documents, unusual CV formatting, ambiguous MM/DD "
+            "dates, name suffixes). Too small to rank tiers against each "
+            "other or against the main 12-packet set above - read per "
+            "category below, not as one blended score: a model's "
+            "narrative-reading ability and its multi-page handling are "
+            "different capabilities that would otherwise average out.**",
+            "",
+        ]
+        lines += _extract_mode_table(hard_modes)
+        lines += ["### Hard set accuracy by category (correct/decidable)", ""]
+        lines += _hard_extract_category_table(result, hard_modes)
 
     return lines
 

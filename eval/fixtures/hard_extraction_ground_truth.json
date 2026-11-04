@@ -1,0 +1,520 @@
+{
+  "cases": [
+    {
+      "case_id": "noisy-1",
+      "category": "noisy_layout",
+      "kind": "license",
+      "description": "ALL-CAPS labels, '#' and dashes instead of colons",
+      "path": "hard_extraction/noisy-1.pdf",
+      "expected_fields": {
+        "holder_name": "Janelle Castillo",
+        "license_number": "LPC-700001",
+        "license_type": "LPC",
+        "status": "ACTIVE",
+        "issue_date": "2019-03-10",
+        "expiration_date": "2027-03-10",
+        "issuing_board": "Texas Behavioral Health Executive Council"
+      },
+      "expected_positions": []
+    },
+    {
+      "case_id": "noisy-2",
+      "category": "noisy_layout",
+      "kind": "license",
+      "description": "label then value on the following line",
+      "path": "hard_extraction/noisy-2.pdf",
+      "expected_fields": {
+        "holder_name": "Marcus Webb",
+        "license_number": "LPC-700002",
+        "license_type": null,
+        "status": null,
+        "issue_date": null,
+        "expiration_date": "2026-08-22",
+        "issuing_board": null
+      },
+      "expected_positions": []
+    },
+    {
+      "case_id": "noisy-3",
+      "category": "noisy_layout",
+      "kind": "license",
+      "description": "doubled/tabbed internal whitespace around labels",
+      "path": "hard_extraction/noisy-3.pdf",
+      "expected_fields": {
+        "holder_name": "Priya Natarajan",
+        "license_number": "LPC-700003",
+        "license_type": null,
+        "status": "Active",
+        "issue_date": null,
+        "expiration_date": null,
+        "issuing_board": null
+      },
+      "expected_positions": []
+    },
+    {
+      "case_id": "noisy-4",
+      "category": "noisy_layout",
+      "kind": "license",
+      "description": "abbreviated, lowercase labels",
+      "path": "hard_extraction/noisy-4.pdf",
+      "expected_fields": {
+        "holder_name": "Sarah O'Brien",
+        "license_number": "LPC-700004",
+        "license_type": null,
+        "status": null,
+        "issue_date": "2021-01-05",
+        "expiration_date": "2027-01-05",
+        "issuing_board": null
+      },
+      "expected_positions": []
+    },
+    {
+      "case_id": "noisy-5",
+      "category": "noisy_layout",
+      "kind": "coi",
+      "description": "semicolon-separated single-line COI fields",
+      "path": "hard_extraction/noisy-5.pdf",
+      "expected_fields": {
+        "insured_name": "Devon Ashford",
+        "carrier": "Lakeside Mutual Insurance",
+        "policy_number": "POL-700005",
+        "effective_date": null,
+        "expiration_date": null,
+        "per_occurrence": null,
+        "aggregate": null
+      },
+      "expected_positions": []
+    },
+    {
+      "case_id": "narrative-1",
+      "category": "narrative",
+      "kind": "license",
+      "description": "license facts embedded in a certifying sentence, no labels",
+      "path": "hard_extraction/narrative-1.pdf",
+      "expected_fields": {
+        "holder_name": "Jane Anderson",
+        "license_number": "LPC-700010",
+        "license_type": "LPC",
+        "status": "active",
+        "issue_date": "2018-06-01",
+        "expiration_date": "2026-06-01",
+        "issuing_board": "Texas Behavioral Health Executive Council"
+      },
+      "expected_positions": []
+    },
+    {
+      "case_id": "narrative-2",
+      "category": "narrative",
+      "kind": "coi",
+      "description": "COI facts in one descriptive sentence, numerals",
+      "path": "hard_extraction/narrative-2.pdf",
+      "expected_fields": {
+        "insured_name": "Robert Kim",
+        "carrier": "Lakeside Mutual Insurance",
+        "policy_number": "POL-700011",
+        "effective_date": "2025-01-01",
+        "expiration_date": "2026-01-01",
+        "per_occurrence": "1000000",
+        "aggregate": "3000000"
+      },
+      "expected_positions": []
+    },
+    {
+      "case_id": "narrative-3",
+      "category": "narrative",
+      "kind": "license",
+      "description": "name mentioned late in the sentence, passive voice",
+      "path": "hard_extraction/narrative-3.pdf",
+      "expected_fields": {
+        "holder_name": "Fatima Al-Rashid",
+        "license_number": "LPC-700012",
+        "license_type": null,
+        "status": "active",
+        "issue_date": "2022-09-15",
+        "expiration_date": null,
+        "issuing_board": "Texas Behavioral Health Executive Council"
+      },
+      "expected_positions": []
+    },
+    {
+      "case_id": "narrative-4",
+      "category": "narrative",
+      "kind": "coi",
+      "description": "insurance limits spelled out in words, not numerals",
+      "path": "hard_extraction/narrative-4.pdf",
+      "expected_fields": {
+        "insured_name": "Yuki Tanaka",
+        "carrier": "Lakeside Mutual Insurance",
+        "policy_number": "POL-700013",
+        "effective_date": null,
+        "expiration_date": null,
+        "per_occurrence": "1000000",
+        "aggregate": "3000000"
+      },
+      "expected_positions": []
+    },
+    {
+      "case_id": "narrative-5",
+      "category": "narrative",
+      "kind": "license",
+      "description": "spelled-out date, no ISO format anywhere in the text",
+      "path": "hard_extraction/narrative-5.pdf",
+      "expected_fields": {
+        "holder_name": "Hannah Lindqvist",
+        "license_number": "LPC-700014",
+        "license_type": null,
+        "status": null,
+        "issue_date": "2018-06-01",
+        "expiration_date": "2026-06-01",
+        "issuing_board": null
+      },
+      "expected_positions": []
+    },
+    {
+      "case_id": "multipage-1",
+      "category": "multi_page",
+      "kind": "license",
+      "description": "identity on page 1, dates/board on page 2",
+      "path": "hard_extraction/multipage-1.pdf",
+      "expected_fields": {
+        "holder_name": "Omar Haddad",
+        "license_number": "LPC-700020",
+        "license_type": null,
+        "status": "Active",
+        "issue_date": "2017-04-11",
+        "expiration_date": "2025-04-11",
+        "issuing_board": "Texas Behavioral Health Executive Council"
+      },
+      "expected_positions": []
+    },
+    {
+      "case_id": "multipage-2",
+      "category": "multi_page",
+      "kind": "license",
+      "description": "cover page with no fields, fields entirely on page 2",
+      "path": "hard_extraction/multipage-2.pdf",
+      "expected_fields": {
+        "holder_name": "Beatrice Nwosu",
+        "license_number": "LPC-700021",
+        "license_type": "LPC",
+        "status": "Active",
+        "issue_date": null,
+        "expiration_date": null,
+        "issuing_board": null
+      },
+      "expected_positions": []
+    },
+    {
+      "case_id": "multipage-3",
+      "category": "multi_page",
+      "kind": "coi",
+      "description": "insured/carrier on page 1, limits on page 2",
+      "path": "hard_extraction/multipage-3.pdf",
+      "expected_fields": {
+        "insured_name": "Lucas Ferreira",
+        "carrier": "Lakeside Mutual Insurance",
+        "policy_number": "POL-700022",
+        "effective_date": "2025-02-01",
+        "expiration_date": "2026-02-01",
+        "per_occurrence": "100000",
+        "aggregate": "300000"
+      },
+      "expected_positions": []
+    },
+    {
+      "case_id": "multipage-4",
+      "category": "multi_page",
+      "kind": "license",
+      "description": "three pages - identity, status, then dates/board",
+      "path": "hard_extraction/multipage-4.pdf",
+      "expected_fields": {
+        "holder_name": "Ingrid Solberg",
+        "license_number": "LPC-700023",
+        "license_type": "LPC",
+        "status": "Active",
+        "issue_date": "2020-07-19",
+        "expiration_date": "2028-07-19",
+        "issuing_board": "Texas Behavioral Health Executive Council"
+      },
+      "expected_positions": []
+    },
+    {
+      "case_id": "multipage-5",
+      "category": "multi_page",
+      "kind": "coi",
+      "description": "policy number repeated on both pages, limits only on page 2",
+      "path": "hard_extraction/multipage-5.pdf",
+      "expected_fields": {
+        "insured_name": "Grace Mbeki",
+        "carrier": "Lakeside Mutual Insurance",
+        "policy_number": "POL-700024",
+        "effective_date": "2025-05-01",
+        "expiration_date": null,
+        "per_occurrence": "100000",
+        "aggregate": "300000"
+      },
+      "expected_positions": []
+    },
+    {
+      "case_id": "cvformat-1",
+      "category": "unusual_cv",
+      "kind": "cv",
+      "description": "bulleted work history, title/employer on one bullet line",
+      "path": "hard_extraction/cvformat-1.pdf",
+      "expected_fields": {},
+      "expected_positions": [
+        {
+          "title": "Associate Counselor",
+          "employer": "Riverside Behavioral Health",
+          "start": "2019-02-01",
+          "end": "2022-02-01"
+        },
+        {
+          "title": "Licensed Professional Counselor",
+          "employer": "Brightpath Counseling Group",
+          "start": "2022-02-01",
+          "end": null
+        }
+      ]
+    },
+    {
+      "case_id": "cvformat-2",
+      "category": "unusual_cv",
+      "kind": "cv",
+      "description": "employer stated before title, em-dash separator",
+      "path": "hard_extraction/cvformat-2.pdf",
+      "expected_fields": {},
+      "expected_positions": [
+        {
+          "title": "Associate Counselor",
+          "employer": "Riverside Behavioral Health",
+          "start": "2018-03-01",
+          "end": "2021-03-01"
+        }
+      ]
+    },
+    {
+      "case_id": "cvformat-3",
+      "category": "unusual_cv",
+      "kind": "cv",
+      "description": "abbreviated month names in the date range",
+      "path": "hard_extraction/cvformat-3.pdf",
+      "expected_fields": {},
+      "expected_positions": [
+        {
+          "title": "Licensed Professional Counselor",
+          "employer": "Brightpath Counseling Group",
+          "start": "2020-01-01",
+          "end": "2023-03-01"
+        }
+      ]
+    },
+    {
+      "case_id": "cvformat-4",
+      "category": "unusual_cv",
+      "kind": "cv",
+      "description": "two positions on one line separated by a semicolon",
+      "path": "hard_extraction/cvformat-4.pdf",
+      "expected_fields": {},
+      "expected_positions": [
+        {
+          "title": "Associate Counselor",
+          "employer": "Riverside Behavioral Health",
+          "start": "2017-06-01",
+          "end": "2019-06-01"
+        },
+        {
+          "title": "Licensed Professional Counselor",
+          "employer": "Brightpath Counseling Group",
+          "start": "2019-06-01",
+          "end": null
+        }
+      ]
+    },
+    {
+      "case_id": "cvformat-5",
+      "category": "unusual_cv",
+      "kind": "cv",
+      "description": "ongoing position described as 'current' instead of 'present'",
+      "path": "hard_extraction/cvformat-5.pdf",
+      "expected_fields": {},
+      "expected_positions": [
+        {
+          "title": "Licensed Professional Counselor",
+          "employer": "Brightpath Counseling Group",
+          "start": "2021-05-01",
+          "end": null
+        }
+      ]
+    },
+    {
+      "case_id": "ambigdate-1",
+      "category": "ambiguous_date",
+      "kind": "license",
+      "description": "bare MM/DD/YYYY, both day and month <=12 (genuinely ambiguous)",
+      "path": "hard_extraction/ambigdate-1.pdf",
+      "expected_fields": {
+        "holder_name": "Elena Vasquez",
+        "license_number": "LPC-700030",
+        "license_type": null,
+        "status": null,
+        "issue_date": "2020-03-04",
+        "expiration_date": "2028-03-04",
+        "issuing_board": null
+      },
+      "expected_positions": []
+    },
+    {
+      "case_id": "ambigdate-2",
+      "category": "ambiguous_date",
+      "kind": "license",
+      "description": "bare MM/DD/YYYY, day >12 (unambiguous control case)",
+      "path": "hard_extraction/ambigdate-2.pdf",
+      "expected_fields": {
+        "holder_name": "Tobias Reinholt",
+        "license_number": "LPC-700031",
+        "license_type": null,
+        "status": null,
+        "issue_date": "2020-04-15",
+        "expiration_date": "2028-04-15",
+        "issuing_board": null
+      },
+      "expected_positions": []
+    },
+    {
+      "case_id": "ambigdate-3",
+      "category": "ambiguous_date",
+      "kind": "coi",
+      "description": "ambiguous effective/expiration dates on a COI",
+      "path": "hard_extraction/ambigdate-3.pdf",
+      "expected_fields": {
+        "insured_name": "Nadia Petrov",
+        "carrier": "Lakeside Mutual Insurance",
+        "policy_number": "POL-700032",
+        "effective_date": "2025-02-03",
+        "expiration_date": "2026-02-03",
+        "per_occurrence": null,
+        "aggregate": null
+      },
+      "expected_positions": []
+    },
+    {
+      "case_id": "ambigdate-4",
+      "category": "ambiguous_date",
+      "kind": "license",
+      "description": "one ambiguous date, one unambiguous date in the same document",
+      "path": "hard_extraction/ambigdate-4.pdf",
+      "expected_fields": {
+        "holder_name": "Samuel Okonkwo",
+        "license_number": "LPC-700033",
+        "license_type": null,
+        "status": null,
+        "issue_date": "2019-07-09",
+        "expiration_date": "2027-11-21",
+        "issuing_board": null
+      },
+      "expected_positions": []
+    },
+    {
+      "case_id": "ambigdate-5",
+      "category": "ambiguous_date",
+      "kind": "coi",
+      "description": "day-first-looking date written with dots instead of slashes",
+      "path": "hard_extraction/ambigdate-5.pdf",
+      "expected_fields": {
+        "insured_name": "Clara Dubois",
+        "carrier": "Lakeside Mutual Insurance",
+        "policy_number": "POL-700034",
+        "effective_date": null,
+        "expiration_date": null,
+        "per_occurrence": null,
+        "aggregate": null
+      },
+      "expected_positions": []
+    },
+    {
+      "case_id": "suffix-1",
+      "category": "name_suffix",
+      "kind": "license",
+      "description": "credential suffix attached to the holder name",
+      "path": "hard_extraction/suffix-1.pdf",
+      "expected_fields": {
+        "holder_name": "Jane Doe, LPC-S",
+        "license_number": "LPC-700040",
+        "license_type": null,
+        "status": null,
+        "issue_date": null,
+        "expiration_date": null,
+        "issuing_board": null
+      },
+      "expected_positions": []
+    },
+    {
+      "case_id": "suffix-2",
+      "category": "name_suffix",
+      "kind": "license",
+      "description": "generational suffix (Jr.)",
+      "path": "hard_extraction/suffix-2.pdf",
+      "expected_fields": {
+        "holder_name": "John Smith Jr.",
+        "license_number": "LPC-700041",
+        "license_type": null,
+        "status": null,
+        "issue_date": null,
+        "expiration_date": null,
+        "issuing_board": null
+      },
+      "expected_positions": []
+    },
+    {
+      "case_id": "suffix-3",
+      "category": "name_suffix",
+      "kind": "license",
+      "description": "title prefix plus academic suffix",
+      "path": "hard_extraction/suffix-3.pdf",
+      "expected_fields": {
+        "holder_name": "Dr. Maria Garcia-Lopez, Ph.D.",
+        "license_number": "LPC-700042",
+        "license_type": null,
+        "status": null,
+        "issue_date": null,
+        "expiration_date": null,
+        "issuing_board": null
+      },
+      "expected_positions": []
+    },
+    {
+      "case_id": "suffix-4",
+      "category": "name_suffix",
+      "kind": "coi",
+      "description": "suffix on the insured name of a COI",
+      "path": "hard_extraction/suffix-4.pdf",
+      "expected_fields": {
+        "insured_name": "Michael O'Connell III",
+        "carrier": "Lakeside Mutual Insurance",
+        "policy_number": "POL-700043",
+        "effective_date": null,
+        "expiration_date": null,
+        "per_occurrence": null,
+        "aggregate": null
+      },
+      "expected_positions": []
+    },
+    {
+      "case_id": "suffix-5",
+      "category": "name_suffix",
+      "kind": "cv",
+      "description": "suffix on the cv's own name line",
+      "path": "hard_extraction/suffix-5.pdf",
+      "expected_fields": {},
+      "expected_positions": [
+        {
+          "title": "Licensed Professional Counselor",
+          "employer": "Brightpath Counseling Group",
+          "start": "2020-01-01",
+          "end": null
+        }
+      ]
+    }
+  ]
+}

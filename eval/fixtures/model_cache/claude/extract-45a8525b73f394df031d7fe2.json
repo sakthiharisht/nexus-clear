@@ -1,0 +1,55 @@
+{
+  "kind": "coi",
+  "fields": {
+    "insured_name": {
+      "value": "Nadia Petrov",
+      "confidence": 0.95,
+      "page": 1,
+      "quote": "Insured: Nadia Petrov"
+    },
+    "carrier": {
+      "value": "Lakeside Mutual Insurance",
+      "confidence": 0.95,
+      "page": 1,
+      "quote": "Carrier: Lakeside Mutual Insurance"
+    },
+    "policy_number": {
+      "value": "POL-700032",
+      "confidence": 0.95,
+      "page": 1,
+      "quote": "Policy number: POL-700032"
+    },
+    "effective_date": {
+      "value": "02/03/2025",
+      "confidence": 0.9,
+      "page": 1,
+      "quote": "Effective date: 02/03/2025"
+    },
+    "expiration_date": {
+      "value": "02/03/2026",
+      "confidence": 0.9,
+      "page": 1,
+      "quote": "Expiration date: 02/03/2026"
+    },
+    "per_occurrence": {
+      "value": null,
+      "confidence": null,
+      "page": null,
+      "quote": null
+    },
+    "aggregate": {
+      "value": null,
+      "confidence": null,
+      "page": null,
+      "quote": null
+    }
+  },
+  "decided_by": "claude",
+  "input_tokens": 1330,
+  "output_tokens": 603,
+  "cost_usd": 0.0004345,
+  "cost_known": true,
+  "latency_ms": 4313.000000081956,
+  "simulated": false,
+  "extraction_error": null
+}

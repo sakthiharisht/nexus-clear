@@ -1,0 +1,48 @@
+{
+  "kind": "cv",
+  "fields": {
+    "name": {
+      "value": "Camille Dupont",
+      "confidence": 0.98,
+      "page": 1,
+      "quote": "Camille Dupont"
+    },
+    "positions": [
+      {
+        "title": {
+          "value": "Associate Counselor",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Associate Counselor"
+        },
+        "employer": {
+          "value": "Riverside Behavioral Health",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Riverside Behavioral Health"
+        },
+        "start": {
+          "value": "2018-03-01",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "2018-03-01"
+        },
+        "end": {
+          "value": "2021-03-01",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "2021-03-01"
+        }
+      }
+    ],
+    "education": []
+  },
+  "decided_by": "claude",
+  "input_tokens": 1437,
+  "output_tokens": 237,
+  "cost_usd": 0.005244,
+  "cost_known": true,
+  "latency_ms": 2000.0,
+  "simulated": false,
+  "extraction_error": null
+}

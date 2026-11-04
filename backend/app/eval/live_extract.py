@@ -33,6 +33,7 @@ from app.backends.extract_types import ExtractInput, ExtractionResult
 from app.eval.extract_metrics import compute_extract_metrics
 from app.eval.extract_run import run_extract
 from app.eval.extract_vision_run import run_extract_vision
+from app.eval.hard_extract_run import load_hard_extraction_cases, run_hard_extract
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
@@ -130,6 +131,24 @@ def _record_vision(
     return {"mode": result.mode, **metrics.model_dump(mode="json")}
 
 
+def _record_hard(
+    backend: ExtractionBackend,
+    model: str,
+    *,
+    mode_name: str,
+    hard_cases: list[dict[str, Any]],
+    hard_fixtures_root: Path,
+    cache_root: Path,
+    budget: LiveRunBudget,
+) -> dict[str, Any]:
+    cached = _cached(backend, model, cache_root=cache_root, budget=budget)
+    result = run_hard_extract(
+        hard_cases, hard_fixtures_root, mode_name=mode_name, backend=cached
+    )
+    metrics = compute_extract_metrics(result)
+    return {"mode": result.mode, **metrics.model_dump(mode="json")}
+
+
 def run_live(
     *,
     ground_truth: dict[str, Any],
@@ -138,6 +157,8 @@ def run_live(
     cost_ceiling_usd: float,
     max_calls: int,
     with_vision: bool = False,
+    hard_cases: list[dict[str, Any]] | None = None,
+    hard_fixtures_root: Path | None = None,
 ) -> dict[str, Any]:
     budget = LiveRunBudget(cost_ceiling_usd=cost_ceiling_usd, max_calls=max_calls)
     report: dict[str, Any] = {"tiers": {}, "aborted": None}
@@ -161,6 +182,18 @@ def run_live(
                     mode_name=f"extract-claude-{tier_name}-vision",
                     ground_truth=ground_truth,
                     fixtures_root=fixtures_root,
+                    cache_root=cache_root,
+                    budget=budget,
+                )
+        if hard_cases is not None:
+            assert hard_fixtures_root is not None
+            for tier_name, model in CLAUDE_TIERS.items():
+                report["tiers"][f"claude-{tier_name}-hard"] = _record_hard(
+                    ClaudeExtractor(model=model),
+                    model,
+                    mode_name=f"extract-claude-{tier_name}-hard",
+                    hard_cases=hard_cases,
+                    hard_fixtures_root=hard_fixtures_root,
                     cache_root=cache_root,
                     budget=budget,
                 )
@@ -188,6 +221,14 @@ def main() -> None:  # pragma: no cover - makes real network calls, not exercise
             "(app/eval/extract_vision_run.py) through each tier."
         ),
     )
+    parser.add_argument(
+        "--with-hard",
+        action="store_true",
+        help=(
+            "Also run the hard extraction set (app/eval/generator/"
+            "hard_extraction_set.py, n=30) through each tier."
+        ),
+    )
     args = parser.parse_args()
 
     if not os.environ.get("ANTHROPIC_API_KEY"):
@@ -198,6 +239,13 @@ def main() -> None:  # pragma: no cover - makes real network calls, not exercise
     cache_root = REPO_ROOT / "eval" / "fixtures" / "model_cache"
     ground_truth = json.loads(ground_truth_path.read_text(encoding="utf-8"))
 
+    hard_cases = None
+    hard_fixtures_root = None
+    if args.with_hard:
+        hard_fixtures_root = REPO_ROOT / "eval" / "fixtures"
+        hard_path = hard_fixtures_root / "hard_extraction_ground_truth.json"
+        hard_cases = load_hard_extraction_cases(hard_path)
+
     report = run_live(
         ground_truth=ground_truth,
         fixtures_root=fixtures_root,
@@ -205,6 +253,8 @@ def main() -> None:  # pragma: no cover - makes real network calls, not exercise
         cost_ceiling_usd=args.cost_ceiling,
         max_calls=args.max_calls,
         with_vision=args.with_vision,
+        hard_cases=hard_cases,
+        hard_fixtures_root=hard_fixtures_root,
     )
     print(json.dumps(report, indent=2))
 

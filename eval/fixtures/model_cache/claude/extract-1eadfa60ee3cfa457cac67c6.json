@@ -1,0 +1,55 @@
+{
+  "kind": "license",
+  "fields": {
+    "holder_name": {
+      "value": "Beatrice Nwosu",
+      "confidence": 0.97,
+      "page": 1,
+      "quote": "Holder name: Beatrice Nwosu"
+    },
+    "license_number": {
+      "value": "LPC-700021",
+      "confidence": 0.97,
+      "page": 1,
+      "quote": "License number: LPC-700021"
+    },
+    "license_type": {
+      "value": "LPC",
+      "confidence": 0.95,
+      "page": 1,
+      "quote": "License type: LPC"
+    },
+    "status": {
+      "value": "Active",
+      "confidence": 0.97,
+      "page": 1,
+      "quote": "Status: Active"
+    },
+    "issue_date": {
+      "value": null,
+      "confidence": null,
+      "page": null,
+      "quote": null
+    },
+    "expiration_date": {
+      "value": null,
+      "confidence": null,
+      "page": null,
+      "quote": null
+    },
+    "issuing_board": {
+      "value": "Texas Behavioral Health Executive Council",
+      "confidence": 0.8,
+      "page": 1,
+      "quote": "Texas Behavioral Health Executive Council"
+    }
+  },
+  "decided_by": "claude",
+  "input_tokens": 1303,
+  "output_tokens": 665,
+  "cost_usd": 0.00046280000000000003,
+  "cost_known": true,
+  "latency_ms": 3297.000000020489,
+  "simulated": false,
+  "extraction_error": null
+}

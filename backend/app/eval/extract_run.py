@@ -79,11 +79,16 @@ CV_POSITION_FIELDS = ("title", "employer", "start", "end")
 _SCORED_SLOTS: dict[str, ExtractKind] = {"license": "license", "coi": "coi", "cv": "cv"}
 
 
-def _full_text(path: Path) -> str | None:
-    """Whole-document text (single page, per app/backends/extract_types.py's
-    ExtractInput docstring), or None for anything pypdf can't read (an
-    image scan) - the caller treats None the same way as an empty text
-    layer: nothing to verify a quote against."""
+def full_text(path: Path) -> str | None:
+    """Every page's text, joined - matches app/eval/baseline_extraction.py's
+    `_read_text`. Every document in the 12-packet corpus happens to be
+    single-page, so this was equivalent to reading page 1 alone until
+    M6.1's hard extraction set (app/eval/generator/hard_extraction_set.py)
+    added genuinely multi-page cases - reading only page 1 would have
+    made those structurally unscorable regardless of model quality.
+    None for anything pypdf can't read (an image scan) - the caller
+    treats None the same way as an empty text layer: nothing to verify
+    a quote against."""
     if path.suffix.lower() != ".pdf":
         return None
     try:
@@ -92,7 +97,7 @@ def _full_text(path: Path) -> str | None:
         return None
     if not reader.pages:
         return None
-    text = reader.pages[0].extract_text() or ""
+    text = "\n".join(page.extract_text() or "" for page in reader.pages)
     return text if text.strip() else None
 
 
@@ -100,7 +105,7 @@ def build_extract_input(
     packet: dict[str, Any], slot: str, kind: ExtractKind, fixtures_root: Path
 ) -> ExtractInput:
     rel_path = packet["documents"][slot]
-    text = _full_text(fixtures_root / rel_path) or ""
+    text = full_text(fixtures_root / rel_path) or ""
     return ExtractInput(
         doc_id=f"doc-{slot}",
         kind=kind,

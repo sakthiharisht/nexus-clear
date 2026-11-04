@@ -1,0 +1,55 @@
+{
+  "kind": "license",
+  "fields": {
+    "holder_name": {
+      "value": "Hannah Lindqvist",
+      "confidence": 0.95,
+      "page": 1,
+      "quote": "counselor Hannah Lindqvist"
+    },
+    "license_number": {
+      "value": "LPC-700014",
+      "confidence": 0.95,
+      "page": 1,
+      "quote": "LPC-700014"
+    },
+    "license_type": {
+      "value": "LPC",
+      "confidence": 0.85,
+      "page": 1,
+      "quote": "Texas LPC license"
+    },
+    "status": {
+      "value": null,
+      "confidence": null,
+      "page": null,
+      "quote": null
+    },
+    "issue_date": {
+      "value": "June 1, 2018",
+      "confidence": 0.9,
+      "page": 1,
+      "quote": "Effective June 1, 2018"
+    },
+    "expiration_date": {
+      "value": "June 1, 2026",
+      "confidence": 0.95,
+      "page": 1,
+      "quote": "expiring June 1, 2026"
+    },
+    "issuing_board": {
+      "value": null,
+      "confidence": null,
+      "page": null,
+      "quote": null
+    }
+  },
+  "decided_by": "claude",
+  "input_tokens": 1287,
+  "output_tokens": 300,
+  "cost_usd": 0.011148,
+  "cost_known": true,
+  "latency_ms": 3311.9999999180436,
+  "simulated": false,
+  "extraction_error": null
+}

@@ -27,7 +27,7 @@ a different entity, would need this generalized.
 
 from __future__ import annotations
 
-from app.reconcile.investigator import Investigator, NameMatchTask, RegistryTask
+from app.reconcile.investigator import InvestigatorLike, NameMatchTask, RegistryTask
 from app.reconcile.matching import CLEAR_MATCH_THRESHOLD, CLEAR_MISMATCH_THRESHOLD, name_similarity
 from app.rules.context import CaseFacts, RegistryResult, get_path
 from app.rules.schema import NameMatchParams, Rule, RulePack
@@ -126,7 +126,7 @@ def _resolve_name_match_tasks(
     return probabilities, tasks
 
 
-def reconcile(pack: RulePack, facts: CaseFacts, *, investigator: Investigator) -> CaseFacts:
+def reconcile(pack: RulePack, facts: CaseFacts, *, investigator: InvestigatorLike) -> CaseFacts:
     name_match_probabilities, name_match_tasks = _resolve_name_match_tasks(pack, facts)
 
     registry_tasks: list[RegistryTask] = []

@@ -31,7 +31,7 @@ import asyncio
 import json
 import logging
 from datetime import datetime
-from typing import Any, Literal
+from typing import Any, Literal, Protocol
 
 import anthropic
 from mcp.server.mcpserver import MCPServer
@@ -100,6 +100,16 @@ class InvestigationResult(BaseModel):
     # ever calling submit_conclusions (the forced tool_choice should
     # always prevent this - a defensive fallback, not the expected path).
     aborted_reason: str | None = None
+
+
+class InvestigatorLike(Protocol):
+    """What app/reconcile/engine.py and app/reconcile/cache.py's
+    CachedInvestigator both need - satisfied by Investigator itself
+    and by any test double with the same method shape."""
+
+    def investigate(
+        self, *, name_match_tasks: list[NameMatchTask], registry_tasks: list[RegistryTask]
+    ) -> InvestigationResult: ...
 
 
 class _SubmitConclusionsInput(BaseModel):

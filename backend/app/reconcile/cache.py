@@ -12,21 +12,19 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
-from typing import Protocol
 
-from app.reconcile.investigator import InvestigationResult, NameMatchTask, RegistryTask
+from app.reconcile.investigator import (
+    InvestigationResult,
+    InvestigatorLike,
+    NameMatchTask,
+    RegistryTask,
+)
 
 
 class MissingFixtureError(RuntimeError):
     """Raised in "replay" mode when no cached investigation exists for
     this exact set of tasks - a cache miss fails loudly in CI instead
     of silently reaching the network."""
-
-
-class InvestigatorLike(Protocol):
-    def investigate(
-        self, *, name_match_tasks: list[NameMatchTask], registry_tasks: list[RegistryTask]
-    ) -> InvestigationResult: ...
 
 
 def cache_key(

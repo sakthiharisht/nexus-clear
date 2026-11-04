@@ -1,0 +1,73 @@
+{
+  "kind": "cv",
+  "fields": {
+    "name": {
+      "value": "Christopher Lee",
+      "confidence": 0.98,
+      "page": 1,
+      "quote": "Name: Christopher Lee"
+    },
+    "positions": [
+      {
+        "title": {
+          "value": "Associate Counselor",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Associate Counselor"
+        },
+        "employer": {
+          "value": "Brown LLC Behavioral Health",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Brown LLC Behavioral Health"
+        },
+        "start": {
+          "value": "2020-11-18",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "2020-11-18"
+        },
+        "end": {
+          "value": "2023-11-18",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "2023-11-18"
+        }
+      },
+      {
+        "title": {
+          "value": "Licensed Professional Counselor",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Licensed Professional Counselor"
+        },
+        "employer": {
+          "value": "Singh, Warner and Wilson Counseling Group",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Singh, Warner and Wilson Counseling Group"
+        },
+        "start": {
+          "value": "2023-11-18",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "(2023-11-18 - present)"
+        },
+        "end": {
+          "value": null,
+          "confidence": 0.9,
+          "page": 1,
+          "quote": null
+        }
+      }
+    ],
+    "education": []
+  },
+  "decided_by": "claude",
+  "input_tokens": 1477,
+  "output_tokens": 438,
+  "cost_usd": 0.007334,
+  "cost_known": true,
+  "latency_ms": 2781.0000001918525,
+  "simulated": false
+}

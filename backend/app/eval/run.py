@@ -27,6 +27,8 @@ import yaml
 
 from app.backends.cache import CachedBackend
 from app.backends.claude_backend import ClaudeBackend
+from app.backends.claude_extractor import ClaudeExtractor
+from app.backends.extract_cache import CachedExtractor, ExtractionBackend
 from app.backends.factory import build_primary_and_fallback
 from app.backends.jev_backend import JevBackend
 from app.core.config import settings as app_settings
@@ -39,6 +41,10 @@ from app.eval.baseline_reconcile import (
 from app.eval.classify_metrics import ClassifyMetrics, compute_classify_metrics
 from app.eval.classify_run import run_classify
 from app.eval.classify_types import ClassifyModeResult
+from app.eval.extract_baseline_run import run_extract_baseline
+from app.eval.extract_metrics import ExtractMetrics, compute_extract_metrics
+from app.eval.extract_run import run_extract
+from app.eval.extract_types import ExtractModeResult
 from app.eval.metrics import compute_mode_metrics
 from app.eval.report import render_markdown_report
 from app.eval.types import ModeResult, PacketResult
@@ -55,6 +61,13 @@ CLAUDE_TIER_MODELS = {
     "classify-claude-haiku": "claude-haiku-5-5",
     "classify-claude-sonnet": "claude-sonnet-5-5",
     "classify-claude-opus": "claude-opus-5-5",
+}
+
+# M6: same per-tier reporting, for Extract.
+EXTRACT_TIER_MODELS = {
+    "extract-claude-haiku": "claude-haiku-5-5",
+    "extract-claude-sonnet": "claude-sonnet-5-5",
+    "extract-claude-opus": "claude-opus-5-5",
 }
 
 
@@ -182,6 +195,32 @@ def run_classify_mode(
     )
 
 
+def _cached_extractor(backend: ExtractionBackend, model: str) -> CachedExtractor:
+    return CachedExtractor(
+        backend,
+        model=model,
+        cache_root=app_settings.model_cache_root,
+        mode=app_settings.model_cache_mode,
+    )
+
+
+def run_extract_mode(
+    mode_name: str, ground_truth: dict[str, Any], fixtures_root: Path
+) -> ExtractModeResult:
+    """Dispatches an extract eval mode by name (eval/config.yaml's
+    `extract_modes`): "extract-baseline" (M3's regex-only extractor,
+    app/eval/baseline_extraction.py - no model, no cache) or
+    "extract-claude-{haiku,sonnet,opus}" (app/backends/claude_extractor.py,
+    through the same record/replay cache Classify's tiers use)."""
+    if mode_name == "extract-baseline":
+        return run_extract_baseline(ground_truth, fixtures_root)
+    if mode_name in EXTRACT_TIER_MODELS:
+        model = EXTRACT_TIER_MODELS[mode_name]
+        backend = _cached_extractor(ClaudeExtractor(model=model), model)
+        return run_extract(ground_truth, fixtures_root, mode_name=mode_name, backend=backend)
+    raise ValueError(f"unknown extract mode: {mode_name!r}")
+
+
 def run_eval(config: dict[str, Any], repo_root: Path = REPO_ROOT) -> dict[str, Any]:
     rule_pack_path = _resolve(config["rule_pack"], repo_root)
     ground_truth_path = _resolve(config["ground_truth"], repo_root)
@@ -226,6 +265,16 @@ def run_eval(config: dict[str, Any], repo_root: Path = REPO_ROOT) -> dict[str, A
         for mode_name, result in classify_results.items()
     }
 
+    extract_results: dict[str, ExtractModeResult] = {}
+    for mode_name in config.get("extract_modes", []):
+        extract_result = run_extract_mode(mode_name, ground_truth, fixtures_root)
+        extract_results[extract_result.mode] = extract_result
+
+    extract_metrics: dict[str, ExtractMetrics] = {
+        mode_name: compute_extract_metrics(result)
+        for mode_name, result in extract_results.items()
+    }
+
     return {
         "rule_pack_version": pack.version,
         "ground_truth_seed": ground_truth["seed"],
@@ -239,6 +288,12 @@ def run_eval(config: dict[str, Any], repo_root: Path = REPO_ROOT) -> dict[str, A
         },
         "classify_metrics": {
             mode: metrics.model_dump(mode="json") for mode, metrics in classify_metrics.items()
+        },
+        "extract_modes": {
+            mode: result.model_dump(mode="json") for mode, result in extract_results.items()
+        },
+        "extract_metrics": {
+            mode: metrics.model_dump(mode="json") for mode, metrics in extract_metrics.items()
         },
     }
 

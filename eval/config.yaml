@@ -50,3 +50,12 @@ classify_modes_hard:
     classify-claude-sonnet-hard,
     classify-claude-opus-hard,
   ]
+
+# M6 Extract (SPEC.md section 7.3): field-level accuracy/coverage for
+# the M3 regex baseline (extract-baseline, no model, no cache) plus
+# each Claude tier (app/backends/claude_extractor.py, through the same
+# record/replay cache Classify's tiers use). Scope: license/coi/cv only
+# - see app/eval/extract_run.py's module docstring for why education/w9
+# aren't scored here.
+extract_modes:
+  [extract-baseline, extract-claude-haiku, extract-claude-sonnet, extract-claude-opus]

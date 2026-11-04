@@ -1,0 +1,73 @@
+{
+  "kind": "cv",
+  "fields": {
+    "name": {
+      "value": "Christopher Lee",
+      "confidence": 0.98,
+      "page": 1,
+      "quote": "Name: Christopher Lee"
+    },
+    "positions": [
+      {
+        "title": {
+          "value": "Associate Counselor",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Associate Counselor, Brown LLC Behavioral Health (2020-11-18 - 2023-11-18)"
+        },
+        "employer": {
+          "value": "Brown LLC Behavioral Health",
+          "confidence": 0.93,
+          "page": 1,
+          "quote": "Associate Counselor, Brown LLC Behavioral Health (2020-11-18 - 2023-11-18)"
+        },
+        "start": {
+          "value": "2020-11-18",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Associate Counselor, Brown LLC Behavioral Health (2020-11-18 - 2023-11-18)"
+        },
+        "end": {
+          "value": "2023-11-18",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Associate Counselor, Brown LLC Behavioral Health (2020-11-18 - 2023-11-18)"
+        }
+      },
+      {
+        "title": {
+          "value": "Licensed Professional Counselor",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Licensed Professional Counselor, Singh, Warner and Wilson Counseling Group (2023-11-18 - present)"
+        },
+        "employer": {
+          "value": "Singh, Warner and Wilson Counseling Group",
+          "confidence": 0.9,
+          "page": 1,
+          "quote": "Licensed Professional Counselor, Singh, Warner and Wilson Counseling Group (2023-11-18 - present)"
+        },
+        "start": {
+          "value": "2023-11-18",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Licensed Professional Counselor, Singh, Warner and Wilson Counseling Group (2023-11-18 - present)"
+        },
+        "end": {
+          "value": null,
+          "confidence": 0.9,
+          "page": 1,
+          "quote": null
+        }
+      }
+    ],
+    "education": []
+  },
+  "decided_by": "claude",
+  "input_tokens": 1477,
+  "output_tokens": 641,
+  "cost_usd": 0.018728,
+  "cost_known": true,
+  "latency_ms": 5500.0,
+  "simulated": false
+}

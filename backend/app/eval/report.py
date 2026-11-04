@@ -157,6 +157,83 @@ def _classify_section(result: dict[str, Any]) -> list[str]:
     return lines
 
 
+def _extract_table_row(mode: str, metrics: dict[str, Any]) -> str:
+    tokens = f"{metrics['total_input_tokens']}/{metrics['total_output_tokens']}"
+    cost = f"${metrics['total_cost_usd']:.4f}" if metrics["cost_known"] else "n/a"
+    return (
+        f"| {mode} | {metrics['n_documents']} | {_pct(metrics['overall_coverage'])} "
+        f"| {_pct(metrics['overall_accuracy_when_known'])} "
+        f"| {_pct(metrics['quote_verified_rate'])} "
+        f"| {tokens} | {cost} | {metrics['mean_latency_ms']:.0f} |"
+    )
+
+
+def _extract_field_table(extract_metrics: dict[str, Any]) -> list[str]:
+    modes = list(extract_metrics)
+    fields: list[str] = []
+    seen = set()
+    for mode in modes:
+        for field in extract_metrics[mode]["per_field"]:
+            if field not in seen:
+                seen.add(field)
+                fields.append(field)
+
+    lines = [
+        "| field | " + " | ".join(modes) + " |",
+        "| --- | " + " | ".join("---" for _ in modes) + " |",
+    ]
+    for field in fields:
+        cells = []
+        for mode in modes:
+            per_field = extract_metrics[mode]["per_field"].get(field)
+            if per_field is None:
+                cells.append("-")
+                continue
+            cells.append(
+                f"cov {_pct(per_field['coverage'])} / acc {_pct(per_field['accuracy_when_known'])}"
+            )
+        lines.append(f"| {field} | " + " | ".join(cells) + " |")
+    lines.append("")
+    return lines
+
+
+def _extract_section(result: dict[str, Any]) -> list[str]:
+    extract_metrics = result.get("extract_metrics", {})
+    if not extract_metrics:
+        return []
+
+    lines = [
+        "## M6 Extract",
+        "",
+        "SPEC.md section 7.3: coverage is the share of fields where "
+        "ground truth has a real value AND the field was extracted as "
+        "`known` (not demoted to `unknown`); accuracy_when_known is, of "
+        "those, the share whose value actually matches ground truth - "
+        "mirroring the M3 baseline's coverage/accuracy_when_decided "
+        "split (a model that's honestly cautious scores differently "
+        "from one that's confidently wrong). Scope: only "
+        "license/coi/cv are scored - education/w9 have no ground-truth "
+        "field values in this fixture set to score against (see "
+        "app/eval/extract_run.py's module docstring).",
+        "",
+    ]
+    lines += _simulated_caveat(extract_metrics)
+
+    lines += [
+        "| mode | n documents | coverage | accuracy when known "
+        "| quote_verified rate | tokens (in/out) | cost | mean latency (ms) |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- |",
+    ]
+    for mode, metrics in extract_metrics.items():
+        lines.append(_extract_table_row(mode, metrics))
+    lines.append("")
+
+    lines += ["### Per-field coverage / accuracy", ""]
+    lines += _extract_field_table(extract_metrics)
+
+    return lines
+
+
 def _misses_section(metrics: dict[str, Any], category: str, title: str) -> list[str]:
     rows = [m for m in metrics["misses"] if m["category"] == category]
     if not rows:
@@ -232,5 +309,6 @@ def render_markdown_report(result: dict[str, Any]) -> str:
         lines += _misses_section(metrics, "unexplained", "Unexplained (needs investigation)")
 
     lines += _classify_section(result)
+    lines += _extract_section(result)
 
     return "\n".join(lines)

@@ -31,6 +31,7 @@ dev = [
     "types-reportlab>=5.0.0.20261008",
     "pypdf>=6.21.4",
     "rapidfuzz>=3.14.6",
+    "python-dotenv>=1.2.4",
 ]
 
 [tool.ruff]

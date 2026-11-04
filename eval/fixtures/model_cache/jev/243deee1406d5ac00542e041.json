@@ -1,14 +1,19 @@
 {
   "doc_type": "malpractice_coi",
   "probabilities": {
-    "malpractice_coi": 0.9805
+    "texas_lpc_license": 0.0,
+    "malpractice_coi": 1.0,
+    "cv": 0.0,
+    "w9": 0.0,
+    "degree_transcript": 0.0,
+    "other": 0.0
   },
-  "legible": 0.9199999999999999,
+  "legible": 0.95,
   "slot_match": true,
   "decided_by": "jev",
-  "input_tokens": 350,
-  "output_tokens": 20,
-  "cost_usd": 0.0002,
-  "latency_ms": 180.0,
-  "simulated": true
+  "input_tokens": 590,
+  "output_tokens": 110,
+  "cost_usd": 0.0,
+  "latency_ms": 250.0,
+  "simulated": false
 }

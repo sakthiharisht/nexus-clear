@@ -115,6 +115,7 @@ def run_classify(
                     input_tokens=result.input_tokens,
                     output_tokens=result.output_tokens,
                     cost_usd=result.cost_usd,
+                    cost_known=result.cost_known,
                     latency_ms=result.latency_ms,
                     simulated=result.simulated,
                 )

@@ -50,6 +50,13 @@ class ClassificationResult(BaseModel):
     input_tokens: int = 0
     output_tokens: int = 0
     cost_usd: float = 0.0
+    # False for JevBackend: its direct-API pricing isn't published/
+    # verified anywhere (app/backends/jev_backend.py's docstring), so
+    # cost_usd is a placeholder 0.0, not a measured zero. Eval
+    # reporting renders a mode's cost as "n/a" rather than "$0.0000"
+    # whenever any document in it has cost_known=False, the same way
+    # `simulated` taints a whole mode's label.
+    cost_known: bool = True
     latency_ms: float = 0.0
     # True only for app/eval/classify_fixture_seed.py's hand-derived
     # placeholders. Real backends (ClaudeBackend, JevBackend) never set

@@ -72,10 +72,11 @@ def _packets_table(result: dict[str, Any]) -> list[str]:
 
 def _classify_table_row(mode: str, metrics: dict[str, Any]) -> str:
     tokens = f"{metrics['total_input_tokens']}/{metrics['total_output_tokens']}"
+    cost = f"${metrics['total_cost_usd']:.4f}" if metrics["cost_known"] else "n/a"
     return (
         f"| {mode} | {metrics['n']} | {_pct(metrics['accuracy'])} "
         f"| {metrics['ece']:.3f} | {_pct(metrics['escalation_rate'])} "
-        f"| {tokens} | ${metrics['total_cost_usd']:.4f} | {metrics['mean_latency_ms']:.0f} |"
+        f"| {tokens} | {cost} | {metrics['mean_latency_ms']:.0f} |"
     )
 
 

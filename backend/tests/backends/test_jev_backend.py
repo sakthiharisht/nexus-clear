@@ -73,8 +73,9 @@ def test_classify_sends_the_pinned_model_and_parses_the_response() -> None:
     assert result.input_tokens == 311
     assert result.output_tokens == 21
     # Jev's direct-API pricing isn't verified (see module docstring) -
-    # cost is deliberately 0.0, not a guessed number.
+    # cost is deliberately 0.0 and marked unknown, not a guessed number.
     assert result.cost_usd == 0.0
+    assert result.cost_known is False
 
 
 def test_request_sends_criteria_as_a_dict_for_choice_and_a_list_for_score() -> None:

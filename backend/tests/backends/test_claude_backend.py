@@ -61,6 +61,7 @@ def test_classify_maps_parsed_output_into_a_classification_result() -> None:
     assert result.slot_match is False
     assert result.decided_by == "claude"
     assert result.cost_usd > 0
+    assert result.cost_known is True
     assert result.latency_ms >= 0
 
 

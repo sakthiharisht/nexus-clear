@@ -26,6 +26,7 @@ class DocumentClassification(BaseModel):
     input_tokens: int
     output_tokens: int
     cost_usd: float
+    cost_known: bool
     latency_ms: float
     simulated: bool
 

@@ -12,6 +12,7 @@ def _doc(
     accepted: bool = True,
     escalated: bool = False,
     cost_usd: float = 0.001,
+    cost_known: bool = True,
     latency_ms: float = 100.0,
     simulated: bool = False,
     input_tokens: int = 100,
@@ -32,6 +33,7 @@ def _doc(
         input_tokens=input_tokens,
         output_tokens=output_tokens,
         cost_usd=cost_usd,
+        cost_known=cost_known,
         latency_ms=latency_ms,
         simulated=simulated,
     )
@@ -91,6 +93,16 @@ def test_total_cost_and_mean_latency_are_summed_and_averaged() -> None:
     metrics = compute_classify_metrics(ClassifyModeResult(mode="x", documents=documents))
     assert metrics.total_cost_usd == 0.03
     assert metrics.mean_latency_ms == 200.0
+    assert metrics.cost_known is True
+
+
+def test_cost_known_is_false_if_any_document_has_an_unverified_cost() -> None:
+    documents = [
+        _doc(cost_known=True),
+        _doc(cost_known=False),  # e.g. a Jev result
+    ]
+    metrics = compute_classify_metrics(ClassifyModeResult(mode="x", documents=documents))
+    assert metrics.cost_known is False
 
 
 def test_total_tokens_are_summed_across_documents() -> None:

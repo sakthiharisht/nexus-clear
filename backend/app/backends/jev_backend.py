@@ -136,6 +136,7 @@ class JevBackend:
             decided_by="jev",
             input_tokens=int(usage.get("input_tokens", 0)),
             output_tokens=int(usage.get("output_tokens", 0)),
-            cost_usd=0.0,  # Jev direct-API pricing not verified - see module docstring
+            cost_usd=0.0,
+            cost_known=False,  # Jev direct-API pricing not verified - see module docstring
             latency_ms=latency_ms,
         )

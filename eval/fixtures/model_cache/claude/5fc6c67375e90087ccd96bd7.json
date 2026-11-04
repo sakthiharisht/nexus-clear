@@ -10,5 +10,6 @@
   "output_tokens": 46,
   "cost_usd": 0.00408,
   "latency_ms": 1734.9999998696148,
-  "simulated": false
+  "simulated": false,
+  "cost_known": true
 }

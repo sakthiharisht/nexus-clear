@@ -54,16 +54,22 @@ def _simulate(
     confused = legible_score < 0.5
     predicted_doc_type = "other" if confused else true_doc_type
     confidence = 0.55 if confused else max(0.80, min(0.99, 0.80 + legible_score * 0.19))
+    is_jev = backend_name == "jev"
     return ClassificationResult(
         doc_type=predicted_doc_type,
         probabilities={predicted_doc_type: confidence},
         legible=legible,
         slot_match=predicted_doc_type != "other",
         decided_by=backend_name,  # type: ignore[arg-type]
-        input_tokens=350 if backend_name == "jev" else 450,
-        output_tokens=20 if backend_name == "jev" else 60,
-        cost_usd=0.0002 if backend_name == "jev" else 0.0009,
-        latency_ms=180.0 if backend_name == "jev" else 650.0,
+        input_tokens=350 if is_jev else 450,
+        output_tokens=20 if is_jev else 60,
+        # Jev's cost is "n/a" even in simulation - its direct-API
+        # pricing isn't verified for real either (app/backends/
+        # jev_backend.py), so a simulated nonzero number here would be
+        # strictly less honest than the real backend's own cost_known.
+        cost_usd=0.0,
+        cost_known=not is_jev,
+        latency_ms=180.0 if is_jev else 650.0,
         simulated=True,
     )
 

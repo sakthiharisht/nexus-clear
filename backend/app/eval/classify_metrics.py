@@ -27,6 +27,12 @@ class ClassifyMetrics(BaseModel):
     total_input_tokens: int
     total_output_tokens: int
     total_cost_usd: float
+    # False whenever any document's cost is a placeholder rather than
+    # a measured/priced value (currently: every Jev result - its
+    # direct-API pricing isn't verified). Report rendering shows "n/a"
+    # for the whole mode rather than a misleadingly precise total, the
+    # same way `simulated` taints a whole mode's label.
+    cost_known: bool
     mean_latency_ms: float
 
 
@@ -42,6 +48,7 @@ def compute_classify_metrics(result: ClassifyModeResult) -> ClassifyMetrics:
             total_input_tokens=0,
             total_output_tokens=0,
             total_cost_usd=0.0,
+            cost_known=True,
             mean_latency_ms=0.0,
         )
 
@@ -75,5 +82,6 @@ def compute_classify_metrics(result: ClassifyModeResult) -> ClassifyMetrics:
         total_input_tokens=sum(d.input_tokens for d in documents),
         total_output_tokens=sum(d.output_tokens for d in documents),
         total_cost_usd=sum(d.cost_usd for d in documents),
+        cost_known=all(d.cost_known for d in documents),
         mean_latency_ms=sum(d.latency_ms for d in documents) / n,
     )

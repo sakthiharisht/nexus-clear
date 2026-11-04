@@ -122,6 +122,64 @@ def test_structural_no_ocr_classification_when_only_one_defect_on_the_slot(pack:
     assert metrics.misses[0].category == "structural_no_ocr"
 
 
+def test_structural_no_ocr_recognizes_end_to_end_s_own_note_phrasing(pack: RulePack) -> None:
+    """app/eval/end_to_end_run.py's own note (M7 housekeeping #2) omits
+    baseline_extraction.py's parenthetical file path - the matcher must
+    key on the "no extractable text layer" substring, not that detail."""
+    packet = PacketResult(
+        packet_id="benign-2-rotated-scan", kind="benign", defect_ids=[],
+        actual={"R-LIC-001": "unknown"}, expected={"R-LIC-001": "pass"},
+        extraction_notes=["license: no extractable text layer - left unknown"],
+    )
+    metrics = compute_mode_metrics(_result("end_to_end", [packet]), pack)
+    assert metrics.misses[0].category == "structural_no_ocr"
+
+
+def test_structural_wrong_doc_type_classification_when_only_one_defect_on_the_slot(
+    pack: RulePack,
+) -> None:
+    """D09 alone (not also D10) is a wrong-document-in-slot gap, not an
+    unreadable scan - the explanation must not claim "no OCR" for a
+    document that was perfectly readable as the wrong kind."""
+    packet = PacketResult(
+        packet_id="p1", kind="defective", defect_ids=["D09"],
+        actual={"R-LIC-001": "unknown"}, expected={"R-LIC-001": "pass"},
+        extraction_notes=["license: uploaded doc type doesn't match this schema - not extracted"],
+    )
+    metrics = compute_mode_metrics(_result("end_to_end", [packet]), pack)
+    assert metrics.misses[0].category == "structural_wrong_doc_type"
+
+
+def test_wrong_doc_type_note_still_counts_as_overlap_when_two_defects_share_the_slot(
+    pack: RulePack,
+) -> None:
+    """defective-7's real shape: D09 (wrong doc in slot) and D10
+    (scanned, unreadable) both target "license" - the wrong-doc-type
+    note is still evidence the slot never reached real values, so this
+    folds into overlap_explained the same way two baseline-style notes
+    would."""
+    packet = PacketResult(
+        packet_id="defective-7", kind="defective", defect_ids=["D09", "D10"],
+        actual={"R-LIC-001": "unknown"}, expected={"R-LIC-001": "pass"},
+        extraction_notes=["license: uploaded doc type doesn't match this schema - not extracted"],
+    )
+    metrics = compute_mode_metrics(_result("end_to_end", [packet]), pack)
+    assert metrics.misses[0].category == "overlap_explained"
+
+
+def test_structural_extraction_failed_classification(pack: RulePack) -> None:
+    """app/eval/end_to_end_run.py's own "extraction failed" note (the
+    model never returned a parsed structured output) - a real error,
+    recorded instead of crashing, left unknown rather than guessed."""
+    packet = PacketResult(
+        packet_id="p1", kind="clean", defect_ids=[],
+        actual={"R-LIC-001": "unknown"}, expected={"R-LIC-001": "pass"},
+        extraction_notes=["license: extraction failed (ValueError: boom) - left unknown"],
+    )
+    metrics = compute_mode_metrics(_result("end_to_end", [packet]), pack)
+    assert metrics.misses[0].category == "structural_extraction_failed"
+
+
 def test_unknown_name_match_on_a_readable_document_is_not_mistaken_for_no_ocr(
     pack: RulePack,
 ) -> None:

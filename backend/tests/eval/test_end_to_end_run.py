@@ -152,6 +152,33 @@ def test_registry_tasks_are_always_sent_to_the_investigator() -> None:
     assert any(t.rule_id == "R-ID-002" for t in registry_tasks)
 
 
+def test_a_slot_with_no_text_layer_is_noted_and_skipped_not_sent_to_the_extractor() -> None:
+    """benign-2-rotated-scan's license slot is a scanned image with no
+    text layer - this eval path attaches no page images (extract_run.py's
+    own scope), so there's nothing for the model to read. The slot must
+    be noted the same way baseline_extraction.py notes it (M7 housekeeping
+    #2, so app/eval/metrics.py's structural_no_ocr recognizes it) and
+    skipped - not sent to the extractor with blank input."""
+    extractor = _StubExtractor()
+    investigator = _StubInvestigator()
+    packet = next(
+        p for p in GROUND_TRUTH["packets"] if p["packet_id"] == "benign-2-rotated-scan"
+    )
+    result = run_end_to_end(
+        PACK,
+        {"packets": [packet]},
+        FIXTURES_ROOT,
+        mode_name="e2e-test",
+        extractor=extractor,
+        investigator=investigator,
+    )
+    notes = result.packets[0].extraction_notes
+    assert "license: no extractable text layer - left unknown" in notes
+    # Only coi and cv (both real text documents) were sent to the
+    # extractor - license wasn't, since there was nothing to read.
+    assert extractor.calls == 2
+
+
 def test_extraction_failure_is_recorded_as_a_note_not_a_crash() -> None:
     class _RaisingExtractor:
         name = "claude"

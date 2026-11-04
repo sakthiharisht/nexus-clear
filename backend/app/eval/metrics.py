@@ -138,18 +138,32 @@ def _affected_slot(finding_id: str, rule_id: str, rule_namespaces: dict[str, str
     return namespace if namespace in ("license", "coi", "cv") else None
 
 
-def _slot_is_unreadable(packet: PacketResult, slot: str) -> bool:
-    """Evidence-based, not inferred: true only when baseline_extraction.py
-    actually recorded this slot as unreadable (extraction_notes), never
-    just because some finding touching it came back unknown - an unknown
-    name_match score, for instance, doesn't mean the document was
-    unreadable, just that reconcile couldn't commit to an answer."""
+def _slot_extraction_gap(packet: PacketResult, slot: str) -> str | None:
+    """Evidence-based, not inferred: a reason code only when some stage
+    actually recorded this slot as never reaching real extracted values
+    (extraction_notes), never just because some finding touching it came
+    back unknown - an unknown name_match score, for instance, doesn't
+    mean the document was unreadable, just that reconcile couldn't commit
+    to an answer. None when no note explains the gap.
+
+    "no_ocr": no extractable text layer / no document uploaded
+        (app/eval/baseline_extraction.py, app/eval/end_to_end_run.py).
+    "wrong_doc_type": the real upload doesn't match this slot's schema
+        (app/eval/end_to_end_run.py - a D09-style wrong document in slot).
+    "extraction_failed": the extractor raised and was recorded as a note
+        instead of a crash (app/eval/end_to_end_run.py).
+    """
     prefix = f"{slot}:"
-    return any(
-        note.startswith(prefix)
-        and ("no extractable text layer" in note or "no document uploaded" in note)
-        for note in packet.extraction_notes
-    )
+    for note in packet.extraction_notes:
+        if not note.startswith(prefix):
+            continue
+        if "no extractable text layer" in note or "no document uploaded" in note:
+            return "no_ocr"
+        if "doesn't match this schema" in note:
+            return "wrong_doc_type"
+        if "extraction failed" in note:
+            return "extraction_failed"
+    return None
 
 
 def _classify_miss(
@@ -174,7 +188,12 @@ def _classify_miss(
     # reconcile just didn't have enough signal, e.g. an ambiguous fuzzy
     # name score, or a registry fixture with no matching entry).
     slot = _affected_slot(finding_id, rule_id, rule_namespaces)
-    if actual == "unknown" and slot is not None and _slot_is_unreadable(packet, slot):
+    gap = (
+        _slot_extraction_gap(packet, slot)
+        if actual == "unknown" and slot is not None
+        else None
+    )
+    if gap is not None and slot is not None:
         count = slot_defect_counts.get((packet.packet_id, slot), 0)
         if count >= 2:
             other = [d for d in packet.defect_ids if DEFECT_SLOTS.get(d) == slot]
@@ -189,6 +208,28 @@ def _classify_miss(
                     "co-occurring on the same slot in this packet"
                 ),
             )
+        if gap == "wrong_doc_type":
+            return MissExplanation(
+                packet_id=packet.packet_id,
+                finding_id=finding_id,
+                expected=expected,
+                actual=actual,
+                category="structural_wrong_doc_type",
+                explanation=(
+                    f"{slot} document is a different document type than this rule's "
+                    "extraction expects - the real upload doesn't match the slot's "
+                    "schema, so there is nothing to extract"
+                ),
+            )
+        if gap == "extraction_failed":
+            return MissExplanation(
+                packet_id=packet.packet_id,
+                finding_id=finding_id,
+                expected=expected,
+                actual=actual,
+                category="structural_extraction_failed",
+                explanation=f"{slot} extraction raised an error and was left unknown, not guessed",
+            )
         return MissExplanation(
             packet_id=packet.packet_id,
             finding_id=finding_id,
@@ -197,7 +238,7 @@ def _classify_miss(
             category="structural_no_ocr",
             explanation=(
                 f"{slot} document has no extractable text layer (scanned image); "
-                "baseline has no OCR/vision capability"
+                "this eval path has no OCR/vision capability for it"
             ),
         )
 

@@ -405,6 +405,12 @@ def render_markdown_report(result: dict[str, Any]) -> str:
         lines += _misses_section(
             metrics, "structural_no_ocr", "Structural: no OCR for scanned documents"
         )
+        lines += _misses_section(
+            metrics, "structural_wrong_doc_type", "Structural: wrong document type in slot"
+        )
+        lines += _misses_section(
+            metrics, "structural_extraction_failed", "Structural: extraction error"
+        )
         lines += _misses_section(metrics, "unexplained", "Unexplained (needs investigation)")
 
     lines += _classify_section(result)

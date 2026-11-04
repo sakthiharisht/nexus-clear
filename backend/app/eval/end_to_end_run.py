@@ -71,6 +71,14 @@ def _extract_case_facts(
             continue
 
         extract_input = build_extract_input(packet, slot, kind, fixtures_root)
+        if not extract_input.document_text:
+            # A scanned/image document with no text layer - this eval
+            # path doesn't attach page images (same reason as extract_run.py's
+            # own docstring), so there is no model input signal at all.
+            # Note it the same way baseline_extraction.py does, and skip the
+            # call rather than spend one on an input with nothing to read.
+            notes.append(f"{slot}: no extractable text layer - left unknown")
+            continue
         try:
             result = extractor.extract(extract_input)
         except ValueError as exc:

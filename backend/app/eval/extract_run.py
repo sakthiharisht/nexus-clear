@@ -35,7 +35,7 @@ from typing import Any, Literal
 
 import pypdf
 
-from app.backends.extract_cache import ExtractionBackend
+from app.backends.extract_cache import ExtractionBackend, MissingFixtureError
 from app.backends.extract_types import (
     DOC_TYPE_TO_EXTRACT_KIND,
     CoiExtraction,
@@ -124,7 +124,7 @@ def str_or_none(value: object) -> str | None:
     return None if value is None else str(value)
 
 
-def _flat_field_results(
+def flat_field_results(
     prefix: str,
     field_names: tuple[str, ...],
     ground_truth: dict[str, Any],
@@ -185,13 +185,13 @@ def _field_results_for(
     if kind == "license":
         assert isinstance(result.fields, LicenseExtraction)
         license_verified = verify_license_extraction(result.fields, document_text)
-        return _flat_field_results(
+        return flat_field_results(
             "license", LICENSE_FIELDS, packet["facts"]["license"], license_verified
         )
     if kind == "coi":
         assert isinstance(result.fields, CoiExtraction)
         coi_verified = verify_coi_extraction(result.fields, document_text)
-        return _flat_field_results("coi", COI_FIELDS, packet["facts"]["coi"], coi_verified)
+        return flat_field_results("coi", COI_FIELDS, packet["facts"]["coi"], coi_verified)
     assert isinstance(result.fields, CvExtraction)
     cv_verified = verify_cv_extraction(result.fields, document_text)
     return _cv_field_results(packet, cv_verified)
@@ -221,12 +221,18 @@ def run_extract(
             extract_input = build_extract_input(packet, slot, kind, fixtures_root)
             try:
                 result = backend.extract(extract_input)
-            except ValueError as exc:
-                # Same failure mode as app/eval/classify_run.py's
-                # ValueError handling: the model never emitted a parsed
-                # structured output. Treated as "nothing extracted" -
-                # every field reports unknown - not a crash, and not a
-                # guess either.
+            except (ValueError, MissingFixtureError) as exc:
+                # ValueError: same residual failure mode as app/eval/
+                # classify_run.py's handling - the model never emitted
+                # a parsed structured output at all (not covered by
+                # ClaudeExtractor's own max_tokens/ValidationError
+                # hardening, e.g. no text block whatsoever).
+                # MissingFixtureError: a replay-mode cache miss - most
+                # plausible for an image-bearing input whose bytes
+                # differ from what got recorded (see app/eval/
+                # extract_vision_run.py's docstring). Both treated as
+                # "nothing extracted" - every field reports unknown -
+                # not a crash, and not a guess either.
                 logger.warning(
                     "extract failed for packet=%s slot=%s backend=%s: %s",
                     packet["packet_id"],

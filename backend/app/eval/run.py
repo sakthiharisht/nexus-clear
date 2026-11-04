@@ -45,6 +45,7 @@ from app.eval.extract_baseline_run import run_extract_baseline
 from app.eval.extract_metrics import ExtractMetrics, compute_extract_metrics
 from app.eval.extract_run import run_extract
 from app.eval.extract_types import ExtractModeResult
+from app.eval.extract_vision_run import run_extract_vision, run_extract_vision_baseline
 from app.eval.metrics import compute_mode_metrics
 from app.eval.report import render_markdown_report
 from app.eval.types import ModeResult, PacketResult
@@ -68,6 +69,15 @@ EXTRACT_TIER_MODELS = {
     "extract-claude-haiku": "claude-haiku-5-5",
     "extract-claude-sonnet": "claude-sonnet-5-5",
     "extract-claude-opus": "claude-opus-5-5",
+}
+
+# M6.1 #3: the vision variant (app/eval/extract_vision_run.py) - same
+# tiers, same models, different mode-name suffix so the dispatcher
+# below can tell them apart.
+EXTRACT_VISION_TIER_MODELS = {
+    "extract-claude-haiku-vision": "claude-haiku-5-5",
+    "extract-claude-sonnet-vision": "claude-sonnet-5-5",
+    "extract-claude-opus-vision": "claude-opus-5-5",
 }
 
 
@@ -207,17 +217,29 @@ def _cached_extractor(backend: ExtractionBackend, model: str) -> CachedExtractor
 def run_extract_mode(
     mode_name: str, ground_truth: dict[str, Any], fixtures_root: Path
 ) -> ExtractModeResult:
-    """Dispatches an extract eval mode by name (eval/config.yaml's
-    `extract_modes`): "extract-baseline" (M3's regex-only extractor,
+    """Dispatches an extract eval mode by name. `extract_modes`
+    (eval/config.yaml): "extract-baseline" (M3's regex-only extractor,
     app/eval/baseline_extraction.py - no model, no cache) or
     "extract-claude-{haiku,sonnet,opus}" (app/backends/claude_extractor.py,
-    through the same record/replay cache Classify's tiers use)."""
+    through the same record/replay cache Classify's tiers use).
+    `extract_modes_vision`: the same tiers plus "extract-vision-baseline",
+    scored only on the two image-only license scans
+    (app/eval/extract_vision_run.py) - a separate mode set so these
+    numbers never blend into the main table above."""
     if mode_name == "extract-baseline":
         return run_extract_baseline(ground_truth, fixtures_root)
+    if mode_name == "extract-vision-baseline":
+        return run_extract_vision_baseline(ground_truth, fixtures_root)
     if mode_name in EXTRACT_TIER_MODELS:
         model = EXTRACT_TIER_MODELS[mode_name]
         backend = _cached_extractor(ClaudeExtractor(model=model), model)
         return run_extract(ground_truth, fixtures_root, mode_name=mode_name, backend=backend)
+    if mode_name in EXTRACT_VISION_TIER_MODELS:
+        model = EXTRACT_VISION_TIER_MODELS[mode_name]
+        backend = _cached_extractor(ClaudeExtractor(model=model), model)
+        return run_extract_vision(
+            ground_truth, fixtures_root, mode_name=mode_name, backend=backend
+        )
     raise ValueError(f"unknown extract mode: {mode_name!r}")
 
 
@@ -267,6 +289,14 @@ def run_eval(config: dict[str, Any], repo_root: Path = REPO_ROOT) -> dict[str, A
 
     extract_results: dict[str, ExtractModeResult] = {}
     for mode_name in config.get("extract_modes", []):
+        extract_result = run_extract_mode(mode_name, ground_truth, fixtures_root)
+        extract_results[extract_result.mode] = extract_result
+
+    # M6.1 #3: same ground_truth/fixtures_root as the main set (the two
+    # scanned documents already live inside the 12 packets) - a
+    # separate config key only so these rows are clearly, explicitly
+    # opted into, not blended silently into extract_modes above.
+    for mode_name in config.get("extract_modes_vision", []):
         extract_result = run_extract_mode(mode_name, ground_truth, fixtures_root)
         extract_results[extract_result.mode] = extract_result
 

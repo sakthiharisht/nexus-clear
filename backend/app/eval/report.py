@@ -197,10 +197,28 @@ def _extract_field_table(extract_metrics: dict[str, Any]) -> list[str]:
     return lines
 
 
+def _is_vision_mode(mode: str) -> bool:
+    return mode.removesuffix("-SIMULATED").endswith("-vision") or mode == "extract-vision-baseline"
+
+
+def _extract_mode_table(modes: dict[str, Any]) -> list[str]:
+    lines = [
+        "| mode | n documents | coverage | accuracy when known "
+        "| quote_verified rate | tokens (in/out) | cost | mean latency (ms) |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- |",
+    ]
+    for mode, metrics in modes.items():
+        lines.append(_extract_table_row(mode, metrics))
+    lines.append("")
+    return lines
+
+
 def _extract_section(result: dict[str, Any]) -> list[str]:
     extract_metrics = result.get("extract_metrics", {})
     if not extract_metrics:
         return []
+    main_modes = {m: v for m, v in extract_metrics.items() if not _is_vision_mode(m)}
+    vision_modes = {m: v for m, v in extract_metrics.items() if _is_vision_mode(m)}
 
     lines = [
         "## M6 Extract",
@@ -219,17 +237,30 @@ def _extract_section(result: dict[str, Any]) -> list[str]:
     ]
     lines += _simulated_caveat(extract_metrics)
 
-    lines += [
-        "| mode | n documents | coverage | accuracy when known "
-        "| quote_verified rate | tokens (in/out) | cost | mean latency (ms) |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- |",
-    ]
-    for mode, metrics in extract_metrics.items():
-        lines.append(_extract_table_row(mode, metrics))
-    lines.append("")
+    if main_modes:
+        lines += _extract_mode_table(main_modes)
+        lines += ["### Per-field coverage / accuracy", ""]
+        lines += _extract_field_table(main_modes)
 
-    lines += ["### Per-field coverage / accuracy", ""]
-    lines += _extract_field_table(extract_metrics)
+    if vision_modes:
+        any_n = next(iter(vision_modes.values()))["n_documents"]
+        lines += [
+            f"### Vision (n={any_n} image-only license scans - "
+            "app/eval/extract_vision_run.py)",
+            "",
+            f"**n={any_n} per tier - the two scan documents in this corpus "
+            "(a genuine rotated license scan, and an illegible wrong-document "
+            "scan). Too small to rank tiers against each other. Read as a "
+            "capability check (can vision read a scan at all, and does it "
+            "correctly report unknown rather than hallucinate on a bad one) "
+            "- extract-vision-baseline is M3's regex extractor, which has no "
+            "OCR at all, included to make that contrast explicit: its "
+            "coverage is 0% by construction, not a bug.**",
+            "",
+        ]
+        lines += _extract_mode_table(vision_modes)
+        lines += ["### Vision per-field coverage / accuracy", ""]
+        lines += _extract_field_table(vision_modes)
 
     return lines
 

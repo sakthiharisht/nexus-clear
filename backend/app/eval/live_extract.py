@@ -32,6 +32,7 @@ from app.backends.extract_cache import CachedExtractor, ExtractionBackend
 from app.backends.extract_types import ExtractInput, ExtractionResult
 from app.eval.extract_metrics import compute_extract_metrics
 from app.eval.extract_run import run_extract
+from app.eval.extract_vision_run import run_extract_vision
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
@@ -89,6 +90,14 @@ class _BudgetedExtractor:
         return result
 
 
+def _cached(
+    backend: ExtractionBackend, model: str, *, cache_root: Path, budget: LiveRunBudget
+) -> CachedExtractor:
+    return CachedExtractor(
+        _BudgetedExtractor(backend, budget), model=model, cache_root=cache_root, mode="record"
+    )
+
+
 def _record(
     backend: ExtractionBackend,
     model: str,
@@ -99,13 +108,24 @@ def _record(
     cache_root: Path,
     budget: LiveRunBudget,
 ) -> dict[str, Any]:
-    cached = CachedExtractor(
-        _BudgetedExtractor(backend, budget),
-        model=model,
-        cache_root=cache_root,
-        mode="record",
-    )
+    cached = _cached(backend, model, cache_root=cache_root, budget=budget)
     result = run_extract(ground_truth, fixtures_root, mode_name=mode_name, backend=cached)
+    metrics = compute_extract_metrics(result)
+    return {"mode": result.mode, **metrics.model_dump(mode="json")}
+
+
+def _record_vision(
+    backend: ExtractionBackend,
+    model: str,
+    *,
+    mode_name: str,
+    ground_truth: dict[str, Any],
+    fixtures_root: Path,
+    cache_root: Path,
+    budget: LiveRunBudget,
+) -> dict[str, Any]:
+    cached = _cached(backend, model, cache_root=cache_root, budget=budget)
+    result = run_extract_vision(ground_truth, fixtures_root, mode_name=mode_name, backend=cached)
     metrics = compute_extract_metrics(result)
     return {"mode": result.mode, **metrics.model_dump(mode="json")}
 
@@ -117,6 +137,7 @@ def run_live(
     cache_root: Path,
     cost_ceiling_usd: float,
     max_calls: int,
+    with_vision: bool = False,
 ) -> dict[str, Any]:
     budget = LiveRunBudget(cost_ceiling_usd=cost_ceiling_usd, max_calls=max_calls)
     report: dict[str, Any] = {"tiers": {}, "aborted": None}
@@ -132,6 +153,17 @@ def run_live(
                 cache_root=cache_root,
                 budget=budget,
             )
+        if with_vision:
+            for tier_name, model in CLAUDE_TIERS.items():
+                report["tiers"][f"claude-{tier_name}-vision"] = _record_vision(
+                    ClaudeExtractor(model=model),
+                    model,
+                    mode_name=f"extract-claude-{tier_name}-vision",
+                    ground_truth=ground_truth,
+                    fixtures_root=fixtures_root,
+                    cache_root=cache_root,
+                    budget=budget,
+                )
     except LiveRunAborted as exc:
         report["aborted"] = str(exc)
 
@@ -148,6 +180,14 @@ def main() -> None:  # pragma: no cover - makes real network calls, not exercise
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cost-ceiling", type=float, default=DEFAULT_COST_CEILING_USD)
     parser.add_argument("--max-calls", type=int, default=DEFAULT_MAX_CALLS)
+    parser.add_argument(
+        "--with-vision",
+        action="store_true",
+        help=(
+            "Also run the two image-only license scans "
+            "(app/eval/extract_vision_run.py) through each tier."
+        ),
+    )
     args = parser.parse_args()
 
     if not os.environ.get("ANTHROPIC_API_KEY"):
@@ -164,6 +204,7 @@ def main() -> None:  # pragma: no cover - makes real network calls, not exercise
         cache_root=cache_root,
         cost_ceiling_usd=args.cost_ceiling,
         max_calls=args.max_calls,
+        with_vision=args.with_vision,
     )
     print(json.dumps(report, indent=2))
 

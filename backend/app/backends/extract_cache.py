@@ -10,6 +10,7 @@ JSON generically.
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 from pathlib import Path
@@ -32,13 +33,21 @@ class ExtractionBackend(Protocol):
 
 
 def cache_key(backend_name: str, model: str, extract_input: ExtractInput) -> str:
+    """M6.1: when an image is attached, the key hashes the image's own
+    sha256 digest rather than embedding the full base64 payload into
+    the canonical JSON - same result for lookup purposes (same bytes
+    in -> same key out), but doesn't push a large blob through
+    json.dumps + a second hash for no benefit. `image_b64=None` (the
+    common case - every text-layer document) is unaffected: the
+    canonical dict is identical to before this existed, so every
+    already-recorded fixture still resolves under its original key.
+    """
+    input_dict = extract_input.model_dump(mode="json")
+    image_b64 = input_dict.get("image_b64")
+    if image_b64 is not None:
+        input_dict["image_b64"] = hashlib.sha256(base64.b64decode(image_b64)).hexdigest()
     canonical = json.dumps(
-        {
-            "backend": backend_name,
-            "model": model,
-            "input": extract_input.model_dump(mode="json"),
-        },
-        sort_keys=True,
+        {"backend": backend_name, "model": model, "input": input_dict}, sort_keys=True
     )
     return hashlib.sha256(canonical.encode()).hexdigest()[:24]
 

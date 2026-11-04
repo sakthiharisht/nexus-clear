@@ -32,6 +32,7 @@ from app.backends.extract_cache import CachedExtractor, ExtractionBackend
 from app.backends.factory import build_primary_and_fallback
 from app.backends.jev_backend import JevBackend
 from app.core.config import settings as app_settings
+from app.escalate.engine import EscalationThresholds
 from app.eval.baseline_extraction import extract_baseline_facts
 from app.eval.baseline_reconcile import (
     load_registry_fixtures,
@@ -42,6 +43,7 @@ from app.eval.classify_metrics import ClassifyMetrics, compute_classify_metrics
 from app.eval.classify_run import run_classify
 from app.eval.classify_types import ClassifyModeResult
 from app.eval.end_to_end_run import run_end_to_end
+from app.eval.escalate_run import EscalationEvalResult, run_escalate_eval
 from app.eval.extract_baseline_run import run_extract_baseline
 from app.eval.extract_metrics import ExtractMetrics, compute_extract_metrics
 from app.eval.extract_run import run_extract
@@ -187,6 +189,44 @@ def run_end_to_end_mode(
     )
 
 
+def run_escalate_mode(
+    mode_name: str, pack: RulePack, ground_truth: dict[str, Any], fixtures_root: Path
+) -> EscalationEvalResult:
+    """M8 (SPEC.md section 7.7): reuses the same end-to-end extraction/
+    reconcile wiring as run_end_to_end_mode above, but escalates every
+    resulting Finding (app/escalate/engine.py) and scores the result
+    against this corpus's known escalation-relevant defects
+    (app/eval/escalate_run.py's own docstring)."""
+    extractor = _cached_extractor(ClaudeExtractor(model=_END_TO_END_MODEL), _END_TO_END_MODEL)
+    mcp = build_mcp_server(
+        mode=app_settings.mcp_tool_mode,
+        fixtures_root=app_settings.registry_fixtures_root,
+        rule_pack_path=app_settings.rule_pack_path,
+        leie_cache_path=app_settings.leie_cache_path,
+    )
+    raw_investigator = Investigator(
+        mcp, model=_END_TO_END_MODEL, max_tool_calls=app_settings.investigator_max_tool_calls
+    )
+    investigator = CachedInvestigator(
+        raw_investigator,
+        model=_END_TO_END_MODEL,
+        cache_root=app_settings.model_cache_root,
+        mode=app_settings.model_cache_mode,
+    )
+    return run_escalate_eval(
+        pack,
+        ground_truth,
+        fixtures_root,
+        mode_name=mode_name,
+        extractor=extractor,
+        investigator=investigator,
+        thresholds=EscalationThresholds(
+            low_confidence_threshold=app_settings.low_confidence_threshold,
+            blocker_confidence_threshold=app_settings.blocker_confidence_threshold,
+        ),
+    )
+
+
 def _cached(backend: Any, model: str) -> CachedBackend:
     return CachedBackend(
         backend,
@@ -322,6 +362,10 @@ def run_eval(config: dict[str, Any], repo_root: Path = REPO_ROOT) -> dict[str, A
             "end_to_end", pack, ground_truth, fixtures_root
         )
 
+    escalate_result: EscalationEvalResult | None = None
+    if config.get("escalate"):
+        escalate_result = run_escalate_mode("escalate", pack, ground_truth, fixtures_root)
+
     # Keyed by result.mode, not the requested mode_name: run_classify
     # appends "-SIMULATED" to the mode name itself when any document in
     # it came from a simulated fixture (app/eval/classify_run.py), so
@@ -404,6 +448,7 @@ def run_eval(config: dict[str, Any], repo_root: Path = REPO_ROOT) -> dict[str, A
         "extract_metrics": {
             mode: metrics.model_dump(mode="json") for mode, metrics in extract_metrics.items()
         },
+        "escalate_metrics": escalate_result.model_dump(mode="json") if escalate_result else None,
     }
 
 

@@ -49,8 +49,14 @@ _SCORED_SLOTS: dict[str, ExtractKind] = {"license": "license", "coi": "coi", "cv
 
 def _extract_case_facts(
     packet: dict[str, Any], fixtures_root: Path, extractor: ExtractionBackend
-) -> tuple[CaseFacts, list[str]]:
+) -> tuple[CaseFacts, list[str], bool]:
+    """Third element: True if any extraction call that actually ran
+    came back simulated (app/eval/classify_fixture_seed.py-style
+    placeholder) - callers that report a mode label propagate this the
+    same way app/eval/classify_run.py/extract_run.py already do, so a
+    simulated number can never be read as a live one."""
     notes: list[str] = []
+    any_simulated = False
     documents = [DocumentFact(**d) for d in packet["facts"]["documents"]]
     gt_facts = packet["facts"]
     facts = CaseFacts(
@@ -85,6 +91,7 @@ def _extract_case_facts(
             notes.append(f"{slot}: extraction failed ({exc}) - left unknown")
             continue
 
+        any_simulated = any_simulated or result.simulated
         document_text = extract_input.document_text or None
         doc_id = f"doc-{slot}"
         if kind == "license":
@@ -97,7 +104,7 @@ def _extract_case_facts(
             assert isinstance(result.fields, CvExtraction)
             facts = apply_cv_extraction(facts, doc_id, result.fields, document_text)
 
-    return facts, notes
+    return facts, notes, any_simulated
 
 
 def run_end_to_end(
@@ -111,7 +118,7 @@ def run_end_to_end(
 ) -> ModeResult:
     packets: list[PacketResult] = []
     for packet in ground_truth["packets"]:
-        facts, notes = _extract_case_facts(packet, fixtures_root, extractor)
+        facts, notes, _simulated = _extract_case_facts(packet, fixtures_root, extractor)
         facts = reconcile(pack, facts, investigator=investigator)
         findings = evaluate_rule_pack(pack, facts, facts.target_date)
         packets.append(

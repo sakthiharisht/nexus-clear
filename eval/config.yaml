@@ -21,6 +21,13 @@ output_dir: eval/runs
 #   real pipeline work end to end," not a tier comparison.
 modes: [ceiling, baseline, end_to_end]
 
+# M8 Escalate (SPEC.md section 7.7): reuses end_to_end's real Extract/
+# Reconcile wiring, escalates every resulting Finding
+# (backend/app/escalate/engine.py), and reports the escalation rate
+# plus queue precision/recall against this corpus's own known
+# escalation-relevant defects (backend/app/eval/escalate_run.py).
+escalate: true
+
 # M5 Classify (SPEC.md section 7.2): each backend/tier run standalone
 # (no fallback/escalation - raw per-backend accuracy/calibration), plus
 # the DECISION_BACKEND=claude policy end to end (CLAUDE.md invariant 6:

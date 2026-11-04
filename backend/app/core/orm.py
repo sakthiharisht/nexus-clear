@@ -54,6 +54,20 @@ class Case(Base):
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
+    # Human gate (SPEC.md section 7.9, M8): set together, exactly once,
+    # by the attest endpoint - never by any code path acting on the
+    # provider's behalf (CLAUDE.md invariant 5). `attested_packet` is a
+    # full snapshot (not just the hash) so a later re-run's fresh
+    # Extraction rows can never change what GET /cases/{id}/packet
+    # returns for an already-attested case - the hash it was attested
+    # under must stay independently verifiable forever. Kept here, not
+    # in audit_log.detail, because audit_log must never carry
+    # extracted PII (CLAUDE.md invariant 4) and this packet does.
+    attested_by: Mapped[str | None] = mapped_column(String, nullable=True)
+    attested_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    attested_packet: Mapped[dict[str, object] | None] = mapped_column(JSONB, nullable=True)
+    attested_packet_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+
 
 class Document(Base):
     __tablename__ = "documents"

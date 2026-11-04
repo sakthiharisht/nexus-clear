@@ -333,6 +333,43 @@ def _extract_section(result: dict[str, Any]) -> list[str]:
     return lines
 
 
+def _escalate_section(result: dict[str, Any]) -> list[str]:
+    metrics = result.get("escalate_metrics")
+    if not metrics:
+        return []
+
+    precision = "n/a" if metrics["precision"] is None else f"{metrics['precision']:.2f}"
+    recall = "n/a" if metrics["recall"] is None else f"{metrics['recall']:.2f}"
+    lines = [
+        "## M8 Escalate",
+        "",
+        "SPEC.md section 7.7: every Finding is escalated or not "
+        "(app/escalate/engine.py's five criteria - low confidence, a "
+        "blocker's stricter confidence bar, an LEIE possible match, an "
+        "unverified quote feeding a blocker, an injection flag). "
+        "Precision/recall are scored against this corpus's own known "
+        "escalation-relevant defects (app/eval/escalate_run.py's "
+        "GROUND_TRUTH_ESCALATIONS) - the confidence-driven criteria "
+        "aren't exhaustively exercised by this 12-packet set alone; "
+        "see that module's docstring for what is and isn't covered "
+        "here.",
+        "",
+        "| mode | total findings | escalated | escalation rate | precision | recall |",
+        "| --- | --- | --- | --- | --- | --- |",
+        f"| {metrics['mode']} | {metrics['total_findings']} | {metrics['escalated_count']} "
+        f"| {metrics['escalation_rate']:.3f} | {precision} | {recall} |",
+        "",
+    ]
+    if metrics["simulated"]:
+        lines += [
+            "**SIMULATED**: at least one extraction in this run came from a "
+            "placeholder fixture, not a live model call - treat these "
+            "numbers as provisional.",
+            "",
+        ]
+    return lines
+
+
 def _misses_section(metrics: dict[str, Any], category: str, title: str) -> list[str]:
     rows = [m for m in metrics["misses"] if m["category"] == category]
     if not rows:
@@ -415,5 +452,6 @@ def render_markdown_report(result: dict[str, Any]) -> str:
 
     lines += _classify_section(result)
     lines += _extract_section(result)
+    lines += _escalate_section(result)
 
     return "\n".join(lines)

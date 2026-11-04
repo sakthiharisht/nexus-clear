@@ -12,22 +12,46 @@ content judgment the rules engine makes.
 
 from __future__ import annotations
 
-from datetime import date, timedelta
+import hashlib
+import json
+from datetime import UTC, date, datetime, timedelta
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_blob_store, get_key_manager, get_rule_pack, get_session
+from app.api.deps import (
+    get_blob_store,
+    get_extractor,
+    get_fallback_backend,
+    get_investigator,
+    get_key_manager,
+    get_phraser,
+    get_primary_backend,
+    get_rule_pack,
+    get_session,
+)
 from app.api.schemas import (
+    AttestRequest,
+    AttestResponse,
     CaseResponse,
     ChecklistResponse,
     ChecklistSlot,
     CreateCaseRequest,
     DocumentResponse,
 )
+from app.backends.base import DecisionBackend
+from app.backends.extract_cache import CachedExtractor
 from app.core.config import settings
-from app.core.orm import Case, Document
+from app.core.finding_store import load_case_findings
+from app.core.orm import AuditLog, Case, Document, Extraction, ReviewItem
+from app.escalate.engine import EscalationThresholds
+from app.orchestrator.run import RunResult, run_case
+from app.packet.builder import CaqhStylePacket, build_packet
+from app.packet.gate import open_blocker_finding_ids, unresolved_review_ids
+from app.reconcile.cache import CachedInvestigator
+from app.report.cache import CachedPhraser
+from app.report.gap_report import GapReport, build_gap_report
 from app.rules.schema import RulePack
 from app.vault import service
 from app.vault.blob_store import BlobStore
@@ -199,3 +223,121 @@ async def upload_document(
     session.commit()
     session.refresh(document)
     return document
+
+
+@router.post("/{case_id}/run", response_model=RunResult)
+def run(
+    case_id: UUID,
+    session: Session = Depends(get_session),
+    pack: RulePack = Depends(get_rule_pack),
+    key_manager: KeyManager = Depends(get_key_manager),
+    blob_store: BlobStore = Depends(get_blob_store),
+    primary_backend: DecisionBackend = Depends(get_primary_backend),
+    fallback_backend: DecisionBackend | None = Depends(get_fallback_backend),
+    extractor: CachedExtractor = Depends(get_extractor),
+    investigator: CachedInvestigator = Depends(get_investigator),
+) -> RunResult:
+    case = _get_case_or_404(session, case_id)
+    return run_case(
+        session,
+        case=case,
+        pack=pack,
+        key_manager=key_manager,
+        blob_store=blob_store,
+        primary_backend=primary_backend,
+        fallback_backend=fallback_backend,
+        extractor=extractor,
+        investigator=investigator,
+        tau_classify=settings.tau_classify,
+        legible_threshold=settings.legible_threshold,
+        escalation_thresholds=EscalationThresholds(
+            low_confidence_threshold=settings.low_confidence_threshold,
+            blocker_confidence_threshold=settings.blocker_confidence_threshold,
+        ),
+    )
+
+
+@router.get("/{case_id}/report", response_model=GapReport)
+def get_report(
+    case_id: UUID,
+    session: Session = Depends(get_session),
+    pack: RulePack = Depends(get_rule_pack),
+    phraser: CachedPhraser = Depends(get_phraser),
+) -> GapReport:
+    case = _get_case_or_404(session, case_id)
+    findings = [finding for _, finding in load_case_findings(session, case.id)]
+    rule_titles = {rule.id: rule.title for rule in pack.rules}
+    return build_gap_report(findings, rule_titles=rule_titles, phraser=phraser)
+
+
+def _case_extractions(session: Session, case_id: UUID) -> list[Extraction]:
+    return (
+        session.query(Extraction)
+        .join(Document, Extraction.document_id == Document.id)
+        .filter(Document.case_id == case_id)
+        .all()
+    )
+
+
+@router.post("/{case_id}/attest", response_model=AttestResponse)
+def attest(
+    case_id: UUID, body: AttestRequest, session: Session = Depends(get_session)
+) -> AttestResponse:
+    case = _get_case_or_404(session, case_id)
+    if case.attested_at is not None:
+        raise HTTPException(status.HTTP_409_CONFLICT, "case is already attested")
+
+    findings = [finding for _, finding in load_case_findings(session, case.id)]
+    open_blockers = open_blocker_finding_ids(findings)
+    if open_blockers:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            f"cannot attest: open blocker findings exist: {', '.join(open_blockers)}",
+        )
+
+    review_items = session.query(ReviewItem).filter_by(case_id=case.id).all()
+    unresolved = unresolved_review_ids(review_items)
+    if unresolved:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            f"cannot attest: unresolved review items exist: {', '.join(unresolved)}",
+        )
+
+    packet = build_packet(
+        case.id,
+        provider_profile=case.provider_profile,
+        extractions=_case_extractions(session, case.id),
+    )
+    packet_json = json.dumps(packet.model_dump(mode="json"), sort_keys=True)
+    packet_hash = hashlib.sha256(packet_json.encode()).hexdigest()
+
+    now = datetime.now(UTC)
+    case.attested_by = body.attested_by
+    case.attested_at = now
+    case.attested_packet = packet.model_dump(mode="json")
+    case.attested_packet_hash = packet_hash
+    case.state = "attested"
+
+    session.add(
+        AuditLog(
+            actor=body.attested_by,
+            action="case_attested",
+            case_id=case.id,
+            detail={"typed_name": body.typed_name, "packet_hash": packet_hash},
+        )
+    )
+    session.commit()
+
+    return AttestResponse(
+        case_id=case.id, attested_by=body.attested_by, attested_at=now, packet_hash=packet_hash
+    )
+
+
+@router.get("/{case_id}/packet", response_model=CaqhStylePacket)
+def get_packet(case_id: UUID, session: Session = Depends(get_session)) -> CaqhStylePacket:
+    case = _get_case_or_404(session, case_id)
+    if case.attested_packet is None:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND, "no packet yet - the case has not been attested"
+        )
+    return CaqhStylePacket.model_validate(case.attested_packet)

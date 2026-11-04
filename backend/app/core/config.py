@@ -53,6 +53,19 @@ class Settings(BaseSettings):
     tau_classify: float = 0.85
     legible_threshold: float = 0.7
 
+    # Extract (SPEC.md section 7.3) / Reconcile (section 7.5): Claude is
+    # the only backend for both (M6/M7 - no Jev extraction, no Jev
+    # same_person pre-filter per section 7.5's as-built note). Same
+    # pinned-version discipline as model_classify_fallback.
+    model_extract: str = "claude-haiku-5-5"
+    model_investigate: str = "claude-haiku-5-5"
+
+    # Gap report phrasing (SPEC.md section 7.8): Claude only phrases -
+    # code verifies every sentence (app/report/gap_report.py) before
+    # trusting it, same CLAUDE.md invariant 1 discipline as every
+    # other stage.
+    model_report: str = "claude-haiku-5-5"
+
     # Record/replay cache for model calls (CLAUDE.md: "LLM/Jev calls go
     # through the record/replay cache so CI is offline and
     # deterministic. Live runs refresh the cache."). "replay" (the CI/
@@ -78,6 +91,16 @@ class Settings(BaseSettings):
     # same risk with a different model. Tuned from the eval, not
     # load-bearing enough yet to need its own config section.
     investigator_max_tool_calls: int = 6
+
+    # Escalate (SPEC.md section 7.7). Any finding with a resolved
+    # confidence below `low_confidence_threshold` goes to review
+    # regardless of severity; `blocker_confidence_threshold` is the
+    # severity override - a blocker stays in review up to a higher bar
+    # (0.60-0.90 is "shown to provider with a caveat" for anything
+    # else, but never for a blocker). Tune from the eval calibration
+    # curve, same as classify's tau_classify/legible_threshold.
+    low_confidence_threshold: float = 0.60
+    blocker_confidence_threshold: float = 0.90
 
 
 settings = Settings()

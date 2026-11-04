@@ -22,9 +22,13 @@ Verified before writing this (checked 2026-11-04):
   the cost_usd estimate below. Haiku 5.5's listed rate applies to
   prompts up to 100,000 tokens, which every call here is well under.
 
-Could not exercise any of this against the live API in this
-environment - no ANTHROPIC_API_KEY was available. See the M5
-completion report's "what I could not verify live" section.
+Update (M5.1, 2026-11-04): exercised against the live API for real,
+with a real ANTHROPIC_API_KEY - `messages.parse`/`parsed_output`,
+structured outputs, and all three tier model ids worked exactly as
+documented above; nothing here needed correcting (contrast
+jev_backend.py, whose docs-only guesses were wrong in several places
+once checked against a live response). See tests/backends/
+test_live_smoke.py and app/eval/live_classify.py.
 """
 
 from __future__ import annotations

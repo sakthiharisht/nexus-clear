@@ -1,0 +1,26 @@
+{
+  "name_match_conclusions": [],
+  "registry_conclusions": [
+    {
+      "rule_id": "R-EXC-001",
+      "exists": null,
+      "status": null,
+      "checks": {},
+      "possible_match": true,
+      "registry": "LEIE",
+      "record_hash": null,
+      "fetched_at": null
+    }
+  ],
+  "audit_log": [
+    {
+      "tool_name": "leie_check",
+      "query": "Injection Test Case",
+      "record_hash": "e2720a163c38a486b3613abc7fe898f32b69b7aa97ab1b54c7768128ae351367",
+      "fetched_at": "2026-11-04T22:37:54.167271+13:00",
+      "mode": "fixture"
+    }
+  ],
+  "tool_calls_made": 1,
+  "aborted_reason": null
+}

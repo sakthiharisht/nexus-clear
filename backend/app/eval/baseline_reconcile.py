@@ -12,8 +12,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from rapidfuzz import fuzz
-
+from app.reconcile.matching import CLEAR_MATCH_THRESHOLD, CLEAR_MISMATCH_THRESHOLD, name_similarity
 from app.rules.context import CaseFacts, RegistryResult, get_path
 from app.rules.schema import NameMatchParams, RulePack
 
@@ -25,16 +24,6 @@ from app.rules.schema import NameMatchParams, RulePack
 # nickname pair ("Jon" vs "Jonathan") without a nickname table scores in
 # the ambiguous band and stays unknown at baseline - a real, reported
 # limitation (see the eval report's reconcile note), not a bug.
-_CLEAR_MATCH_THRESHOLD = 0.95
-_CLEAR_MISMATCH_THRESHOLD = 0.60
-
-
-def _normalize_name(name: str) -> str:
-    return " ".join(name.lower().replace(".", "").replace(",", "").split())
-
-
-def _name_similarity(a: str, b: str) -> float:
-    return fuzz.token_sort_ratio(_normalize_name(a), _normalize_name(b)) / 100.0
 
 
 def reconcile_name_matches(pack: RulePack, facts: CaseFacts) -> dict[str, float]:
@@ -50,16 +39,16 @@ def reconcile_name_matches(pack: RulePack, facts: CaseFacts) -> dict[str, float]
         candidates: list[float] = []
         right = get_path(facts, params.right)
         if isinstance(right, str):
-            candidates.append(_name_similarity(left, right))
+            candidates.append(name_similarity(left, right))
         if params.alt_right:
             alt_right = get_path(facts, params.alt_right)
             if isinstance(alt_right, str):
-                candidates.append(_name_similarity(left, alt_right))
+                candidates.append(name_similarity(left, alt_right))
         if not candidates:
             continue
 
         score = max(candidates)
-        if score >= _CLEAR_MATCH_THRESHOLD or score <= _CLEAR_MISMATCH_THRESHOLD:
+        if score >= CLEAR_MATCH_THRESHOLD or score <= CLEAR_MISMATCH_THRESHOLD:
             probabilities[rule.id] = score
     return probabilities
 

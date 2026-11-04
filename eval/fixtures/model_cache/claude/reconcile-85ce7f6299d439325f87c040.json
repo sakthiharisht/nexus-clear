@@ -1,0 +1,60 @@
+{
+  "name_match_conclusions": [
+    {
+      "rule_id": "R-LIC-004",
+      "probability": 0.9
+    },
+    {
+      "rule_id": "R-COI-004",
+      "probability": 0.9
+    }
+  ],
+  "registry_conclusions": [
+    {
+      "rule_id": "R-ID-002",
+      "exists": null,
+      "status": null,
+      "checks": {
+        "exists": true,
+        "name_consistent": true,
+        "taxonomy_counselor": true
+      },
+      "possible_match": null,
+      "registry": null,
+      "record_hash": null,
+      "fetched_at": null
+    },
+    {
+      "rule_id": "R-EXC-001",
+      "exists": null,
+      "status": null,
+      "checks": {},
+      "possible_match": false,
+      "registry": null,
+      "record_hash": null,
+      "fetched_at": null
+    }
+  ],
+  "audit_log": [
+    {
+      "tool_name": "nppes_lookup",
+      "query": "1000000020",
+      "record_hash": "15d23ddaa976da6ea186127085302de5898be442571beefe6b4d3da6c92f80fd",
+      "fetched_at": "2026-11-04T23:01:03.280956+13:00",
+      "mode": "fixture"
+    },
+    {
+      "tool_name": "leie_check",
+      "query": "Jonathan Alvarez",
+      "record_hash": "04717d49bf5559ad40065a9ffc742f310f579e8f1d20b190289347f917f50f39",
+      "fetched_at": "2026-11-04T23:01:03.283356+13:00",
+      "mode": "fixture"
+    }
+  ],
+  "tool_calls_made": 2,
+  "aborted_reason": null,
+  "input_tokens": 4981,
+  "output_tokens": 504,
+  "cost_usd": 0.0007501000000000001,
+  "latency_ms": 3062.9999998491257
+}

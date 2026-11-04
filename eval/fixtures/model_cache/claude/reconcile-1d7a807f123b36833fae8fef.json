@@ -1,0 +1,68 @@
+{
+  "name_match_conclusions": [],
+  "registry_conclusions": [
+    {
+      "rule_id": "R-SUP-001",
+      "exists": null,
+      "status": "Active",
+      "checks": {},
+      "possible_match": null,
+      "registry": null,
+      "record_hash": null,
+      "fetched_at": null
+    },
+    {
+      "rule_id": "R-ID-002",
+      "exists": null,
+      "status": null,
+      "checks": {
+        "exists": true,
+        "name_consistent": true,
+        "taxonomy_counselor": true
+      },
+      "possible_match": null,
+      "registry": null,
+      "record_hash": null,
+      "fetched_at": null
+    },
+    {
+      "rule_id": "R-EXC-001",
+      "exists": null,
+      "status": null,
+      "checks": {},
+      "possible_match": false,
+      "registry": null,
+      "record_hash": null,
+      "fetched_at": null
+    }
+  ],
+  "audit_log": [
+    {
+      "tool_name": "tx_license_lookup",
+      "query": "LPC-100008-SUPERVISOR",
+      "record_hash": "508030ec5dab8d3e56cf0dc488b5fd0dd097b46457868cd47e96d760572c77b9",
+      "fetched_at": "2026-11-04T23:03:46.400199+13:00",
+      "mode": "fixture"
+    },
+    {
+      "tool_name": "nppes_lookup",
+      "query": "1000000087",
+      "record_hash": "25725abee1d723527fb3ff5d26035ad664a6d99361fb7a23fed41da163cae2c1",
+      "fetched_at": "2026-11-04T23:03:46.415351+13:00",
+      "mode": "fixture"
+    },
+    {
+      "tool_name": "leie_check",
+      "query": "Joseph Sullivan",
+      "record_hash": "999c23c117637883d68f8718a0f33e8f4a0623ad4c0cebecf103f45d8aa1fc24",
+      "fetched_at": "2026-11-04T23:03:46.431710+13:00",
+      "mode": "fixture"
+    }
+  ],
+  "tool_calls_made": 3,
+  "aborted_reason": null,
+  "input_tokens": 5031,
+  "output_tokens": 547,
+  "cost_usd": 0.0007766,
+  "latency_ms": 3140.000000130385
+}

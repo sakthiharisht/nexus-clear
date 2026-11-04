@@ -41,6 +41,7 @@ from app.eval.baseline_reconcile import (
 from app.eval.classify_metrics import ClassifyMetrics, compute_classify_metrics
 from app.eval.classify_run import run_classify
 from app.eval.classify_types import ClassifyModeResult
+from app.eval.end_to_end_run import run_end_to_end
 from app.eval.extract_baseline_run import run_extract_baseline
 from app.eval.extract_metrics import ExtractMetrics, compute_extract_metrics
 from app.eval.extract_run import run_extract
@@ -50,10 +51,13 @@ from app.eval.hard_extract_run import load_hard_extraction_cases, run_hard_extra
 from app.eval.metrics import compute_mode_metrics
 from app.eval.report import render_markdown_report
 from app.eval.types import ModeResult, PacketResult
+from app.reconcile.cache import CachedInvestigator
+from app.reconcile.investigator import Investigator
 from app.rules.context import CaseFacts
 from app.rules.engine import evaluate_rule_pack
 from app.rules.loader import load_rule_pack
 from app.rules.schema import RulePack
+from app.tools_mcp.server import build_mcp_server
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
@@ -141,6 +145,46 @@ def run_baseline(pack: RulePack, ground_truth: dict[str, Any], fixtures_root: Pa
             )
         )
     return ModeResult(mode="baseline", packets=packets)
+
+
+# M7 #6: the "real pipeline" mode - Extract (app/backends/claude_extractor.py)
+# feeding Reconcile (app/reconcile/engine.py, Investigator included)
+# feeding Validate, scored the same way ceiling/baseline are. One
+# tier only (not per-tier like Classify/Extract's own eval sections) -
+# this mode answers "does the real pipeline work end to end," not "how
+# do the tiers compare" - matches app_settings.model_classify_fallback,
+# the same cheap tier the real DECISION_BACKEND=claude policy falls
+# back to.
+_END_TO_END_MODEL = app_settings.model_classify_fallback
+
+
+def run_end_to_end_mode(
+    mode_name: str, pack: RulePack, ground_truth: dict[str, Any], fixtures_root: Path
+) -> ModeResult:
+    extractor = _cached_extractor(ClaudeExtractor(model=_END_TO_END_MODEL), _END_TO_END_MODEL)
+    mcp = build_mcp_server(
+        mode=app_settings.mcp_tool_mode,
+        fixtures_root=app_settings.registry_fixtures_root,
+        rule_pack_path=app_settings.rule_pack_path,
+        leie_cache_path=app_settings.leie_cache_path,
+    )
+    raw_investigator = Investigator(
+        mcp, model=_END_TO_END_MODEL, max_tool_calls=app_settings.investigator_max_tool_calls
+    )
+    investigator = CachedInvestigator(
+        raw_investigator,
+        model=_END_TO_END_MODEL,
+        cache_root=app_settings.model_cache_root,
+        mode=app_settings.model_cache_mode,
+    )
+    return run_end_to_end(
+        pack,
+        ground_truth,
+        fixtures_root,
+        mode_name=mode_name,
+        extractor=extractor,
+        investigator=investigator,
+    )
 
 
 def _cached(backend: Any, model: str) -> CachedBackend:
@@ -273,6 +317,10 @@ def run_eval(config: dict[str, Any], repo_root: Path = REPO_ROOT) -> dict[str, A
         mode_results["ceiling"] = run_ceiling(pack, ground_truth)
     if "baseline" in config["modes"]:
         mode_results["baseline"] = run_baseline(pack, ground_truth, fixtures_root)
+    if "end_to_end" in config["modes"]:
+        mode_results["end_to_end"] = run_end_to_end_mode(
+            "end_to_end", pack, ground_truth, fixtures_root
+        )
 
     # Keyed by result.mode, not the requested mode_name: run_classify
     # appends "-SIMULATED" to the mode name itself when any document in

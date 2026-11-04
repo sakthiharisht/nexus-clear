@@ -13,7 +13,13 @@ output_dir: eval/runs
 # baseline: rules engine run on CaseFacts built by non-LLM extraction
 #   (PDF text layer + regex/heuristics) from the rendered packets. This is
 #   the number any future LLM-backed stage has to beat.
-modes: [ceiling, baseline]
+# end_to_end (M7 #6): the real pipeline - Extract
+#   (app/backends/claude_extractor.py) feeding Reconcile
+#   (app/reconcile/engine.py, Investigator included) feeding Validate -
+#   scored the same way, shown in the same table. One tier
+#   (model_classify_fallback), not per-tier - this answers "does the
+#   real pipeline work end to end," not a tier comparison.
+modes: [ceiling, baseline, end_to_end]
 
 # M5 Classify (SPEC.md section 7.2): each backend/tier run standalone
 # (no fallback/escalation - raw per-backend accuracy/calibration), plus

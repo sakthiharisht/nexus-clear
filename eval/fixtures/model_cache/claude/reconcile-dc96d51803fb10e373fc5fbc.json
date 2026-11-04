@@ -1,0 +1,51 @@
+{
+  "name_match_conclusions": [],
+  "registry_conclusions": [
+    {
+      "rule_id": "R-ID-002",
+      "exists": true,
+      "status": null,
+      "checks": {
+        "exists": true,
+        "name_consistent": true,
+        "taxonomy_counselor": true
+      },
+      "possible_match": null,
+      "registry": "NPPES",
+      "record_hash": null,
+      "fetched_at": null
+    },
+    {
+      "rule_id": "R-EXC-001",
+      "exists": null,
+      "status": null,
+      "checks": {},
+      "possible_match": false,
+      "registry": null,
+      "record_hash": null,
+      "fetched_at": null
+    }
+  ],
+  "audit_log": [
+    {
+      "tool_name": "nppes_lookup",
+      "query": "1000000053",
+      "record_hash": "86da3e3429523534f3b5d4d2e26e758f0b5a2254469998e84e1a481ebb519e6d",
+      "fetched_at": "2026-11-04T23:03:37.654809+13:00",
+      "mode": "fixture"
+    },
+    {
+      "tool_name": "leie_check",
+      "query": "Victoria Richardson",
+      "record_hash": "b7dc1e6bccd862660ab9dd95586feedb19f0b44e37b2a10df5824f1a3305dd3d",
+      "fetched_at": "2026-11-04T23:03:37.670298+13:00",
+      "mode": "fixture"
+    }
+  ],
+  "tool_calls_made": 2,
+  "aborted_reason": null,
+  "input_tokens": 4685,
+  "output_tokens": 260,
+  "cost_usd": 0.0005985,
+  "latency_ms": 2438.0000000819564
+}

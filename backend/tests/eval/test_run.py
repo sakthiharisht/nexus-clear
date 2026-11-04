@@ -19,7 +19,7 @@ REAL_CONFIG_PATH = REPO_ROOT / "eval" / "config.yaml"
 def test_load_config_reads_the_real_config() -> None:
     config = load_config(REAL_CONFIG_PATH)
     assert config["rule_pack"] == "rules/tx_bcbstx_lpc.yaml"
-    assert set(config["modes"]) == {"ceiling", "baseline"}
+    assert set(config["modes"]) == {"ceiling", "baseline", "end_to_end"}
     assert set(config["classify_modes"]) == {
         "classify-jev",
         "classify-claude-haiku",

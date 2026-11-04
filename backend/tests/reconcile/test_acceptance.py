@@ -132,12 +132,26 @@ def test_leie_possible_match_returns_unknown_replay() -> None:
     """defective-8 plants D12: a synthetic LEIE possible-match row.
     evaluate_registry_exclusion_check reports `unknown`, never pass or
     fail, for a possible match - that is the documented hand-off to a
-    human reviewer (SPEC.md section 7.7), not an auto-decision."""
+    human reviewer (SPEC.md section 7.7), not an auto-decision.
+    Also pins R-ID-002 (registry_flags_check) == "pass": this packet's
+    real NPPES fixture entry has every flag true, a regression test
+    for a real bug this project hit - the Investigator once reported
+    `exists` only at the RegistryConclusion's top level, never inside
+    `checks`, so evaluate_registry_flags_check's `checks.get("exists")`
+    came back falsy and R-ID-002 failed even though every flag the
+    tool returned was true."""
     facts = reconcile(PACK, _defective_8_facts(), investigator=_replay_investigator())
     assert facts.registry_results["R-EXC-001"].possible_match is True
+    assert facts.registry_results["R-ID-002"].checks == {
+        "exists": True,
+        "name_consistent": True,
+        "taxonomy_counselor": True,
+    }
     findings = evaluate_rule_pack(PACK, facts, facts.target_date)
     exc001 = next(f for f in findings if f.finding_id.startswith("R-EXC-001"))
+    id002 = next(f for f in findings if f.finding_id.startswith("R-ID-002"))
     assert exc001.status == "unknown"
+    assert id002.status == "pass"
 
 
 @pytest.mark.skipif(not _HAS_ANTHROPIC_KEY, reason="no ANTHROPIC_API_KEY in backend/.env")
@@ -145,4 +159,6 @@ def test_leie_possible_match_returns_unknown_live() -> None:
     facts = reconcile(PACK, _defective_8_facts(), investigator=_live_investigator())
     findings = evaluate_rule_pack(PACK, facts, facts.target_date)
     exc001 = next(f for f in findings if f.finding_id.startswith("R-EXC-001"))
+    id002 = next(f for f in findings if f.finding_id.startswith("R-ID-002"))
     assert exc001.status == "unknown"
+    assert id002.status == "pass"

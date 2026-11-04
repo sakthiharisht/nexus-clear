@@ -171,6 +171,26 @@ def _build_tool_params(mcp_tools: list[Any]) -> list[dict[str, Any]]:
     return params
 
 
+_REGISTRY_TASK_INSTRUCTIONS = {
+    "registry_status_check": (
+        "call {tool} with {query!r}, then report `status` set to exactly "
+        "the tool's returned status string (e.g. its payload's `status` field)."
+    ),
+    "registry_flags_check": (
+        "call {tool} with {query!r}, then report `checks` as a dict with "
+        "exactly these three keys: exists, name_consistent, taxonomy_counselor "
+        "- copy each value directly from the tool's payload (it already "
+        "provides all three as booleans; do not compute or guess any of "
+        "them yourself, and do not use the top-level `exists` field for this - "
+        "`exists` must also appear inside `checks`, not only at the top level)."
+    ),
+    "registry_exclusion_check": (
+        "call {tool} with {query!r}, then report `possible_match` set to "
+        "exactly the tool's returned `possible_match` value."
+    ),
+}
+
+
 def _build_task_prompt(
     name_match_tasks: list[NameMatchTask], registry_tasks: list[RegistryTask]
 ) -> str:
@@ -182,10 +202,10 @@ def _build_task_prompt(
             f"{task.right_label}={task.right_value!r}? Report a probability."
         )
     for registry_task in registry_tasks:
-        lines.append(
-            f"- {registry_task.kind} rule_id={registry_task.rule_id}: call "
-            f"{registry_task.tool} with {registry_task.query!r}, then report the result."
+        instruction = _REGISTRY_TASK_INSTRUCTIONS[registry_task.kind].format(
+            tool=registry_task.tool, query=registry_task.query
         )
+        lines.append(f"- {registry_task.kind} rule_id={registry_task.rule_id}: {instruction}")
     return "\n".join(lines)
 
 

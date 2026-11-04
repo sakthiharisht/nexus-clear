@@ -2,11 +2,11 @@
   "name_match_conclusions": [
     {
       "rule_id": "R-LIC-004",
-      "probability": 0.8
+      "probability": 0.85
     },
     {
       "rule_id": "R-COI-004",
-      "probability": 0.8
+      "probability": 0.85
     }
   ],
   "registry_conclusions": [
@@ -14,9 +14,11 @@
       "rule_id": "R-ID-002",
       "exists": false,
       "status": null,
-      "checks": {},
+      "checks": {
+        "exists": false
+      },
       "possible_match": null,
-      "registry": "NPPES",
+      "registry": null,
       "record_hash": null,
       "fetched_at": null
     },
@@ -26,7 +28,7 @@
       "status": null,
       "checks": {},
       "possible_match": false,
-      "registry": "LEIE",
+      "registry": null,
       "record_hash": null,
       "fetched_at": null
     }
@@ -36,17 +38,21 @@
       "tool_name": "nppes_lookup",
       "query": "9999999998",
       "record_hash": "4ae057f5106130da09fb7534162cbeb5e0bf9c789c81c44daed277462453c459",
-      "fetched_at": "2026-11-04T22:46:29.192495+13:00",
+      "fetched_at": "2026-11-04T22:57:56.750946+13:00",
       "mode": "fixture"
     },
     {
       "tool_name": "leie_check",
       "query": "John Smyth",
       "record_hash": "99fd39425a6a49cb3e0b0043101b6d4e9e85cbd12eeb949ce3fb4682d47219ca",
-      "fetched_at": "2026-11-04T22:46:29.213704+13:00",
+      "fetched_at": "2026-11-04T22:57:56.751945+13:00",
       "mode": "fixture"
     }
   ],
   "tool_calls_made": 2,
-  "aborted_reason": null
+  "aborted_reason": null,
+  "input_tokens": 4897,
+  "output_tokens": 609,
+  "cost_usd": 0.0007942,
+  "latency_ms": 3702.999999979511
 }

@@ -14,7 +14,9 @@
       "rule_id": "R-ID-002",
       "exists": false,
       "status": null,
-      "checks": {},
+      "checks": {
+        "exists": false
+      },
       "possible_match": null,
       "registry": "NPPES",
       "record_hash": null,
@@ -26,7 +28,7 @@
       "status": null,
       "checks": {},
       "possible_match": false,
-      "registry": "LEIE",
+      "registry": null,
       "record_hash": null,
       "fetched_at": null
     }
@@ -36,17 +38,21 @@
       "tool_name": "nppes_lookup",
       "query": "9999999997",
       "record_hash": "4ae057f5106130da09fb7534162cbeb5e0bf9c789c81c44daed277462453c459",
-      "fetched_at": "2026-11-04T22:46:50.478354+13:00",
+      "fetched_at": "2026-11-04T22:57:52.924759+13:00",
       "mode": "fixture"
     },
     {
       "tool_name": "leie_check",
       "query": "Christopher Donovan",
       "record_hash": "99fd39425a6a49cb3e0b0043101b6d4e9e85cbd12eeb949ce3fb4682d47219ca",
-      "fetched_at": "2026-11-04T22:46:50.499532+13:00",
+      "fetched_at": "2026-11-04T22:57:52.926295+13:00",
       "mode": "fixture"
     }
   ],
   "tool_calls_made": 2,
-  "aborted_reason": null
+  "aborted_reason": null,
+  "input_tokens": 4922,
+  "output_tokens": 594,
+  "cost_usd": 0.0007892,
+  "latency_ms": 4186.999999918044
 }

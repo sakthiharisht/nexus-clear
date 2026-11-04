@@ -16,6 +16,7 @@ dependencies = [
     "python-multipart>=0.0.20",
     "anthropic>=2.4.0",
     "httpx>=0.28.1",
+    "mcp[cli]>=2.3.0",
 ]
 
 [dependency-groups]

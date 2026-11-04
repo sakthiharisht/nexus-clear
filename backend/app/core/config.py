@@ -62,5 +62,22 @@ class Settings(BaseSettings):
     model_cache_mode: Literal["replay", "record"] = "replay"
     model_cache_root: Path = _REPO_ROOT / "eval" / "fixtures" / "model_cache"
 
+    # MCP tools (SPEC.md section 7.6). FIXTURE is the default and the
+    # only mode tx_license_lookup ever runs in (BHEC has no verified
+    # programmatic access - app/tools_mcp/server.py). "live" switches
+    # nppes_lookup/leie_check to the real public NPPES API / LEIE CSV
+    # download; synthetic providers won't exist there, so live mode is
+    # a not-found/indeterminate demonstration, not the eval path.
+    mcp_tool_mode: Literal["fixture", "live"] = "fixture"
+    registry_fixtures_root: Path = _REPO_ROOT / "eval" / "fixtures" / "registry"
+    leie_cache_path: Path = Path("data/cache/leie_updated.csv")
+
+    # Reconcile (SPEC.md section 7.5): hard cap on tool calls per
+    # Investigator invocation - Jev is "known to repeat tool calls in
+    # agent loops" per SPEC 7.2, and an unbounded Claude loop is the
+    # same risk with a different model. Tuned from the eval, not
+    # load-bearing enough yet to need its own config section.
+    investigator_max_tool_calls: int = 6
+
 
 settings = Settings()

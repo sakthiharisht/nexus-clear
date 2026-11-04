@@ -131,6 +131,26 @@ def _run_acceptance_flow(client: TestClient, db_session: Session) -> None:
     review_rows = db_session.query(ReviewItem).filter_by(case_id=case_id).all()
     assert review_rows and all(row.status == "resolved" for row in review_rows)
 
+    # Pre-M9 fix #2 (stale-attest guard): the run that produced the
+    # just-resolved review items predates those resolutions, so attest
+    # must still refuse until the case is run again - that re-run
+    # carries each resolved rule's decision forward (never re-asks)
+    # rather than re-escalating the same confidence-driven finding.
+    stale = client.post(
+        f"/cases/{case_id}/attest",
+        json={"confirmed": True, "attested_by": "reviewer-1", "typed_name": "Reviewer One"},
+    )
+    assert stale.status_code == 409
+
+    rerun = client.post(f"/cases/{case_id}/run")
+    assert rerun.status_code == 200, rerun.text
+    assert rerun.json()["escalated_finding_ids"] == []
+
+    review_rows_after_rerun = db_session.query(ReviewItem).filter_by(case_id=case_id).all()
+    assert all(row.status == "resolved" for row in review_rows_after_rerun), (
+        "a rule a human already resolved must never be re-escalated"
+    )
+
     attest = client.post(
         f"/cases/{case_id}/attest",
         json={"confirmed": True, "attested_by": "reviewer-1", "typed_name": "Reviewer One"},

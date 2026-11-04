@@ -68,6 +68,15 @@ class Case(Base):
     attested_packet: Mapped[dict[str, object] | None] = mapped_column(JSONB, nullable=True)
     attested_packet_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
+    # Pre-M9 fix #2 - stale-attest guard: when POST /cases/{id}/run last
+    # completed for this case. Attest refuses (409) if any document was
+    # uploaded or any review item was resolved after this timestamp -
+    # the packet/findings being attested must reflect the latest state,
+    # not a run that predates a since-corrected upload or a since-
+    # resolved review. Forces one more /run after the last change,
+    # before attesting.
+    last_run_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
 
 class Document(Base):
     __tablename__ = "documents"

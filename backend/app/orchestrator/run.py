@@ -36,6 +36,7 @@ from __future__ import annotations
 import io
 import logging
 from base64 import b64encode
+from datetime import UTC, datetime
 from typing import Literal
 from uuid import UUID
 
@@ -335,10 +336,43 @@ def run_case(
     facts = reconcile(pack, facts, investigator=investigator)
     findings = evaluate_rule_pack(pack, facts, case.target_date)
 
+    # Carry forward prior human decisions (pre-M9 fix #2): without
+    # this, a rule a reviewer already resolved would re-escalate on
+    # every subsequent run with identical confidence, making it
+    # impossible to ever clear the queue for a data-level issue
+    # (confidence doesn't change just because a human looked at it).
+    # A rule_id a human has already resolved for this case is never
+    # asked about again; its decision is reapplied directly instead.
+    prior_resolutions_by_rule: dict[str, ReviewItem] = {}
+    for item in session.query(ReviewItem).filter_by(case_id=case.id, status="resolved").all():
+        prior_record = session.get(FindingRecord, item.finding_id)
+        if prior_record is None:
+            continue
+        prior_rule_id = prior_record.finding.get("rule_id")
+        if not isinstance(prior_rule_id, str):
+            continue
+        existing = prior_resolutions_by_rule.get(prior_rule_id)
+        if existing is None or (
+            item.resolved_at is not None
+            and existing.resolved_at is not None
+            and item.resolved_at > existing.resolved_at
+        ):
+            prior_resolutions_by_rule[prior_rule_id] = item
+
     finding_id_to_record_id: dict[str, UUID] = {}
+    already_reviewed_rule_ids: set[str] = set()
     for finding in findings:
+        prior = prior_resolutions_by_rule.get(finding.rule_id)
+        finding_payload = finding.model_dump(mode="json")
+        if prior is not None:
+            already_reviewed_rule_ids.add(finding.rule_id)
+            resolution = prior.reviewer_resolution or {}
+            finding_payload["decided_by"] = "human"
+            if resolution.get("decision") == "override" and resolution.get("override_status"):
+                finding_payload["status"] = resolution["override_status"]
+
         record = FindingRecord(
-            case_id=case.id, rule_pack_version=pack.version, finding=finding.model_dump(mode="json")
+            case_id=case.id, rule_pack_version=pack.version, finding=finding_payload
         )
         session.add(record)
         session.flush()
@@ -352,7 +386,7 @@ def run_case(
     )
     escalated_finding_ids: list[str] = []
     for decision in decisions:
-        if not decision.escalated:
+        if not decision.escalated or decision.rule_id in already_reviewed_rule_ids:
             continue
         escalated_finding_ids.append(decision.finding_id)
         session.add(
@@ -364,6 +398,7 @@ def run_case(
         )
 
     case.state = "reconciled"
+    case.last_run_at = datetime.now(UTC)
     session.add(
         AuditLog(
             actor="orchestrator",

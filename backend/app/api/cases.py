@@ -48,7 +48,7 @@ from app.core.orm import AuditLog, Case, Document, Extraction, ReviewItem
 from app.escalate.engine import EscalationThresholds
 from app.orchestrator.run import RunResult, run_case
 from app.packet.builder import CaqhStylePacket, build_packet
-from app.packet.gate import open_blocker_finding_ids, unresolved_review_ids
+from app.packet.gate import open_blocker_finding_ids, staleness_reason, unresolved_review_ids
 from app.reconcile.cache import CachedInvestigator
 from app.report.cache import CachedPhraser
 from app.report.gap_report import GapReport, build_gap_report
@@ -287,6 +287,16 @@ def attest(
     if case.attested_at is not None:
         raise HTTPException(status.HTTP_409_CONFLICT, "case is already attested")
 
+    documents = session.query(Document).filter_by(case_id=case.id).all()
+    review_items = session.query(ReviewItem).filter_by(case_id=case.id).all()
+    stale_reason = staleness_reason(
+        last_run_at=case.last_run_at, documents=documents, review_items=review_items
+    )
+    if stale_reason is not None:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT, f"cannot attest: {stale_reason} - run the case again first"
+        )
+
     findings = [finding for _, finding in load_case_findings(session, case.id)]
     open_blockers = open_blocker_finding_ids(findings)
     if open_blockers:
@@ -295,7 +305,6 @@ def attest(
             f"cannot attest: open blocker findings exist: {', '.join(open_blockers)}",
         )
 
-    review_items = session.query(ReviewItem).filter_by(case_id=case.id).all()
     unresolved = unresolved_review_ids(review_items)
     if unresolved:
         raise HTTPException(

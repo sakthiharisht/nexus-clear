@@ -10,6 +10,7 @@ from app.backends.types import ClassificationResult, ClassifyInput
 
 class _FakeBackend:
     name = "fake"
+    prompt_version = "test"
 
     def __init__(self) -> None:
         self.calls = 0
@@ -35,12 +36,23 @@ def _input(slot: str = "cv") -> ClassifyInput:
 
 
 def test_cache_key_is_deterministic_for_the_same_input() -> None:
-    assert cache_key("claude", "model-x", _input()) == cache_key("claude", "model-x", _input())
+    assert cache_key("claude", "model-x", "v1", _input()) == cache_key(
+        "claude", "model-x", "v1", _input()
+    )
 
 
 def test_cache_key_differs_for_different_inputs() -> None:
-    assert cache_key("claude", "model-x", _input("cv")) != cache_key(
-        "claude", "model-x", _input("license")
+    assert cache_key("claude", "model-x", "v1", _input("cv")) != cache_key(
+        "claude", "model-x", "v1", _input("license")
+    )
+
+
+def test_cache_key_differs_for_different_prompt_versions() -> None:
+    """M7 housekeeping #1: an edited prompt must change the key even
+    when the model and input are identical, so a stale fixture can
+    never silently replay output recorded under a different prompt."""
+    assert cache_key("claude", "model-x", "v1", _input()) != cache_key(
+        "claude", "model-x", "v2", _input()
     )
 
 

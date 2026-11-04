@@ -88,6 +88,7 @@ def test_build_classify_input_reads_real_rendered_text(tmp_path: Path) -> None:
 
 class _StubBackend:
     name = "claude"
+    prompt_version = "test"
 
     def classify(self, classify_input: ClassifyInput) -> ClassificationResult:
         return ClassificationResult(

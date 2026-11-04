@@ -1,0 +1,74 @@
+{
+  "kind": "cv",
+  "fields": {
+    "name": {
+      "value": "Ashley Warren",
+      "confidence": 0.97,
+      "page": 1,
+      "quote": "Name: Ashley Warren"
+    },
+    "positions": [
+      {
+        "title": {
+          "value": "Associate Counselor",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Associate Counselor"
+        },
+        "employer": {
+          "value": "Martinez, Valdez and Mcclure Behavioral Health",
+          "confidence": 0.93,
+          "page": 1,
+          "quote": "Martinez, Valdez and Mcclure Behavioral Health"
+        },
+        "start": {
+          "value": "2020-11-18",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "2020-11-18"
+        },
+        "end": {
+          "value": "2023-11-18",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "2023-11-18"
+        }
+      },
+      {
+        "title": {
+          "value": "Licensed Professional Counselor",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Licensed Professional Counselor"
+        },
+        "employer": {
+          "value": "Lewis PLC Counseling Group",
+          "confidence": 0.93,
+          "page": 1,
+          "quote": "Lewis PLC Counseling Group"
+        },
+        "start": {
+          "value": "2023-11-18",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "2023-11-18 - present"
+        },
+        "end": {
+          "value": null,
+          "confidence": 0.9,
+          "page": 1,
+          "quote": null
+        }
+      }
+    ],
+    "education": []
+  },
+  "decided_by": "claude",
+  "input_tokens": 1488,
+  "output_tokens": 444,
+  "cost_usd": 0.007416,
+  "cost_known": true,
+  "latency_ms": 3000.0,
+  "simulated": false,
+  "extraction_error": null
+}

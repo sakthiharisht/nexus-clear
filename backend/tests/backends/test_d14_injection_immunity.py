@@ -110,6 +110,10 @@ class _FailOnCallExtractor:
     nothing except what's already recorded."""
 
     name = "claude"
+    # Must match the real ClaudeExtractor's fingerprint - this stub's
+    # job is to prove a cache HIT resolves correctly, which requires
+    # computing the exact same key a real recording would have used.
+    prompt_version = ClaudeExtractor.prompt_version
 
     def extract(self, extract_input: ExtractInput) -> ExtractionResult:
         raise AssertionError(

@@ -15,6 +15,8 @@ from app.eval.live_extract import LiveRunAborted, LiveRunBudget, _BudgetedExtrac
 
 
 class _FakeExtractor:
+    prompt_version = "test"
+
     def __init__(self, name: str, cost_usd: float = 0.01) -> None:
         self.name = name
         self.calls = 0
@@ -102,6 +104,8 @@ def test_run_live_aborts_mid_run_and_reports_which_tiers_completed(
     calls: list[str] = []
 
     class _RecordingFake:
+        prompt_version = "test"
+
         def __init__(self, model: str) -> None:
             self.name = "claude"
             self._model = model

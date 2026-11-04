@@ -23,11 +23,18 @@ class MissingFixtureError(RuntimeError):
     """
 
 
-def cache_key(backend_name: str, model: str, classify_input: ClassifyInput) -> str:
+def cache_key(
+    backend_name: str, model: str, prompt_version: str, classify_input: ClassifyInput
+) -> str:
+    """`prompt_version` (M7 housekeeping #1, app/core/prompt_version.py)
+    is part of the key so an edited prompt can never silently replay a
+    fixture recorded under the old wording - a changed fingerprint is
+    a guaranteed cache miss, forcing a fresh live recording."""
     canonical = json.dumps(
         {
             "backend": backend_name,
             "model": model,
+            "prompt_version": prompt_version,
             "input": classify_input.model_dump(mode="json"),
         },
         sort_keys=True,
@@ -59,8 +66,14 @@ class CachedBackend:
     def name(self) -> str:
         return self._backend.name
 
+    @property
+    def prompt_version(self) -> str:
+        return self._backend.prompt_version
+
     def _path_for(self, classify_input: ClassifyInput) -> Path:
-        key = cache_key(self._backend.name, self._model, classify_input)
+        key = cache_key(
+            self._backend.name, self._model, self._backend.prompt_version, classify_input
+        )
         return self._cache_root / self._backend.name / f"{key}.json"
 
     def classify(self, classify_input: ClassifyInput) -> ClassificationResult:

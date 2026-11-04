@@ -8,6 +8,8 @@ _LEGIBLE = 0.7
 
 
 class _StubBackend:
+    prompt_version = "test"
+
     def __init__(self, name: str, result: ClassificationResult) -> None:
         self.name = name
         self._result = result

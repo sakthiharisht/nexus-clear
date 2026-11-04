@@ -42,6 +42,7 @@ def test_build_hard_extract_input_joins_all_pages(tmp_path: Path) -> None:
 
 class _CorrectExtractor:
     name = "claude"
+    prompt_version = "test"
 
     def extract(self, extract_input: ExtractInput) -> ExtractionResult:
         if extract_input.kind == "license":
@@ -103,6 +104,7 @@ def test_run_hard_extract_scores_cv_positions(tmp_path: Path) -> None:
 
 class _RaisingExtractor:
     name = "claude"
+    prompt_version = "test"
 
     def extract(self, extract_input: ExtractInput) -> ExtractionResult:
         raise ValueError("Claude did not return a parsed structured output")

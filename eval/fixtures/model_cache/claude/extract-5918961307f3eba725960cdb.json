@@ -1,0 +1,55 @@
+{
+  "kind": "license",
+  "fields": {
+    "holder_name": {
+      "value": "John Smith Jr.",
+      "confidence": 0.97,
+      "page": 1,
+      "quote": "Holder name: John Smith Jr."
+    },
+    "license_number": {
+      "value": "LPC-700041",
+      "confidence": 0.97,
+      "page": 1,
+      "quote": "License number: LPC-700041"
+    },
+    "license_type": {
+      "value": "Licensed Professional Counselor",
+      "confidence": 0.85,
+      "page": 1,
+      "quote": "Texas Licensed Professional Counselor"
+    },
+    "status": {
+      "value": null,
+      "confidence": null,
+      "page": null,
+      "quote": null
+    },
+    "issue_date": {
+      "value": null,
+      "confidence": null,
+      "page": null,
+      "quote": null
+    },
+    "expiration_date": {
+      "value": null,
+      "confidence": null,
+      "page": null,
+      "quote": null
+    },
+    "issuing_board": {
+      "value": null,
+      "confidence": null,
+      "page": null,
+      "quote": null
+    }
+  },
+  "decided_by": "claude",
+  "input_tokens": 1272,
+  "output_tokens": 354,
+  "cost_usd": 0.012168,
+  "cost_known": true,
+  "latency_ms": 3609.0000001713634,
+  "simulated": false,
+  "extraction_error": null
+}

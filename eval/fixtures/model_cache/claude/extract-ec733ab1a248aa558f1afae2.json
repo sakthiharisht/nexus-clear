@@ -1,0 +1,48 @@
+{
+  "kind": "cv",
+  "fields": {
+    "name": {
+      "value": "Angela Whitfield, LPC",
+      "confidence": 0.95,
+      "page": 1,
+      "quote": "Name: Angela Whitfield, LPC"
+    },
+    "positions": [
+      {
+        "title": {
+          "value": "Licensed Professional Counselor",
+          "confidence": 0.9,
+          "page": 1,
+          "quote": "Licensed Professional Counselor, Brightpath Counseling Group (2020-01-01 - present)"
+        },
+        "employer": {
+          "value": "Brightpath Counseling Group",
+          "confidence": 0.9,
+          "page": 1,
+          "quote": "Licensed Professional Counselor, Brightpath Counseling Group (2020-01-01 - present)"
+        },
+        "start": {
+          "value": "2020-01-01",
+          "confidence": 0.9,
+          "page": 1,
+          "quote": "Licensed Professional Counselor, Brightpath Counseling Group (2020-01-01 - present)"
+        },
+        "end": {
+          "value": null,
+          "confidence": null,
+          "page": null,
+          "quote": null
+        }
+      }
+    ],
+    "education": []
+  },
+  "decided_by": "claude",
+  "input_tokens": 1434,
+  "output_tokens": 618,
+  "cost_usd": 0.0004524,
+  "cost_known": true,
+  "latency_ms": 3202.999999979511,
+  "simulated": false,
+  "extraction_error": null
+}

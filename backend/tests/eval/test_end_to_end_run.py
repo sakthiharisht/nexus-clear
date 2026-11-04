@@ -35,6 +35,7 @@ def _field(value: str | None, quote: str | None) -> ExtractedField:
 
 class _StubExtractor:
     name = "claude"
+    prompt_version = "test"
 
     def __init__(self) -> None:
         self.calls = 0
@@ -59,6 +60,8 @@ class _StubExtractor:
 
 
 class _StubInvestigator:
+    prompt_version = "test"
+
     def __init__(self) -> None:
         self.calls: list[tuple[list[NameMatchTask], list[RegistryTask]]] = []
 
@@ -152,6 +155,7 @@ def test_registry_tasks_are_always_sent_to_the_investigator() -> None:
 def test_extraction_failure_is_recorded_as_a_note_not_a_crash() -> None:
     class _RaisingExtractor:
         name = "claude"
+        prompt_version = "test"
 
         def extract(self, extract_input: ExtractInput) -> ExtractionResult:
             raise ValueError("Claude did not return a parsed structured output")

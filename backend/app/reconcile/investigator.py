@@ -28,6 +28,7 @@ with whatever was gathered, rather than looping or crashing.
 from __future__ import annotations
 
 import asyncio
+import inspect
 import json
 import logging
 import time
@@ -40,6 +41,7 @@ from mcp.types import CallToolResult
 from pydantic import BaseModel, ValidationError
 
 from app.backends.pricing import estimate_cost_usd
+from app.core.prompt_version import prompt_fingerprint
 
 logger = logging.getLogger(__name__)
 
@@ -117,6 +119,9 @@ class InvestigatorLike(Protocol):
     """What app/reconcile/engine.py and app/reconcile/cache.py's
     CachedInvestigator both need - satisfied by Investigator itself
     and by any test double with the same method shape."""
+
+    @property
+    def prompt_version(self) -> str: ...  # M7 housekeeping #1 - app/core/prompt_version.py
 
     def investigate(
         self, *, name_match_tasks: list[NameMatchTask], registry_tasks: list[RegistryTask]
@@ -209,7 +214,17 @@ def _build_task_prompt(
     return "\n".join(lines)
 
 
+PROMPT_VERSION = prompt_fingerprint(
+    _SYSTEM_PROMPT,
+    str(_REGISTRY_TASK_INSTRUCTIONS),
+    inspect.getsource(_build_task_prompt),
+    inspect.getsource(_build_tool_params),
+)
+
+
 class Investigator:
+    prompt_version = PROMPT_VERSION
+
     def __init__(
         self,
         mcp: MCPServer,

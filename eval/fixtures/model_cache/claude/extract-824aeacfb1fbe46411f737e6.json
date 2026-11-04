@@ -1,0 +1,74 @@
+{
+  "kind": "cv",
+  "fields": {
+    "name": {
+      "value": "Jonathan Alvarez",
+      "confidence": 0.98,
+      "page": 1,
+      "quote": "Name: Jonathan Alvarez"
+    },
+    "positions": [
+      {
+        "title": {
+          "value": "Associate Counselor",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Associate Counselor"
+        },
+        "employer": {
+          "value": "Graham and Sons Behavioral Health",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Graham and Sons Behavioral Health"
+        },
+        "start": {
+          "value": "2020-11-18",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "(2020-11-18 - 2023-11-18)"
+        },
+        "end": {
+          "value": "2023-11-18",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "(2020-11-18 - 2023-11-18)"
+        }
+      },
+      {
+        "title": {
+          "value": "Licensed Professional Counselor",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Licensed Professional Counselor"
+        },
+        "employer": {
+          "value": "Smith-Wong Counseling Group",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Smith-Wong Counseling Group"
+        },
+        "start": {
+          "value": "2023-11-18",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "(2023-11-18 - present)"
+        },
+        "end": {
+          "value": null,
+          "confidence": 0.9,
+          "page": 1,
+          "quote": null
+        }
+      }
+    ],
+    "education": []
+  },
+  "decided_by": "claude",
+  "input_tokens": 1480,
+  "output_tokens": 458,
+  "cost_usd": 0.01508,
+  "cost_known": true,
+  "latency_ms": 3936.9999999180436,
+  "simulated": false,
+  "extraction_error": null
+}

@@ -21,6 +21,7 @@ redacted input, document-is-data framing, one schema per doc type.
 
 from __future__ import annotations
 
+import inspect
 import time
 from typing import cast
 
@@ -39,6 +40,7 @@ from app.backends.extract_types import (
     W9Extraction,
 )
 from app.backends.pricing import estimate_cost_usd
+from app.core.prompt_version import prompt_fingerprint
 from app.core.redact import redact
 
 _SCHEMA_BY_KIND: dict[ExtractKind, type[ExtractionFields]] = {
@@ -114,8 +116,14 @@ def _build_content(extract_input: ExtractInput) -> str | list[dict[str, object]]
     ]
 
 
+PROMPT_VERSION = prompt_fingerprint(
+    _PROMPT_TEMPLATE, str(_FIELD_GUIDANCE_BY_KIND), inspect.getsource(_build_content)
+)
+
+
 class ClaudeExtractor:
     name = "claude"
+    prompt_version = PROMPT_VERSION
 
     def __init__(self, model: str, client: anthropic.Anthropic | None = None) -> None:
         self._model = model

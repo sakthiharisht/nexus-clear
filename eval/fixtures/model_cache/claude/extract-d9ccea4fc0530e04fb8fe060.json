@@ -1,0 +1,48 @@
+{
+  "kind": "cv",
+  "fields": {
+    "name": {
+      "value": "Mei Lin Tanaka",
+      "confidence": 0.97,
+      "page": 1,
+      "quote": "Name: Mei Lin Tanaka"
+    },
+    "positions": [
+      {
+        "title": {
+          "value": "Licensed Professional Counselor",
+          "confidence": 0.93,
+          "page": 1,
+          "quote": "Licensed Professional Counselor at Brightpath Counseling Group, 2021-05-01 to"
+        },
+        "employer": {
+          "value": "Brightpath Counseling Group",
+          "confidence": 0.93,
+          "page": 1,
+          "quote": "Licensed Professional Counselor at Brightpath Counseling Group, 2021-05-01 to"
+        },
+        "start": {
+          "value": "2021-05-01",
+          "confidence": 0.93,
+          "page": 1,
+          "quote": "Licensed Professional Counselor at Brightpath Counseling Group, 2021-05-01 to"
+        },
+        "end": {
+          "value": null,
+          "confidence": null,
+          "page": null,
+          "quote": null
+        }
+      }
+    ],
+    "education": []
+  },
+  "decided_by": "claude",
+  "input_tokens": 1436,
+  "output_tokens": 596,
+  "cost_usd": 0.0004416,
+  "cost_known": true,
+  "latency_ms": 3328.0000002123415,
+  "simulated": false,
+  "extraction_error": null
+}

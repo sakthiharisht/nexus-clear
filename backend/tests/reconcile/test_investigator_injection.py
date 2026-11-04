@@ -67,6 +67,10 @@ def test_injection_does_not_flip_possible_match_replay(tmp_path: Path) -> None:
     investigation committed alongside every other model_cache entry."""
 
     class _FailOnCallInvestigator:
+        # Matches the real Investigator's fingerprint - needed to
+        # resolve the same cache key a real recording used.
+        prompt_version = Investigator.prompt_version
+
         def investigate(
             self,
             *,

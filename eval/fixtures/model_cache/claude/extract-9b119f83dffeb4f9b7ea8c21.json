@@ -1,0 +1,74 @@
+{
+  "kind": "cv",
+  "fields": {
+    "name": {
+      "value": "Rosalind Achebe",
+      "confidence": 0.97,
+      "page": 1,
+      "quote": "Name: Rosalind Achebe"
+    },
+    "positions": [
+      {
+        "title": {
+          "value": "Associate Counselor",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Associate Counselor, Riverside Behavioral Health (2017-06-01 - 2019-06-01)"
+        },
+        "employer": {
+          "value": "Riverside Behavioral Health",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Associate Counselor, Riverside Behavioral Health (2017-06-01 - 2019-06-01)"
+        },
+        "start": {
+          "value": "2017-06-01",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Associate Counselor, Riverside Behavioral Health (2017-06-01 - 2019-06-01)"
+        },
+        "end": {
+          "value": "2019-06-01",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Associate Counselor, Riverside Behavioral Health (2017-06-01 - 2019-06-01)"
+        }
+      },
+      {
+        "title": {
+          "value": "Licensed Professional Counselor",
+          "confidence": 0.9,
+          "page": 1,
+          "quote": "Professional Counselor, Brightpath Counseling Group (2019-06-01 - present)"
+        },
+        "employer": {
+          "value": "Brightpath Counseling Group",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Professional Counselor, Brightpath Counseling Group (2019-06-01 - present)"
+        },
+        "start": {
+          "value": "2019-06-01",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Professional Counselor, Brightpath Counseling Group (2019-06-01 - present)"
+        },
+        "end": {
+          "value": null,
+          "confidence": null,
+          "page": null,
+          "quote": null
+        }
+      }
+    ],
+    "education": []
+  },
+  "decided_by": "claude",
+  "input_tokens": 1469,
+  "output_tokens": 1192,
+  "cost_usd": 0.0007429,
+  "cost_known": true,
+  "latency_ms": 5203.999999910593,
+  "simulated": false,
+  "extraction_error": null
+}

@@ -29,10 +29,15 @@ class ExtractionBackend(Protocol):
     @property
     def name(self) -> str: ...
 
+    @property
+    def prompt_version(self) -> str: ...  # M7 housekeeping #1 - app/core/prompt_version.py
+
     def extract(self, extract_input: ExtractInput) -> ExtractionResult: ...
 
 
-def cache_key(backend_name: str, model: str, extract_input: ExtractInput) -> str:
+def cache_key(
+    backend_name: str, model: str, prompt_version: str, extract_input: ExtractInput
+) -> str:
     """M6.1: when an image is attached, the key hashes the image's own
     sha256 digest rather than embedding the full base64 payload into
     the canonical JSON - same result for lookup purposes (same bytes
@@ -41,13 +46,23 @@ def cache_key(backend_name: str, model: str, extract_input: ExtractInput) -> str
     common case - every text-layer document) is unaffected: the
     canonical dict is identical to before this existed, so every
     already-recorded fixture still resolves under its original key.
+
+    `prompt_version` (M7 housekeeping #1) is part of the key so an
+    edited prompt can never silently replay a fixture recorded under
+    the old wording.
     """
     input_dict = extract_input.model_dump(mode="json")
     image_b64 = input_dict.get("image_b64")
     if image_b64 is not None:
         input_dict["image_b64"] = hashlib.sha256(base64.b64decode(image_b64)).hexdigest()
     canonical = json.dumps(
-        {"backend": backend_name, "model": model, "input": input_dict}, sort_keys=True
+        {
+            "backend": backend_name,
+            "model": model,
+            "prompt_version": prompt_version,
+            "input": input_dict,
+        },
+        sort_keys=True,
     )
     return hashlib.sha256(canonical.encode()).hexdigest()[:24]
 
@@ -70,8 +85,14 @@ class CachedExtractor:
     def name(self) -> str:
         return self._backend.name
 
+    @property
+    def prompt_version(self) -> str:
+        return self._backend.prompt_version
+
     def _path_for(self, extract_input: ExtractInput) -> Path:
-        key = cache_key(self._backend.name, self._model, extract_input)
+        key = cache_key(
+            self._backend.name, self._model, self._backend.prompt_version, extract_input
+        )
         return self._cache_root / self._backend.name / f"extract-{key}.json"
 
     def extract(self, extract_input: ExtractInput) -> ExtractionResult:

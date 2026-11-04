@@ -1,0 +1,20 @@
+{
+  "doc_type": "cv",
+  "probabilities": {
+    "texas_lpc_license": 0.07,
+    "malpractice_coi": 0.0,
+    "cv": 0.93,
+    "w9": 0.0,
+    "degree_transcript": 0.0,
+    "other": 0.0
+  },
+  "legible": 0.9275,
+  "slot_match": true,
+  "decided_by": "jev",
+  "input_tokens": 589,
+  "output_tokens": 105,
+  "cost_usd": 0.0,
+  "cost_known": false,
+  "latency_ms": 218.00000010989606,
+  "simulated": false
+}

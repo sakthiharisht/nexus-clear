@@ -1,0 +1,55 @@
+{
+  "kind": "license",
+  "fields": {
+    "holder_name": {
+      "value": null,
+      "confidence": 0.0,
+      "page": null,
+      "quote": null
+    },
+    "license_number": {
+      "value": null,
+      "confidence": 0.0,
+      "page": null,
+      "quote": null
+    },
+    "license_type": {
+      "value": null,
+      "confidence": 0.0,
+      "page": null,
+      "quote": null
+    },
+    "status": {
+      "value": null,
+      "confidence": 0.0,
+      "page": null,
+      "quote": null
+    },
+    "issue_date": {
+      "value": null,
+      "confidence": 0.0,
+      "page": null,
+      "quote": null
+    },
+    "expiration_date": {
+      "value": null,
+      "confidence": 0.0,
+      "page": null,
+      "quote": null
+    },
+    "issuing_board": {
+      "value": null,
+      "confidence": 0.0,
+      "page": null,
+      "quote": null
+    }
+  },
+  "decided_by": "claude",
+  "input_tokens": 1232,
+  "output_tokens": 362,
+  "cost_usd": 0.00030419999999999997,
+  "cost_known": true,
+  "latency_ms": 2719.000000040978,
+  "simulated": false,
+  "extraction_error": null
+}

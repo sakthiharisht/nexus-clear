@@ -1,0 +1,15 @@
+{
+  "doc_type": "malpractice_coi",
+  "probabilities": {
+    "malpractice_coi": 0.97
+  },
+  "legible": 0.98,
+  "slot_match": true,
+  "decided_by": "claude",
+  "input_tokens": 837,
+  "output_tokens": 99,
+  "cost_usd": 0.00013319999999999999,
+  "cost_known": true,
+  "latency_ms": 1437.9999998491257,
+  "simulated": false
+}

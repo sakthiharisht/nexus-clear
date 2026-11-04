@@ -1,0 +1,15 @@
+{
+  "doc_type": "other",
+  "probabilities": {
+    "other": 0.93
+  },
+  "legible": 0.95,
+  "slot_match": false,
+  "decided_by": "claude",
+  "input_tokens": 819,
+  "output_tokens": 41,
+  "cost_usd": 0.004096,
+  "cost_known": true,
+  "latency_ms": 2063.0000000819564,
+  "simulated": false
+}

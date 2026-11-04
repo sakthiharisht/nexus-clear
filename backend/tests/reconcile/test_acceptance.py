@@ -74,6 +74,10 @@ def _lic004_status(pack: RulePack, facts: CaseFacts) -> str:
 
 
 class _FailOnCallInvestigator:
+    # Matches the real Investigator's fingerprint - needed to resolve
+    # the same cache key a real recording used.
+    prompt_version = Investigator.prompt_version
+
     def investigate(self, *, name_match_tasks, registry_tasks):  # type: ignore[no-untyped-def]
         raise AssertionError(
             "replay-mode acceptance test hit a cache miss and tried a real "

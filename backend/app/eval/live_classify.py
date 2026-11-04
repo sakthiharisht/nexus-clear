@@ -96,6 +96,10 @@ class _BudgetedBackend:
     def name(self) -> str:
         return self._backend.name
 
+    @property
+    def prompt_version(self) -> str:
+        return self._backend.prompt_version
+
     def classify(self, classify_input: ClassifyInput) -> ClassificationResult:
         self._budget.before_call()
         result = self._backend.classify(classify_input)

@@ -1,0 +1,51 @@
+{
+  "name_match_conclusions": [],
+  "registry_conclusions": [
+    {
+      "rule_id": "R-ID-002",
+      "exists": true,
+      "status": null,
+      "checks": {
+        "exists": true,
+        "name_consistent": true,
+        "taxonomy_counselor": true
+      },
+      "possible_match": null,
+      "registry": "NPPES",
+      "record_hash": null,
+      "fetched_at": null
+    },
+    {
+      "rule_id": "R-EXC-001",
+      "exists": null,
+      "status": null,
+      "checks": {},
+      "possible_match": false,
+      "registry": "LEIE",
+      "record_hash": null,
+      "fetched_at": null
+    }
+  ],
+  "audit_log": [
+    {
+      "tool_name": "nppes_lookup",
+      "query": "1000000061",
+      "record_hash": "b9ca242fa0367c977015ea5e11c30f3b3388c6a257534449212774a77c19dac0",
+      "fetched_at": "2026-11-05T07:02:50.202427+13:00",
+      "mode": "fixture"
+    },
+    {
+      "tool_name": "leie_check",
+      "query": "Denise Thompson",
+      "record_hash": "b25cd3de33cb91087fbc256b3e47f9922224703501ee347174ea3e70192485d1",
+      "fetched_at": "2026-11-05T07:02:50.218086+13:00",
+      "mode": "fixture"
+    }
+  ],
+  "tool_calls_made": 2,
+  "aborted_reason": null,
+  "input_tokens": 4681,
+  "output_tokens": 358,
+  "cost_usd": 0.0006471000000000001,
+  "latency_ms": 2500.0
+}

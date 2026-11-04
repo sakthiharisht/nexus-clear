@@ -20,6 +20,8 @@ PACK = load_rule_pack(REPO_ROOT / "rules" / "tx_bcbstx_lpc.yaml")
 
 
 class _FakeInvestigator:
+    prompt_version = "test"
+
     def __init__(self, result: InvestigationResult) -> None:
         self.result = result
         self.calls: list[tuple[list[NameMatchTask], list[RegistryTask]]] = []

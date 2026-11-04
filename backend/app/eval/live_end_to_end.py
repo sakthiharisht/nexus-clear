@@ -84,6 +84,10 @@ class _BudgetedExtractor:
     def name(self) -> str:
         return self._backend.name
 
+    @property
+    def prompt_version(self) -> str:
+        return self._backend.prompt_version
+
     def extract(self, extract_input: ExtractInput) -> ExtractionResult:
         self._budget.before_call()
         result = self._backend.extract(extract_input)
@@ -95,6 +99,10 @@ class _BudgetedInvestigator:
     def __init__(self, investigator: InvestigatorLike, budget: LiveRunBudget) -> None:
         self._investigator = investigator
         self._budget = budget
+
+    @property
+    def prompt_version(self) -> str:
+        return self._investigator.prompt_version
 
     def investigate(
         self, *, name_match_tasks: list[NameMatchTask], registry_tasks: list[RegistryTask]

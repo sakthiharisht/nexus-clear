@@ -1,0 +1,15 @@
+{
+  "doc_type": "degree_transcript",
+  "probabilities": {
+    "degree_transcript": 0.92
+  },
+  "legible": 0.95,
+  "slot_match": true,
+  "decided_by": "claude",
+  "input_tokens": 795,
+  "output_tokens": 143,
+  "cost_usd": 0.000151,
+  "cost_known": true,
+  "latency_ms": 1672.000000020489,
+  "simulated": false
+}

@@ -42,11 +42,13 @@ is resolved: both are confirmed from real responses, not guessed.
 
 from __future__ import annotations
 
+import inspect
 import time
 
 import httpx
 
 from app.backends.types import ClassificationResult, ClassifyInput
+from app.core.prompt_version import prompt_fingerprint
 from app.core.redact import redact
 
 JEV_ENDPOINT = "https://api.typesafe.ai/v1/systemone"
@@ -99,8 +101,17 @@ def _legible_from_score_answer(answer: dict[str, object]) -> float:
     return raw / (len(_LEGIBLE_LEVELS) - 1)
 
 
+PROMPT_VERSION = prompt_fingerprint(
+    str(_QUESTIONS),
+    str(_DOC_TYPE_DESCRIPTIONS),
+    str(_LEGIBLE_LEVELS),
+    inspect.getsource(_build_state),
+)
+
+
 class JevBackend:
     name = "jev"
+    prompt_version = PROMPT_VERSION
 
     def __init__(self, api_key: str, model: str, client: httpx.Client | None = None) -> None:
         self._api_key = api_key

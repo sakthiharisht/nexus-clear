@@ -1,0 +1,15 @@
+{
+  "doc_type": "cv",
+  "probabilities": {
+    "cv": 0.97
+  },
+  "legible": 0.98,
+  "slot_match": true,
+  "decided_by": "claude",
+  "input_tokens": 834,
+  "output_tokens": 42,
+  "cost_usd": 0.002088,
+  "cost_known": true,
+  "latency_ms": 1375.0,
+  "simulated": false
+}

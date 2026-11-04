@@ -21,6 +21,7 @@ def _packet(packet_id: str) -> dict:
 
 class _StubBackend:
     name = "claude"
+    prompt_version = "test"
 
     def __init__(self, simulated: bool = False) -> None:
         self.inputs: list[ClassifyInput] = []
@@ -92,6 +93,7 @@ def test_filenames_differ_between_two_different_packets_scanned_license_slots() 
 
 class _RaisingBackend:
     name = "claude"
+    prompt_version = "test"
 
     def __init__(self, exc: Exception) -> None:
         self._exc = exc

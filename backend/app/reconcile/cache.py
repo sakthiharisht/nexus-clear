@@ -28,11 +28,19 @@ class MissingFixtureError(RuntimeError):
 
 
 def cache_key(
-    model: str, name_match_tasks: list[NameMatchTask], registry_tasks: list[RegistryTask]
+    model: str,
+    prompt_version: str,
+    name_match_tasks: list[NameMatchTask],
+    registry_tasks: list[RegistryTask],
 ) -> str:
+    """`prompt_version` (M7 housekeeping #1, app/core/prompt_version.py)
+    is part of the key so an edited system/task prompt can never
+    silently replay an investigation recorded under the old wording -
+    the exact bug class the registry_flags_check prompt fix hit."""
     canonical = json.dumps(
         {
             "model": model,
+            "prompt_version": prompt_version,
             "name_match_tasks": [t.model_dump(mode="json") for t in name_match_tasks],
             "registry_tasks": [t.model_dump(mode="json") for t in registry_tasks],
         },
@@ -50,10 +58,16 @@ class CachedInvestigator:
         self._cache_root = cache_root
         self._mode = mode
 
+    @property
+    def prompt_version(self) -> str:
+        return self._investigator.prompt_version
+
     def _path_for(
         self, name_match_tasks: list[NameMatchTask], registry_tasks: list[RegistryTask]
     ) -> Path:
-        key = cache_key(self._model, name_match_tasks, registry_tasks)
+        key = cache_key(
+            self._model, self._investigator.prompt_version, name_match_tasks, registry_tasks
+        )
         return self._cache_root / "claude" / f"reconcile-{key}.json"
 
     def investigate(

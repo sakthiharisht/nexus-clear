@@ -1,0 +1,55 @@
+{
+  "kind": "license",
+  "fields": {
+    "holder_name": {
+      "value": "Sarah O'Brien",
+      "confidence": 0.95,
+      "page": 1,
+      "quote": "hldr: Sarah O'Brien"
+    },
+    "license_number": {
+      "value": "LPC-700004",
+      "confidence": 0.95,
+      "page": 1,
+      "quote": "lic.#: LPC-700004"
+    },
+    "license_type": {
+      "value": "Licensed Professional Counselor",
+      "confidence": 0.85,
+      "page": 1,
+      "quote": "Texas Licensed Professional Counselor"
+    },
+    "status": {
+      "value": null,
+      "confidence": null,
+      "page": null,
+      "quote": null
+    },
+    "issue_date": {
+      "value": "2021-01-05",
+      "confidence": 0.95,
+      "page": 1,
+      "quote": "iss: 2021-01-05"
+    },
+    "expiration_date": {
+      "value": "2027-01-05",
+      "confidence": 0.95,
+      "page": 1,
+      "quote": "exp: 2027-01-05"
+    },
+    "issuing_board": {
+      "value": null,
+      "confidence": null,
+      "page": null,
+      "quote": null
+    }
+  },
+  "decided_by": "claude",
+  "input_tokens": 1296,
+  "output_tokens": 651,
+  "cost_usd": 0.0004551,
+  "cost_known": true,
+  "latency_ms": 3469.000000040978,
+  "simulated": false,
+  "extraction_error": null
+}

@@ -43,6 +43,7 @@ def test_build_vision_extract_input_is_none_for_a_text_layer_packet() -> None:
 
 class _StubVisionExtractor:
     name = "claude"
+    prompt_version = "test"
 
     def __init__(self, holder_name: str | None) -> None:
         self._holder_name = holder_name
@@ -103,6 +104,7 @@ def test_run_extract_vision_scores_defective_7_as_unknown_not_a_guess() -> None:
 
 class _RaisingVisionExtractor:
     name = "claude"
+    prompt_version = "test"
 
     def extract(self, extract_input: ExtractInput) -> ExtractionResult:
         raise MissingFixtureError("no cached response")

@@ -1,0 +1,74 @@
+{
+  "kind": "cv",
+  "fields": {
+    "name": {
+      "value": "Theo Kowalski",
+      "confidence": 0.98,
+      "page": 1,
+      "quote": "Name: Theo Kowalski"
+    },
+    "positions": [
+      {
+        "title": {
+          "value": "Associate Counselor",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Associate Counselor, Riverside Behavioral Health (2019-02-01 to 2022-02-01)"
+        },
+        "employer": {
+          "value": "Riverside Behavioral Health",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Associate Counselor, Riverside Behavioral Health (2019-02-01 to 2022-02-01)"
+        },
+        "start": {
+          "value": "2019-02-01",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Associate Counselor, Riverside Behavioral Health (2019-02-01 to 2022-02-01)"
+        },
+        "end": {
+          "value": "2022-02-01",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Associate Counselor, Riverside Behavioral Health (2019-02-01 to 2022-02-01)"
+        }
+      },
+      {
+        "title": {
+          "value": "Licensed Professional Counselor",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Licensed Professional Counselor, Brightpath Counseling Group (2022-02-01 to"
+        },
+        "employer": {
+          "value": "Brightpath Counseling Group",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Licensed Professional Counselor, Brightpath Counseling Group (2022-02-01 to"
+        },
+        "start": {
+          "value": "2022-02-01",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Licensed Professional Counselor, Brightpath Counseling Group (2022-02-01 to"
+        },
+        "end": {
+          "value": null,
+          "confidence": 0.9,
+          "page": null,
+          "quote": null
+        }
+      }
+    ],
+    "education": []
+  },
+  "decided_by": "claude",
+  "input_tokens": 1476,
+  "output_tokens": 1050,
+  "cost_usd": 0.0006726,
+  "cost_known": true,
+  "latency_ms": 4125.0,
+  "simulated": false,
+  "extraction_error": null
+}

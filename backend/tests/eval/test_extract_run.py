@@ -34,6 +34,7 @@ def _field(value: str | None, quote: str | None) -> ExtractedField:
 
 class _StubExtractor:
     name = "claude"
+    prompt_version = "test"
 
     def __init__(self, simulated: bool = False) -> None:
         self.inputs: list[ExtractInput] = []
@@ -58,6 +59,7 @@ class _StubExtractor:
 
 class _RaisingExtractor:
     name = "claude"
+    prompt_version = "test"
 
     def extract(self, extract_input: ExtractInput) -> ExtractionResult:
         raise ValueError("Claude did not return a parsed structured output")
@@ -129,6 +131,7 @@ def test_run_extract_handles_a_value_error_as_an_empty_unknown_document() -> Non
 def test_cv_positions_score_each_position_independently() -> None:
     class _CvExtractor:
         name = "claude"
+        prompt_version = "test"
 
         def extract(self, extract_input: ExtractInput) -> ExtractionResult:
             if extract_input.kind == "license":

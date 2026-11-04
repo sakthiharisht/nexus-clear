@@ -1,0 +1,48 @@
+{
+  "kind": "cv",
+  "fields": {
+    "name": {
+      "value": "Aiden Novak",
+      "confidence": 0.98,
+      "page": 1,
+      "quote": "Name: Aiden Novak"
+    },
+    "positions": [
+      {
+        "title": {
+          "value": "Licensed Professional Counselor",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Licensed Professional Counselor"
+        },
+        "employer": {
+          "value": "Brightpath Counseling Group",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Brightpath Counseling Group"
+        },
+        "start": {
+          "value": "Jan 2020",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Jan 2020"
+        },
+        "end": {
+          "value": "Mar 2023",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Mar 2023"
+        }
+      }
+    ],
+    "education": []
+  },
+  "decided_by": "claude",
+  "input_tokens": 1435,
+  "output_tokens": 248,
+  "cost_usd": 0.0107,
+  "cost_known": true,
+  "latency_ms": 4359.999999869615,
+  "simulated": false,
+  "extraction_error": null
+}

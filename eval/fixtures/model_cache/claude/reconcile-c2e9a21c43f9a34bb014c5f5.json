@@ -1,0 +1,51 @@
+{
+  "name_match_conclusions": [],
+  "registry_conclusions": [
+    {
+      "rule_id": "R-ID-002",
+      "exists": null,
+      "status": null,
+      "checks": {
+        "exists": true,
+        "name_consistent": true,
+        "taxonomy_counselor": true
+      },
+      "possible_match": null,
+      "registry": null,
+      "record_hash": null,
+      "fetched_at": null
+    },
+    {
+      "rule_id": "R-EXC-001",
+      "exists": null,
+      "status": null,
+      "checks": {},
+      "possible_match": false,
+      "registry": null,
+      "record_hash": null,
+      "fetched_at": null
+    }
+  ],
+  "audit_log": [
+    {
+      "tool_name": "nppes_lookup",
+      "query": "1000000103",
+      "record_hash": "d56eeeb7b82759242c73f66bcbae953c72c28d50fe11397553b506a915b7e684",
+      "fetched_at": "2026-11-05T07:03:02.495519+13:00",
+      "mode": "fixture"
+    },
+    {
+      "tool_name": "leie_check",
+      "query": "Alicia Bailey",
+      "record_hash": "f879e971c06171f5a0cde2b038da776410a5d861fd550563ec396a4ff84b92dd",
+      "fetched_at": "2026-11-05T07:03:02.511023+13:00",
+      "mode": "fixture"
+    }
+  ],
+  "tool_calls_made": 2,
+  "aborted_reason": null,
+  "input_tokens": 4685,
+  "output_tokens": 378,
+  "cost_usd": 0.0006575,
+  "latency_ms": 2797.000000020489
+}

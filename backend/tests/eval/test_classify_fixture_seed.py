@@ -11,6 +11,7 @@ from pathlib import Path
 import pytest
 
 from app.backends.cache import CachedBackend, MissingFixtureError
+from app.backends.claude_backend import ClaudeBackend
 from app.backends.types import ClassificationResult
 from app.core.config import settings
 from app.eval.classify_fixture_seed import seed
@@ -24,6 +25,12 @@ FIXTURES_ROOT = REPO_ROOT / "eval" / "fixtures"
 
 
 class _UnreachableBackend:
+    # Matches ClaudeBackend's real fingerprint - every call site below
+    # uses name="claude" against fixtures seed() wrote keyed under
+    # ClaudeBackend.prompt_version (app/eval/classify_fixture_seed.py's
+    # _PROMPT_VERSION_BY_BACKEND), so this must resolve to the same key.
+    prompt_version = ClaudeBackend.prompt_version
+
     def __init__(self, name: str) -> None:
         self.name = name
 
@@ -49,7 +56,7 @@ def test_seed_never_overwrites_an_already_real_recording(tmp_path: Path) -> None
 
     from app.backends.cache import cache_key
 
-    key = cache_key("claude", "claude-haiku-5-5", classify_input)
+    key = cache_key("claude", "claude-haiku-5-5", ClaudeBackend.prompt_version, classify_input)
     real_path = tmp_path / "claude" / f"{key}.json"
     real_result = ClassificationResult(
         doc_type="texas_lpc_license",

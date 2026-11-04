@@ -33,6 +33,7 @@ test_live_smoke.py and app/eval/live_classify.py.
 
 from __future__ import annotations
 
+import inspect
 import time
 
 import anthropic
@@ -40,6 +41,7 @@ from pydantic import BaseModel, Field
 
 from app.backends.pricing import estimate_cost_usd
 from app.backends.types import ClassificationResult, ClassifyInput, DocType
+from app.core.prompt_version import prompt_fingerprint
 from app.core.redact import redact
 
 
@@ -82,8 +84,12 @@ def _build_content(classify_input: ClassifyInput) -> str | list[dict[str, object
     ]
 
 
+PROMPT_VERSION = prompt_fingerprint(inspect.getsource(_build_content))
+
+
 class ClaudeBackend:
     name = "claude"
+    prompt_version = PROMPT_VERSION
 
     def __init__(self, model: str, client: anthropic.Anthropic | None = None) -> None:
         self._model = model

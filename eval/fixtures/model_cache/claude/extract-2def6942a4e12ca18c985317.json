@@ -1,0 +1,55 @@
+{
+  "kind": "license",
+  "fields": {
+    "holder_name": {
+      "value": "Marcus Webb",
+      "confidence": 0.95,
+      "page": 1,
+      "quote": "Marcus Webb"
+    },
+    "license_number": {
+      "value": "LPC-700002",
+      "confidence": 0.95,
+      "page": 1,
+      "quote": "LPC-700002"
+    },
+    "license_type": {
+      "value": "Licensed Professional Counselor",
+      "confidence": 0.85,
+      "page": 1,
+      "quote": "Texas Licensed Professional Counselor"
+    },
+    "status": {
+      "value": null,
+      "confidence": null,
+      "page": null,
+      "quote": null
+    },
+    "issue_date": {
+      "value": null,
+      "confidence": null,
+      "page": null,
+      "quote": null
+    },
+    "expiration_date": {
+      "value": "2026-08-22",
+      "confidence": 0.95,
+      "page": 1,
+      "quote": "2026-08-22"
+    },
+    "issuing_board": {
+      "value": null,
+      "confidence": null,
+      "page": null,
+      "quote": null
+    }
+  },
+  "decided_by": "claude",
+  "input_tokens": 1290,
+  "output_tokens": 282,
+  "cost_usd": 0.0108,
+  "cost_known": true,
+  "latency_ms": 2890.000000130385,
+  "simulated": false,
+  "extraction_error": null
+}

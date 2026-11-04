@@ -35,9 +35,16 @@ from pathlib import Path
 from typing import Any
 
 from app.backends.cache import cache_key
+from app.backends.claude_backend import ClaudeBackend
+from app.backends.jev_backend import JevBackend
 from app.backends.types import ClassificationResult
 from app.core.config import settings
 from app.eval.classify_run import build_classify_input
+
+_PROMPT_VERSION_BY_BACKEND = {
+    "jev": JevBackend.prompt_version,
+    "claude": ClaudeBackend.prompt_version,
+}
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 
@@ -99,7 +106,9 @@ def seed(ground_truth: dict[str, Any], fixtures_root: Path, cache_root: Path) ->
                 ("claude", "claude-sonnet-5-5", 0.03),
                 ("claude", "claude-opus-5-5", 0.04),
             ):
-                key = cache_key(backend_name, model, classify_input)
+                key = cache_key(
+                    backend_name, model, _PROMPT_VERSION_BY_BACKEND[backend_name], classify_input
+                )
                 path = cache_root / backend_name / f"{key}.json"
                 if path.exists():
                     existing = ClassificationResult.model_validate_json(

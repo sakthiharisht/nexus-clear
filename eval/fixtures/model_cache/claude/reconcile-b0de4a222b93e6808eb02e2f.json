@@ -1,0 +1,51 @@
+{
+  "name_match_conclusions": [],
+  "registry_conclusions": [
+    {
+      "rule_id": "R-ID-002",
+      "exists": null,
+      "status": null,
+      "checks": {
+        "exists": true,
+        "name_consistent": true,
+        "taxonomy_counselor": true
+      },
+      "possible_match": null,
+      "registry": null,
+      "record_hash": null,
+      "fetched_at": null
+    },
+    {
+      "rule_id": "R-EXC-001",
+      "exists": null,
+      "status": null,
+      "checks": {},
+      "possible_match": false,
+      "registry": null,
+      "record_hash": null,
+      "fetched_at": null
+    }
+  ],
+  "audit_log": [
+    {
+      "tool_name": "nppes_lookup",
+      "query": "1000000004",
+      "record_hash": "4d59939ad007cb7fd3319d40ac300a4178d7b11cf941a33d9b7f3e7284e0ca8b",
+      "fetched_at": "2026-11-05T07:02:33.130426+13:00",
+      "mode": "fixture"
+    },
+    {
+      "tool_name": "leie_check",
+      "query": "Christopher Lee",
+      "record_hash": "abc3551b8541a6a2d021ce4e751dcf48b68cb874a550547b3b09ac9a0a8d1171",
+      "fetched_at": "2026-11-05T07:02:33.146419+13:00",
+      "mode": "fixture"
+    }
+  ],
+  "tool_calls_made": 2,
+  "aborted_reason": null,
+  "input_tokens": 4681,
+  "output_tokens": 400,
+  "cost_usd": 0.0006681,
+  "latency_ms": 3156.999999890104
+}

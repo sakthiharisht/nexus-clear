@@ -1,0 +1,55 @@
+{
+  "kind": "coi",
+  "fields": {
+    "insured_name": {
+      "value": "Devon Ashford",
+      "confidence": 0.97,
+      "page": 1,
+      "quote": "Insured: Devon Ashford"
+    },
+    "carrier": {
+      "value": "Lakeside Mutual Insurance",
+      "confidence": 0.97,
+      "page": 1,
+      "quote": "Carrier: Lakeside Mutual Insurance"
+    },
+    "policy_number": {
+      "value": "POL-700005",
+      "confidence": 0.97,
+      "page": 1,
+      "quote": "Policy#: POL-700005"
+    },
+    "effective_date": {
+      "value": null,
+      "confidence": 0.95,
+      "page": 1,
+      "quote": null
+    },
+    "expiration_date": {
+      "value": null,
+      "confidence": 0.95,
+      "page": 1,
+      "quote": null
+    },
+    "per_occurrence": {
+      "value": null,
+      "confidence": 0.95,
+      "page": 1,
+      "quote": null
+    },
+    "aggregate": {
+      "value": null,
+      "confidence": 0.95,
+      "page": 1,
+      "quote": null
+    }
+  },
+  "decided_by": "claude",
+  "input_tokens": 1302,
+  "output_tokens": 294,
+  "cost_usd": 0.005544,
+  "cost_known": true,
+  "latency_ms": 3016.0000000614673,
+  "simulated": false,
+  "extraction_error": null
+}

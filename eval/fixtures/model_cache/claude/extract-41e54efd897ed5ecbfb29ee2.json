@@ -1,0 +1,55 @@
+{
+  "kind": "license",
+  "fields": {
+    "holder_name": {
+      "value": "Dr. Maria Garcia-Lopez, Ph.D.",
+      "confidence": 0.9,
+      "page": 1,
+      "quote": "Dr. Maria Garcia-Lopez, Ph.D."
+    },
+    "license_number": {
+      "value": "LPC-700042",
+      "confidence": 0.97,
+      "page": 1,
+      "quote": "LPC-700042"
+    },
+    "license_type": {
+      "value": "Licensed Professional Counselor",
+      "confidence": 0.9,
+      "page": 1,
+      "quote": "Licensed Professional Counselor"
+    },
+    "status": {
+      "value": null,
+      "confidence": null,
+      "page": null,
+      "quote": null
+    },
+    "issue_date": {
+      "value": null,
+      "confidence": null,
+      "page": null,
+      "quote": null
+    },
+    "expiration_date": {
+      "value": null,
+      "confidence": null,
+      "page": null,
+      "quote": null
+    },
+    "issuing_board": {
+      "value": null,
+      "confidence": null,
+      "page": null,
+      "quote": null
+    }
+  },
+  "decided_by": "claude",
+  "input_tokens": 1287,
+  "output_tokens": 296,
+  "cost_usd": 0.005534,
+  "cost_known": true,
+  "latency_ms": 2108.9999999385327,
+  "simulated": false,
+  "extraction_error": null
+}

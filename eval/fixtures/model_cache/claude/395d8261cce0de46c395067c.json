@@ -1,0 +1,15 @@
+{
+  "doc_type": "texas_lpc_license",
+  "probabilities": {
+    "texas_lpc_license": 0.96
+  },
+  "legible": 0.97,
+  "slot_match": true,
+  "decided_by": "claude",
+  "input_tokens": 824,
+  "output_tokens": 48,
+  "cost_usd": 0.002128,
+  "cost_known": true,
+  "latency_ms": 1889.9999998975545,
+  "simulated": false
+}

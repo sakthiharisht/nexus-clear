@@ -16,6 +16,8 @@ from app.eval.live_classify import LiveRunAborted, LiveRunBudget, _BudgetedBacke
 
 
 class _FakeBackend:
+    prompt_version = "test"
+
     def __init__(self, name: str, cost_usd: float = 0.01) -> None:
         self.name = name
         self.calls = 0
@@ -84,7 +86,7 @@ def test_a_cache_hit_never_counts_against_the_budget(tmp_path: Path) -> None:
     assert fake.calls == 1
 
 
-def _one_document_ground_truth() -> dict:
+def _one_document_ground_truth() -> dict[str, object]:
     return {
         "packets": [
             {
@@ -114,6 +116,8 @@ def test_run_live_aborts_mid_run_and_reports_which_tiers_completed(
     calls: list[str] = []
 
     class _RecordingFake:
+        prompt_version = "test"
+
         def __init__(self, name: str, model: str) -> None:
             self.name = name
             self._model = model
@@ -156,6 +160,8 @@ def test_run_live_records_jev_when_a_key_is_present(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     class _FakeClaude:
+        prompt_version = "test"
+
         def __init__(self, model: str) -> None:
             self.name = "claude"
 
@@ -166,6 +172,8 @@ def test_run_live_records_jev_when_a_key_is_present(
             )
 
     class _FakeJev:
+        prompt_version = "test"
+
         def __init__(self, api_key: str, model: str) -> None:
             self.name = "jev"
 

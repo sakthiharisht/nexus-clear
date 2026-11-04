@@ -1,0 +1,20 @@
+{
+  "doc_type": "degree_transcript",
+  "probabilities": {
+    "texas_lpc_license": 0.0,
+    "malpractice_coi": 0.0,
+    "cv": 0.0,
+    "w9": 0.0,
+    "degree_transcript": 1.0,
+    "other": 0.0
+  },
+  "legible": 0.93,
+  "slot_match": true,
+  "decided_by": "jev",
+  "input_tokens": 542,
+  "output_tokens": 108,
+  "cost_usd": 0.0,
+  "cost_known": false,
+  "latency_ms": 186.9999999180436,
+  "simulated": false
+}

@@ -38,16 +38,9 @@ import time
 import anthropic
 from pydantic import BaseModel, Field
 
+from app.backends.pricing import estimate_cost_usd
 from app.backends.types import ClassificationResult, ClassifyInput, DocType
 from app.core.redact import redact
-
-# USD per million tokens, input/output. Verified 2026-11-04 (see module
-# docstring) - re-verify before relying on this for real billing.
-_PRICING_PER_MTOK: dict[str, tuple[float, float]] = {
-    "claude-haiku-5-5": (0.10, 0.50),
-    "claude-sonnet-5-5": (2.00, 10.00),
-    "claude-opus-5-5": (4.00, 20.00),
-}
 
 
 class _ClaudeClassification(BaseModel):
@@ -55,11 +48,6 @@ class _ClaudeClassification(BaseModel):
     doc_type_confidence: float = Field(ge=0.0, le=1.0)
     legible: float = Field(ge=0.0, le=1.0)
     slot_match: bool
-
-
-def _estimate_cost_usd(model: str, input_tokens: int, output_tokens: int) -> float:
-    input_rate, output_rate = _PRICING_PER_MTOK.get(model, (0.0, 0.0))
-    return (input_tokens * input_rate + output_tokens * output_rate) / 1_000_000
 
 
 def _build_content(classify_input: ClassifyInput) -> str | list[dict[str, object]]:
@@ -126,7 +114,7 @@ class ClaudeBackend:
         if parsed is None:
             raise ValueError("Claude did not return a parsed structured output")
 
-        cost_usd = _estimate_cost_usd(
+        cost_usd = estimate_cost_usd(
             self._model, response.usage.input_tokens, response.usage.output_tokens
         )
         return ClassificationResult(

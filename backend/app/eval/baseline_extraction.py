@@ -28,6 +28,7 @@ from typing import Any
 
 import pypdf
 
+from app.core.injection import contains_injection_text
 from app.eval.generator.mutations import SLOT_DOC_TYPES, SLOTS
 from app.rules.context import (
     CaseFacts,
@@ -47,15 +48,6 @@ _TITLE_TO_DOC_TYPE = {
     "Degree / Transcript": "degree_transcript",
     "Form W-9 (synthetic)": "w9",
 }
-
-_INJECTION_PATTERNS = [
-    re.compile(p, re.IGNORECASE)
-    for p in [
-        r"ignore all (previous|prior) instructions",
-        r"system instruction",
-        r"disregard (all |the )?(previous|prior) instructions",
-    ]
-]
 
 _DATE_RE = r"\d{4}-\d{2}-\d{2}"
 _POSITION_RE = re.compile(
@@ -117,10 +109,6 @@ def _positions(text: str) -> list[CvPosition]:
     ]
 
 
-def _contains_injection(text: str) -> bool:
-    return any(pattern.search(text) for pattern in _INJECTION_PATTERNS)
-
-
 def extract_baseline_facts(
     packet: dict[str, Any], fixtures_root: Path
 ) -> tuple[CaseFacts, list[str]]:
@@ -165,7 +153,7 @@ def extract_baseline_facts(
                 expected_doc_type=expected_doc_type,
                 uploaded_doc_type=uploaded_doc_type,
                 legible_score=0.95 if uploaded_doc_type is not None else None,
-                contains_injection_text=_contains_injection(text),
+                contains_injection_text=contains_injection_text(text),
                 readable=True,
             )
         )

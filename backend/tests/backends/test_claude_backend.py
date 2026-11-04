@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from app.backends.claude_backend import ClaudeBackend, _ClaudeClassification, _estimate_cost_usd
+from app.backends.claude_backend import ClaudeBackend, _ClaudeClassification
 from app.backends.types import ClassifyInput
 from app.core.redact import SSN_MASK
 
@@ -33,15 +33,6 @@ class _FakeMessagesAPI:
 class _FakeClient:
     def __init__(self, response: _FakeParsedMessage) -> None:
         self.messages = _FakeMessagesAPI(response)
-
-
-def test_estimate_cost_usd_uses_the_pinned_models_rate() -> None:
-    cost = _estimate_cost_usd("claude-haiku-5-5", input_tokens=1_000_000, output_tokens=1_000_000)
-    assert cost == 0.10 + 0.50
-
-
-def test_estimate_cost_usd_is_zero_for_an_unpinned_model() -> None:
-    assert _estimate_cost_usd("some-unknown-model", input_tokens=1000, output_tokens=1000) == 0.0
 
 
 def test_classify_maps_parsed_output_into_a_classification_result() -> None:

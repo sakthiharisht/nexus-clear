@@ -146,7 +146,13 @@ def run_live(
     max_calls: int,
     claude_only: bool,
     jev_api_key: str | None,
+    mode_suffix: str = "",
 ) -> dict[str, Any]:
+    """`mode_suffix` (e.g. "-hard") distinguishes a run over a
+    different document set using the SAME tiers/budget machinery -
+    app/eval/run.py's run_classify_mode strips it back off before
+    dispatching, so the recorded mode names line up with what the
+    report groups by."""
     budget = LiveRunBudget(cost_ceiling_usd=cost_ceiling_usd, max_calls=max_calls)
     report: dict[str, Any] = {"tiers": {}, "aborted": None}
 
@@ -155,7 +161,7 @@ def run_live(
             report["tiers"][f"claude-{tier_name}"] = _record(
                 ClaudeBackend(model=model),
                 model,
-                mode_name=f"classify-claude-{tier_name}",
+                mode_name=f"classify-claude-{tier_name}{mode_suffix}",
                 ground_truth=ground_truth,
                 fixtures_root=fixtures_root,
                 cache_root=cache_root,
@@ -166,7 +172,7 @@ def run_live(
             report["tiers"]["jev"] = _record(
                 JevBackend(api_key=jev_api_key, model="jev-1.14.0"),
                 "jev-1.14.0",
-                mode_name="classify-jev",
+                mode_name=f"classify-jev{mode_suffix}",
                 ground_truth=ground_truth,
                 fixtures_root=fixtures_root,
                 cache_root=cache_root,
@@ -188,12 +194,22 @@ def main() -> None:  # pragma: no cover - makes real network calls, not exercise
     parser.add_argument("--cost-ceiling", type=float, default=DEFAULT_COST_CEILING_USD)
     parser.add_argument("--max-calls", type=int, default=DEFAULT_MAX_CALLS)
     parser.add_argument("--claude-only", action="store_true")
+    parser.add_argument(
+        "--ground-truth",
+        default="eval/fixtures/ground_truth.json",
+        help="Repo-root-relative path to the manifest to classify (default: the 12-packet set).",
+    )
+    parser.add_argument(
+        "--mode-suffix",
+        default="",
+        help='Appended to every recorded mode name, e.g. "-hard" for the hard classify set.',
+    )
     args = parser.parse_args()
 
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise SystemExit("ANTHROPIC_API_KEY is required (set it in backend/.env)")
 
-    ground_truth_path = REPO_ROOT / "eval" / "fixtures" / "ground_truth.json"
+    ground_truth_path = REPO_ROOT / args.ground_truth
     fixtures_root = REPO_ROOT / "eval" / "fixtures"
     cache_root = REPO_ROOT / "eval" / "fixtures" / "model_cache"
     ground_truth = json.loads(ground_truth_path.read_text(encoding="utf-8"))
@@ -206,6 +222,7 @@ def main() -> None:  # pragma: no cover - makes real network calls, not exercise
         max_calls=args.max_calls,
         claude_only=args.claude_only,
         jev_api_key=os.environ.get("JEV_API_KEY"),
+        mode_suffix=args.mode_suffix,
     )
     print(json.dumps(report, indent=2))
 

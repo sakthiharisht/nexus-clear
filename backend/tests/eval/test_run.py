@@ -119,7 +119,7 @@ def test_run_classify_mode_rejects_an_unknown_mode_name() -> None:
 
 def test_markdown_report_omits_the_classify_section_when_no_classify_metrics_ran() -> None:
     config = load_config(REAL_CONFIG_PATH)
-    result = run_eval({**config, "classify_modes": []}, REPO_ROOT)
+    result = run_eval({**config, "classify_modes": [], "classify_modes_hard": []}, REPO_ROOT)
     report = render_markdown_report(result)
     assert "M5 Classify" not in report
 

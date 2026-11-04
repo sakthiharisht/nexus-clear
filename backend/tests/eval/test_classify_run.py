@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from app.backends.types import ClassificationResult, ClassifyInput
 from app.eval.classify_run import _page1_text, build_classify_input, run_classify
 
@@ -86,6 +88,60 @@ def test_filenames_differ_between_two_different_packets_scanned_license_slots() 
     a = build_classify_input(_packet("benign-2-rotated-scan"), "license", FIXTURES_ROOT)
     b = build_classify_input(_packet("defective-7"), "license", FIXTURES_ROOT)
     assert a.filename != b.filename
+
+
+class _RaisingBackend:
+    name = "claude"
+
+    def __init__(self, exc: Exception) -> None:
+        self._exc = exc
+
+    def classify(self, classify_input: ClassifyInput) -> ClassificationResult:
+        raise self._exc
+
+
+def test_a_value_error_from_the_backend_is_escalated_not_raised() -> None:
+    """ClaudeBackend.classify raises ValueError when the model never
+    emits a parsed structured output (hit live, M5.1 housekeeping #2,
+    on an ambiguous hard-set document). One bad document must not
+    crash the whole batch, and must not be guessed past either
+    (CLAUDE.md invariant 2)."""
+    backend = _RaisingBackend(ValueError("Claude did not return a parsed structured output"))
+    result = run_classify(
+        _one_document_ground_truth(),
+        FIXTURES_ROOT,
+        mode_name="test-mode",
+        primary=backend,
+        fallback=None,
+        tau_classify=0.85,
+        legible_threshold=0.7,
+    )
+    assert len(result.documents) == 1
+    doc = result.documents[0]
+    assert doc.escalated is True
+    assert doc.accepted is False
+    assert doc.predicted_doc_type == "other"
+    assert doc.predicted_probability == 0.0
+
+
+def test_a_runtime_error_from_the_backend_still_propagates() -> None:
+    """Narrowly scoped to ValueError: a budget abort
+    (app.eval.live_classify.LiveRunAborted, a RuntimeError) or any
+    other infrastructure failure must still stop the run, not get
+    silently folded into "one bad document." Regression: an earlier,
+    too-broad `except Exception` here swallowed LiveRunAborted and
+    broke the cost-ceiling abort signal."""
+    backend = _RaisingBackend(RuntimeError("budget exceeded"))
+    with pytest.raises(RuntimeError, match="budget exceeded"):
+        run_classify(
+            _one_document_ground_truth(),
+            FIXTURES_ROOT,
+            mode_name="test-mode",
+            primary=backend,
+            fallback=None,
+            tau_classify=0.85,
+            legible_threshold=0.7,
+        )
 
 
 def test_run_classify_covers_every_uploaded_document_across_all_packets() -> None:

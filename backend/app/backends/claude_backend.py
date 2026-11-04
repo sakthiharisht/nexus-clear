@@ -106,7 +106,14 @@ class ClaudeBackend:
         started = time.monotonic()
         response = self._client.messages.parse(
             model=self._model,
-            max_tokens=256,
+            # 256 was too tight: found live (M5.1 housekeeping #2) on
+            # an ambiguous hard-set lookalike document, where the model
+            # spent its whole budget on an extended-thinking block and
+            # hit stop_reason="max_tokens" before ever emitting the
+            # structured answer - parsed_output came back None, not a
+            # low-confidence-but-present result. 1024 leaves room for
+            # thinking plus the (tiny) actual JSON output.
+            max_tokens=1024,
             # The SDK's MessageParam union needs a precise TypedDict shape;
             # `content` is correct at runtime (str, or text+image blocks
             # per the Messages API) but looser than mypy can verify here.

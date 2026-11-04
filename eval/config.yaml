@@ -33,3 +33,20 @@ classify_modes:
     classify-claude-opus,
     classify-policy-claude,
   ]
+
+# M5.1 housekeeping #2: ~30 adversarial documents (lookalikes, CVs with
+# license-like text, degraded/partial scans, mixed-content pages,
+# wrong-slot uploads - app/eval/generator/hard_classify_set.py), a
+# different ground_truth/fixtures_root from the 12-packet "easy" set
+# above. Reported as separate rows (report.py), never pooled with or
+# ranked against the easy set's - n=29 is too small to support a tier
+# ranking either way; see the report's own caveat text.
+hard_ground_truth: eval/fixtures/hard_classify_ground_truth.json
+hard_fixtures_root: eval/fixtures
+classify_modes_hard:
+  [
+    classify-jev-hard,
+    classify-claude-haiku-hard,
+    classify-claude-sonnet-hard,
+    classify-claude-opus-hard,
+  ]

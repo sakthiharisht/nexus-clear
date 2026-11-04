@@ -22,15 +22,18 @@ page1_text is the only signal this eval's cache keys depend on.
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import Any
 
 import pypdf
 
 from app.backends.base import DecisionBackend
-from app.backends.policy import decide
-from app.backends.types import DOC_TYPES, ClassifyInput
+from app.backends.policy import ClassifyDecision, decide
+from app.backends.types import DOC_TYPES, ClassificationResult, ClassifyInput
 from app.eval.classify_types import ClassifyModeResult, DocumentClassification
+
+logger = logging.getLogger(__name__)
 
 _IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg"}
 
@@ -90,13 +93,47 @@ def run_classify(
                 continue  # nothing uploaded to this slot - nothing to classify
 
             classify_input = build_classify_input(packet, slot, fixtures_root)
-            classify_decision = decide(
-                classify_input,
-                primary=primary,
-                fallback=fallback,
-                tau_classify=tau_classify,
-                legible_threshold=legible_threshold,
-            )
+            try:
+                classify_decision = decide(
+                    classify_input,
+                    primary=primary,
+                    fallback=fallback,
+                    tau_classify=tau_classify,
+                    legible_threshold=legible_threshold,
+                )
+            except ValueError as exc:
+                # ClaudeBackend.classify's ValueError when the model
+                # never emits a parsed structured output - hit live
+                # (M5.1 housekeeping #2) on an ambiguous hard-set
+                # document that burned its whole token budget on
+                # extended thinking. Narrowly scoped to ValueError, not
+                # bare Exception: a budget abort (LiveRunAborted, a
+                # RuntimeError - app/eval/live_classify.py) or a
+                # network-level failure must still propagate and stop
+                # the run, not get silently swallowed as "one bad
+                # document." One bad document must not crash the whole
+                # batch, and must not be guessed past either (CLAUDE.md
+                # invariant 2) - treated as an escalation, loudly
+                # logged, never silent.
+                logger.warning(
+                    "classify failed for packet=%s slot=%s backend=%s: %s",
+                    packet["packet_id"],
+                    slot,
+                    primary.name,
+                    exc,
+                )
+                classify_decision = ClassifyDecision(
+                    result=ClassificationResult(
+                        doc_type="other",
+                        probabilities={},
+                        legible=0.0,
+                        slot_match=False,
+                        decided_by=primary.name,  # type: ignore[arg-type]
+                    ),
+                    accepted=False,
+                    escalated=True,
+                    reason=f"{primary.name} raised: {exc}",
+                )
             result = classify_decision.result
             top_probability = max(result.probabilities.values()) if result.probabilities else 0.0
             documents.append(

@@ -132,7 +132,7 @@ def run_classify_mode(
     mode_name: str, ground_truth: dict[str, Any], fixtures_root: Path
 ) -> ClassifyModeResult:
     """Dispatches a classify eval mode by name (eval/config.yaml's
-    `classify_modes`):
+    `classify_modes` / `classify_modes_hard`):
 
     - "classify-jev" / "classify-claude-{haiku,sonnet,opus}": the
       backend alone, no fallback - raw per-backend/per-tier accuracy/
@@ -146,18 +146,26 @@ def run_classify_mode(
       end with zero Jev involvement. Always the haiku tier
       (MODEL_CLASSIFY_FALLBACK), matching the real policy's cheap-tier
       fallback - not whichever tier happens to run alongside it.
+
+    A trailing "-hard" (M5.1 housekeeping #2's hard classify set,
+    app/eval/generator/hard_classify_set.py) is stripped before
+    dispatch but kept in the mode name `run_classify` actually returns
+    - the hard set uses a different `ground_truth`/`fixtures_root`, not
+    a different backend/tier, so the two sets land as separate rows
+    rather than silently pooling into one average.
     """
-    if mode_name == "classify-jev":
+    base_mode_name = mode_name.removesuffix("-hard")
+    if base_mode_name == "classify-jev":
         primary: Any = _cached(
             JevBackend(api_key=app_settings.jev_api_key or "unset", model=app_settings.jev_model),
             app_settings.jev_model,
         )
         fallback = None
-    elif mode_name in CLAUDE_TIER_MODELS:
-        model = CLAUDE_TIER_MODELS[mode_name]
+    elif base_mode_name in CLAUDE_TIER_MODELS:
+        model = CLAUDE_TIER_MODELS[base_mode_name]
         primary = _cached(ClaudeBackend(model=model), model)
         fallback = None
-    elif mode_name == "classify-policy-claude":
+    elif base_mode_name == "classify-policy-claude":
         claude_settings = app_settings.model_copy(update={"decision_backend": "claude"})
         primary, fallback = build_primary_and_fallback(claude_settings)
     else:
@@ -198,6 +206,21 @@ def run_eval(config: dict[str, Any], repo_root: Path = REPO_ROOT) -> dict[str, A
     for mode_name in config.get("classify_modes", []):
         result = run_classify_mode(mode_name, ground_truth, fixtures_root)
         classify_results[result.mode] = result
+
+    # M5.1 housekeeping #2: the hard classify set is a different
+    # ground_truth/fixtures_root entirely (not just different mode
+    # names), so it needs its own load - run_classify_mode still
+    # dispatches by stripping the "-hard" suffix.
+    if "classify_modes_hard" in config:
+        hard_ground_truth_path = _resolve(config["hard_ground_truth"], repo_root)
+        hard_fixtures_root = _resolve(config["hard_fixtures_root"], repo_root)
+        hard_ground_truth: dict[str, Any] = json.loads(
+            hard_ground_truth_path.read_text(encoding="utf-8")
+        )
+        for mode_name in config["classify_modes_hard"]:
+            result = run_classify_mode(mode_name, hard_ground_truth, hard_fixtures_root)
+            classify_results[result.mode] = result
+
     classify_metrics: dict[str, ClassifyMetrics] = {
         mode_name: compute_classify_metrics(result)
         for mode_name, result in classify_results.items()

@@ -39,6 +39,38 @@ def test_seed_writes_one_file_per_document_per_backend_and_tier(tmp_path: Path) 
     assert len(list((tmp_path / "claude").glob("*.json"))) == 60 * 3
 
 
+def test_seed_never_overwrites_an_already_real_recording(tmp_path: Path) -> None:
+    """Regression: seeding a second manifest (e.g. the hard set) into
+    the same cache root once clobbered 240 already-real easy-set
+    recordings back to simulated placeholders."""
+    seed(GROUND_TRUTH, FIXTURES_ROOT, tmp_path)
+    packet = next(p for p in GROUND_TRUTH["packets"] if p["packet_id"] == "clean-1")
+    classify_input = build_classify_input(packet, "license", FIXTURES_ROOT)
+
+    from app.backends.cache import cache_key
+
+    key = cache_key("claude", "claude-haiku-5-5", classify_input)
+    real_path = tmp_path / "claude" / f"{key}.json"
+    real_result = ClassificationResult(
+        doc_type="texas_lpc_license",
+        probabilities={"texas_lpc_license": 0.99},
+        legible=0.98,
+        slot_match=True,
+        decided_by="claude",
+        simulated=False,
+    )
+    real_path.write_text(real_result.model_dump_json(indent=2) + "\n", encoding="utf-8")
+
+    written = seed(GROUND_TRUTH, FIXTURES_ROOT, tmp_path)
+    reloaded = ClassificationResult.model_validate_json(real_path.read_text(encoding="utf-8"))
+    assert reloaded.simulated is False
+    assert reloaded.doc_type == "texas_lpc_license"
+    # Every OTHER file in this second pass was a legitimate re-seed
+    # (freshly written to tmp_path); only the one marked real was
+    # skipped.
+    assert written == 12 * 5 * 4 - 1
+
+
 def test_seeded_fixtures_are_replayable_without_any_live_call(tmp_path: Path) -> None:
     seed(GROUND_TRUTH, FIXTURES_ROOT, tmp_path)
 

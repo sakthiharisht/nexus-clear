@@ -1,0 +1,527 @@
+{
+  "packets": [
+    {
+      "category": "lookalike",
+      "description": "general liability cert, not malpractice - structurally COI-shaped",
+      "documents": {
+        "coi": "hard/hard-lookalike-general-liability.pdf"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "malpractice_coi",
+            "legible_score": 0.95,
+            "slot": "coi",
+            "uploaded_doc_type": "other"
+          }
+        ]
+      },
+      "packet_id": "hard-lookalike-general-liability"
+    },
+    {
+      "category": "lookalike",
+      "description": "workers' comp cert, not malpractice - structurally COI-shaped",
+      "documents": {
+        "coi": "hard/hard-lookalike-workers-comp.pdf"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "malpractice_coi",
+            "legible_score": 0.95,
+            "slot": "coi",
+            "uploaded_doc_type": "other"
+          }
+        ]
+      },
+      "packet_id": "hard-lookalike-workers-comp"
+    },
+    {
+      "category": "lookalike",
+      "description": "an insurance binder (a promise of future coverage), not a certificate",
+      "documents": {
+        "coi": "hard/hard-lookalike-coi-binder.pdf"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "malpractice_coi",
+            "legible_score": 0.95,
+            "slot": "coi",
+            "uploaded_doc_type": "other"
+          }
+        ]
+      },
+      "packet_id": "hard-lookalike-coi-binder"
+    },
+    {
+      "category": "lookalike",
+      "description": "a 1099-NEC, not a W-9 - structurally W9-shaped (name/TIN/signed)",
+      "documents": {
+        "w9": "hard/hard-lookalike-1099.pdf"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "w9",
+            "legible_score": 0.95,
+            "slot": "w9",
+            "uploaded_doc_type": "other"
+          }
+        ]
+      },
+      "packet_id": "hard-lookalike-1099"
+    },
+    {
+      "category": "lookalike",
+      "description": "a W-4, not a W-9 - both are short IRS forms with a name/TIN field",
+      "documents": {
+        "w9": "hard/hard-lookalike-w4.pdf"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "w9",
+            "legible_score": 0.95,
+            "slot": "w9",
+            "uploaded_doc_type": "other"
+          }
+        ]
+      },
+      "packet_id": "hard-lookalike-w4"
+    },
+    {
+      "category": "lookalike",
+      "description": "an SS-4 (EIN application), not a W-9",
+      "documents": {
+        "w9": "hard/hard-lookalike-ss4.pdf"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "w9",
+            "legible_score": 0.95,
+            "slot": "w9",
+            "uploaded_doc_type": "other"
+          }
+        ]
+      },
+      "packet_id": "hard-lookalike-ss4"
+    },
+    {
+      "category": "cv_license_text",
+      "description": "CV work history prominently mentions license number/board",
+      "documents": {
+        "cv": "hard/hard-cv-license-mention-1.pdf"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "cv",
+            "legible_score": 0.95,
+            "slot": "cv",
+            "uploaded_doc_type": "cv"
+          }
+        ]
+      },
+      "packet_id": "hard-cv-license-mention-1"
+    },
+    {
+      "category": "cv_license_text",
+      "description": "CV first line echoes license-document phrasing",
+      "documents": {
+        "cv": "hard/hard-cv-license-mention-2.pdf"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "cv",
+            "legible_score": 0.95,
+            "slot": "cv",
+            "uploaded_doc_type": "cv"
+          }
+        ]
+      },
+      "packet_id": "hard-cv-license-mention-2"
+    },
+    {
+      "category": "cv_license_text",
+      "description": "CV with a dense licensing/compliance section",
+      "documents": {
+        "cv": "hard/hard-cv-license-mention-3.pdf"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "cv",
+            "legible_score": 0.95,
+            "slot": "cv",
+            "uploaded_doc_type": "cv"
+          }
+        ]
+      },
+      "packet_id": "hard-cv-license-mention-3"
+    },
+    {
+      "category": "degraded_scan",
+      "description": "license rendered as a heavily degraded scan (low contrast, blur, noise)",
+      "documents": {
+        "license": "hard/hard-degraded-license.png"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "texas_lpc_license",
+            "legible_score": 0.15,
+            "slot": "license",
+            "uploaded_doc_type": "texas_lpc_license"
+          }
+        ]
+      },
+      "packet_id": "hard-degraded-license"
+    },
+    {
+      "category": "degraded_scan",
+      "description": "coi rendered as a heavily degraded scan (low contrast, blur, noise)",
+      "documents": {
+        "coi": "hard/hard-degraded-coi.png"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "malpractice_coi",
+            "legible_score": 0.15,
+            "slot": "coi",
+            "uploaded_doc_type": "malpractice_coi"
+          }
+        ]
+      },
+      "packet_id": "hard-degraded-coi"
+    },
+    {
+      "category": "degraded_scan",
+      "description": "cv rendered as a heavily degraded scan (low contrast, blur, noise)",
+      "documents": {
+        "cv": "hard/hard-degraded-cv.png"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "cv",
+            "legible_score": 0.15,
+            "slot": "cv",
+            "uploaded_doc_type": "cv"
+          }
+        ]
+      },
+      "packet_id": "hard-degraded-cv"
+    },
+    {
+      "category": "degraded_scan",
+      "description": "education rendered as a heavily degraded scan (low contrast, blur, noise)",
+      "documents": {
+        "education": "hard/hard-degraded-education.png"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "degree_transcript",
+            "legible_score": 0.15,
+            "slot": "education",
+            "uploaded_doc_type": "degree_transcript"
+          }
+        ]
+      },
+      "packet_id": "hard-degraded-education"
+    },
+    {
+      "category": "degraded_scan",
+      "description": "w9 rendered as a heavily degraded scan (low contrast, blur, noise)",
+      "documents": {
+        "w9": "hard/hard-degraded-w9.png"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "w9",
+            "legible_score": 0.15,
+            "slot": "w9",
+            "uploaded_doc_type": "w9"
+          }
+        ]
+      },
+      "packet_id": "hard-degraded-w9"
+    },
+    {
+      "category": "degraded_scan",
+      "description": "license with content truncated, simulating a partial/cut-off scan",
+      "documents": {
+        "license": "hard/hard-partial-license.png"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "texas_lpc_license",
+            "legible_score": 0.3,
+            "slot": "license",
+            "uploaded_doc_type": "texas_lpc_license"
+          }
+        ]
+      },
+      "packet_id": "hard-partial-license"
+    },
+    {
+      "category": "degraded_scan",
+      "description": "coi with content truncated, simulating a partial/cut-off scan",
+      "documents": {
+        "coi": "hard/hard-partial-coi.png"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "malpractice_coi",
+            "legible_score": 0.3,
+            "slot": "coi",
+            "uploaded_doc_type": "malpractice_coi"
+          }
+        ]
+      },
+      "packet_id": "hard-partial-coi"
+    },
+    {
+      "category": "degraded_scan",
+      "description": "w9 with content truncated, simulating a partial/cut-off scan",
+      "documents": {
+        "w9": "hard/hard-partial-w9.png"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "w9",
+            "legible_score": 0.3,
+            "slot": "w9",
+            "uploaded_doc_type": "w9"
+          }
+        ]
+      },
+      "packet_id": "hard-partial-w9"
+    },
+    {
+      "category": "mixed_content",
+      "description": "cv content with a second document's content appended on the same page",
+      "documents": {
+        "cv": "hard/hard-mixed-cv.pdf"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "cv",
+            "legible_score": 0.95,
+            "slot": "cv",
+            "uploaded_doc_type": "cv"
+          }
+        ]
+      },
+      "packet_id": "hard-mixed-cv"
+    },
+    {
+      "category": "mixed_content",
+      "description": "license content with a second document's content appended on the same page",
+      "documents": {
+        "license": "hard/hard-mixed-license.pdf"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "texas_lpc_license",
+            "legible_score": 0.95,
+            "slot": "license",
+            "uploaded_doc_type": "texas_lpc_license"
+          }
+        ]
+      },
+      "packet_id": "hard-mixed-license"
+    },
+    {
+      "category": "mixed_content",
+      "description": "education content with a second document's content appended on the same page",
+      "documents": {
+        "education": "hard/hard-mixed-education.pdf"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "degree_transcript",
+            "legible_score": 0.95,
+            "slot": "education",
+            "uploaded_doc_type": "degree_transcript"
+          }
+        ]
+      },
+      "packet_id": "hard-mixed-education"
+    },
+    {
+      "category": "mixed_content",
+      "description": "w9 content with a second document's content appended on the same page",
+      "documents": {
+        "w9": "hard/hard-mixed-w9.pdf"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "w9",
+            "legible_score": 0.95,
+            "slot": "w9",
+            "uploaded_doc_type": "w9"
+          }
+        ]
+      },
+      "packet_id": "hard-mixed-w9"
+    },
+    {
+      "category": "mixed_content",
+      "description": "cv content with a second document's content appended on the same page",
+      "documents": {
+        "cv": "hard/hard-mixed-cv_2.pdf"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "cv",
+            "legible_score": 0.95,
+            "slot": "cv",
+            "uploaded_doc_type": "cv"
+          }
+        ]
+      },
+      "packet_id": "hard-mixed-cv_2"
+    },
+    {
+      "category": "mixed_content",
+      "description": "license content with a second document's content appended on the same page",
+      "documents": {
+        "license": "hard/hard-mixed-license_2.pdf"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "texas_lpc_license",
+            "legible_score": 0.95,
+            "slot": "license",
+            "uploaded_doc_type": "texas_lpc_license"
+          }
+        ]
+      },
+      "packet_id": "hard-mixed-license_2"
+    },
+    {
+      "category": "wrong_slot",
+      "description": "real malpractice_coi content uploaded into the license slot",
+      "documents": {
+        "license": "hard/hard-wrong-slot-malpractice_coi-in-license.pdf"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "texas_lpc_license",
+            "legible_score": 0.95,
+            "slot": "license",
+            "uploaded_doc_type": "malpractice_coi"
+          }
+        ]
+      },
+      "packet_id": "hard-wrong-slot-malpractice_coi-in-license"
+    },
+    {
+      "category": "wrong_slot",
+      "description": "real w9 content uploaded into the cv slot",
+      "documents": {
+        "cv": "hard/hard-wrong-slot-w9-in-cv.pdf"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "cv",
+            "legible_score": 0.95,
+            "slot": "cv",
+            "uploaded_doc_type": "w9"
+          }
+        ]
+      },
+      "packet_id": "hard-wrong-slot-w9-in-cv"
+    },
+    {
+      "category": "wrong_slot",
+      "description": "real degree_transcript content uploaded into the w9 slot",
+      "documents": {
+        "w9": "hard/hard-wrong-slot-degree_transcript-in-w9.pdf"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "w9",
+            "legible_score": 0.95,
+            "slot": "w9",
+            "uploaded_doc_type": "degree_transcript"
+          }
+        ]
+      },
+      "packet_id": "hard-wrong-slot-degree_transcript-in-w9"
+    },
+    {
+      "category": "wrong_slot",
+      "description": "real cv content uploaded into the education slot",
+      "documents": {
+        "education": "hard/hard-wrong-slot-cv-in-education.pdf"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "degree_transcript",
+            "legible_score": 0.95,
+            "slot": "education",
+            "uploaded_doc_type": "cv"
+          }
+        ]
+      },
+      "packet_id": "hard-wrong-slot-cv-in-education"
+    },
+    {
+      "category": "wrong_slot",
+      "description": "real texas_lpc_license content uploaded into the coi slot",
+      "documents": {
+        "coi": "hard/hard-wrong-slot-texas_lpc_license-in-coi.pdf"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "malpractice_coi",
+            "legible_score": 0.95,
+            "slot": "coi",
+            "uploaded_doc_type": "texas_lpc_license"
+          }
+        ]
+      },
+      "packet_id": "hard-wrong-slot-texas_lpc_license-in-coi"
+    },
+    {
+      "category": "wrong_slot",
+      "description": "real malpractice_coi content uploaded into the w9 slot",
+      "documents": {
+        "w9": "hard/hard-wrong-slot-malpractice_coi-in-w9.pdf"
+      },
+      "facts": {
+        "documents": [
+          {
+            "expected_doc_type": "w9",
+            "legible_score": 0.95,
+            "slot": "w9",
+            "uploaded_doc_type": "malpractice_coi"
+          }
+        ]
+      },
+      "packet_id": "hard-wrong-slot-malpractice_coi-in-w9"
+    }
+  ],
+  "seed": 2026110401
+}

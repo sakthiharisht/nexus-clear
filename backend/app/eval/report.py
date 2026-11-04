@@ -80,11 +80,43 @@ def _classify_table_row(mode: str, metrics: dict[str, Any]) -> str:
     )
 
 
+def _is_hard_mode(mode: str) -> bool:
+    return mode.removesuffix("-SIMULATED").endswith("-hard")
+
+
+def _simulated_caveat(modes: dict[str, Any]) -> list[str]:
+    simulated_modes = [mode for mode in modes if mode.endswith("-SIMULATED")]
+    if not simulated_modes:
+        return []
+    return [
+        "**A mode name ending in -SIMULATED (" + ", ".join(sorted(simulated_modes)) + ") "
+        "was built from app/eval/classify_fixture_seed.py's simulated fixtures, not "
+        "real model output - see the M5/M5.1 completion reports for why. Every other "
+        "mode below is a real recorded response "
+        "(app/eval/live_classify.py, MODEL_CACHE_MODE=record).**",
+        "",
+    ]
+
+
+def _classify_table(modes: dict[str, Any]) -> list[str]:
+    lines = [
+        "| mode | n | accuracy | ECE | escalation rate | tokens (in/out) "
+        "| cost | mean latency (ms) |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- |",
+    ]
+    for mode, metrics in modes.items():
+        lines.append(_classify_table_row(mode, metrics))
+    lines.append("")
+    return lines
+
+
 def _classify_section(result: dict[str, Any]) -> list[str]:
     classify_metrics = result.get("classify_metrics", {})
     if not classify_metrics:
         return []
-    simulated_modes = [mode for mode in classify_metrics if mode.endswith("-SIMULATED")]
+    easy_modes = {m: v for m, v in classify_metrics.items() if not _is_hard_mode(m)}
+    hard_modes = {m: v for m, v in classify_metrics.items() if _is_hard_mode(m)}
+
     lines = [
         "## M5 Classify",
         "",
@@ -102,23 +134,26 @@ def _classify_section(result: dict[str, Any]) -> list[str]:
         "zero Jev involvement.**",
         "",
     ]
-    if simulated_modes:
+    lines += _simulated_caveat(classify_metrics)
+
+    if easy_modes:
+        lines += ["### Easy set (12 packets, 60 documents)", ""]
+        lines += _classify_table(easy_modes)
+
+    if hard_modes:
+        any_n = next(iter(hard_modes.values()))["n"]
         lines += [
-            "**A mode name ending in -SIMULATED (" + ", ".join(sorted(simulated_modes)) + ") "
-            "was built from app/eval/classify_fixture_seed.py's simulated fixtures, not "
-            "real model output - see the M5/M5.1 completion reports for why. Every other "
-            "mode below is a real recorded response "
-            "(app/eval/live_classify.py, MODEL_CACHE_MODE=record).**",
+            f"### Hard set ({any_n} adversarial documents - "
+            "app/eval/generator/hard_classify_set.py)",
+            "",
+            f"**n={any_n} per tier. Too small to support ranking tiers against each "
+            "other, or against the easy set above - a few documents flipping would "
+            "change the ordering. Read these as rough signal (does accuracy hold up "
+            "at all on harder inputs?), not a leaderboard.**",
             "",
         ]
-    lines += [
-        "| mode | n | accuracy | ECE | escalation rate | tokens (in/out) "
-        "| cost | mean latency (ms) |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- |",
-    ]
-    for mode, metrics in classify_metrics.items():
-        lines.append(_classify_table_row(mode, metrics))
-    lines.append("")
+        lines += _classify_table(hard_modes)
+
     return lines
 
 

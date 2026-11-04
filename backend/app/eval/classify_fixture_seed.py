@@ -75,6 +75,13 @@ def _simulate(
 
 
 def seed(ground_truth: dict[str, Any], fixtures_root: Path, cache_root: Path) -> int:
+    """Never overwrites an existing cache file whose `simulated` is
+    already False - re-running this after a live recording (M5.1
+    housekeeping #2) must not silently regress real data back to a
+    placeholder. Hit exactly that bug once already: seeding both sets
+    after adding the hard set clobbered 240 real easy-set recordings,
+    recovered only because they were already committed to git.
+    """
     written = 0
     for packet in ground_truth["packets"]:
         for doc_fact in packet["facts"]["documents"]:
@@ -92,14 +99,21 @@ def seed(ground_truth: dict[str, Any], fixtures_root: Path, cache_root: Path) ->
                 ("claude", "claude-sonnet-5-5", 0.03),
                 ("claude", "claude-opus-5-5", 0.04),
             ):
+                key = cache_key(backend_name, model, classify_input)
+                path = cache_root / backend_name / f"{key}.json"
+                if path.exists():
+                    existing = ClassificationResult.model_validate_json(
+                        path.read_text(encoding="utf-8")
+                    )
+                    if not existing.simulated:
+                        continue
+
                 result = _simulate(
                     backend_name=backend_name,
                     true_doc_type=true_doc_type,
                     legible_score=legible_score,
                     offset=offset,
                 )
-                key = cache_key(backend_name, model, classify_input)
-                path = cache_root / backend_name / f"{key}.json"
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text(result.model_dump_json(indent=2) + "\n", encoding="utf-8")
                 written += 1
@@ -107,11 +121,21 @@ def seed(ground_truth: dict[str, Any], fixtures_root: Path, cache_root: Path) ->
 
 
 def main() -> None:  # pragma: no cover - thin CLI wrapper, exercised via seed() in tests
-    ground_truth_path = _REPO_ROOT / "eval" / "fixtures" / "ground_truth.json"
     fixtures_root = _REPO_ROOT / "eval" / "fixtures"
+
+    ground_truth_path = fixtures_root / "ground_truth.json"
     ground_truth = json.loads(ground_truth_path.read_text(encoding="utf-8"))
     written = seed(ground_truth, fixtures_root, settings.model_cache_root)
-    print(f"Wrote {written} simulated classify fixtures to {settings.model_cache_root}")
+    print(f"Wrote {written} simulated classify fixtures (easy set) to {settings.model_cache_root}")
+
+    # M5.1 housekeeping #2: seed() doesn't care which manifest it's
+    # given - a hard-set "packet" is just a one-document instance of
+    # the same shape (app/eval/generator/hard_classify_set.py).
+    hard_ground_truth_path = fixtures_root / "hard_classify_ground_truth.json"
+    if hard_ground_truth_path.exists():
+        hard_ground_truth = json.loads(hard_ground_truth_path.read_text(encoding="utf-8"))
+        hard_written = seed(hard_ground_truth, fixtures_root, settings.model_cache_root)
+        print(f"Wrote {hard_written} simulated classify fixtures (hard set)")
 
 
 if __name__ == "__main__":  # pragma: no cover

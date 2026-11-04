@@ -31,11 +31,12 @@ class _UnreachableBackend:
         raise AssertionError("seeded fixtures should make a live call unnecessary")
 
 
-def test_seed_writes_one_file_per_document_per_backend(tmp_path: Path) -> None:
+def test_seed_writes_one_file_per_document_per_backend_and_tier(tmp_path: Path) -> None:
     written = seed(GROUND_TRUTH, FIXTURES_ROOT, tmp_path)
-    assert written == 12 * 5 * 2  # 12 packets x 5 slots x {jev, claude}
+    # 12 packets x 5 slots x {jev, claude-haiku, claude-sonnet, claude-opus}
+    assert written == 12 * 5 * 4
     assert len(list((tmp_path / "jev").glob("*.json"))) == 60
-    assert len(list((tmp_path / "claude").glob("*.json"))) == 60
+    assert len(list((tmp_path / "claude").glob("*.json"))) == 60 * 3
 
 
 def test_seeded_fixtures_are_replayable_without_any_live_call(tmp_path: Path) -> None:

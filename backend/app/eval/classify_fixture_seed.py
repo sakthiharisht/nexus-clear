@@ -82,7 +82,9 @@ def seed(ground_truth: dict[str, Any], fixtures_root: Path, cache_root: Path) ->
 
             for backend_name, model, offset in (
                 ("jev", settings.jev_model, -0.03),
-                ("claude", settings.model_classify_fallback, 0.02),
+                ("claude", "claude-haiku-5-5", 0.02),
+                ("claude", "claude-sonnet-5-5", 0.03),
+                ("claude", "claude-opus-5-5", 0.04),
             ):
                 result = _simulate(
                     backend_name=backend_name,

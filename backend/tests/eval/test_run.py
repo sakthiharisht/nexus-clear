@@ -22,7 +22,9 @@ def test_load_config_reads_the_real_config() -> None:
     assert set(config["modes"]) == {"ceiling", "baseline"}
     assert set(config["classify_modes"]) == {
         "classify-jev",
-        "classify-claude",
+        "classify-claude-haiku",
+        "classify-claude-sonnet",
+        "classify-claude-opus",
         "classify-policy-claude",
     }
 
@@ -82,19 +84,26 @@ def test_classify_modes_run_against_the_real_committed_fixture_cache() -> None:
         assert len(matches) == 1, f"expected exactly one of {candidates}, found {matches}"
         return matches[0]
 
-    for base_mode in ("classify-jev", "classify-claude", "classify-policy-claude"):
+    for base_mode in (
+        "classify-jev",
+        "classify-claude-haiku",
+        "classify-claude-sonnet",
+        "classify-claude-opus",
+        "classify-policy-claude",
+    ):
         mode = _find(base_mode)
         metrics = result["classify_metrics"][mode]
         assert metrics["n"] == 60  # 12 packets x 5 slots
         assert 0.0 <= metrics["accuracy"] <= 1.0
         assert 0.0 <= metrics["ece"] <= 1.0
+        assert metrics["total_input_tokens"] > 0
 
     # CLAUDE.md invariant 6: DECISION_BACKEND=claude must run end to end
-    # with zero Jev involvement - classify-claude (no fallback) and
-    # classify-policy-claude (the real factory wiring, forced to
-    # decision_backend="claude") exercise the exact same backend/cache,
-    # so they must agree exactly.
-    assert result["classify_metrics"][_find("classify-claude")] == (
+    # with zero Jev involvement - classify-claude-haiku (no fallback,
+    # MODEL_CLASSIFY_FALLBACK's tier) and classify-policy-claude (the
+    # real factory wiring, forced to decision_backend="claude") exercise
+    # the exact same backend/cache, so they must agree exactly.
+    assert result["classify_metrics"][_find("classify-claude-haiku")] == (
         result["classify_metrics"][_find("classify-policy-claude")]
     )
 
@@ -145,6 +154,6 @@ def test_main_writes_a_json_run_file(tmp_path: Path, monkeypatch: pytest.MonkeyP
     assert "ceiling" in written["metrics"]
     assert "baseline" in written["metrics"]
     assert any(
-        mode in ("classify-claude", "classify-claude-SIMULATED")
+        mode in ("classify-claude-haiku", "classify-claude-haiku-SIMULATED")
         for mode in written["classify_metrics"]
     )

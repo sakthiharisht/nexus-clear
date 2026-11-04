@@ -15,9 +15,21 @@ output_dir: eval/runs
 #   the number any future LLM-backed stage has to beat.
 modes: [ceiling, baseline]
 
-# M5 Classify (SPEC.md section 7.2): each backend run standalone (no
-# fallback/escalation - raw per-backend accuracy/calibration), plus the
-# DECISION_BACKEND=claude policy end to end (CLAUDE.md invariant 6: this
-# one must work with no Jev involvement at all). classify-policy-jev
-# needs JEV_API_KEY and isn't run without one.
-classify_modes: [classify-jev, classify-claude, classify-policy-claude]
+# M5 Classify (SPEC.md section 7.2): each backend/tier run standalone
+# (no fallback/escalation - raw per-backend accuracy/calibration), plus
+# the DECISION_BACKEND=claude policy end to end (CLAUDE.md invariant 6:
+# this one must work with no Jev involvement at all - it uses
+# MODEL_CLASSIFY_FALLBACK, i.e. the haiku tier). classify-policy-jev
+# needs JEV_API_KEY and isn't run without one. A mode name ending in
+# -SIMULATED in the report means its cache entries are still
+# app/eval/classify_fixture_seed.py placeholders, not real model
+# output - app/eval/live_classify.py replaces them with real recordings
+# when run with a live API key (M5.1).
+classify_modes:
+  [
+    classify-jev,
+    classify-claude-haiku,
+    classify-claude-sonnet,
+    classify-claude-opus,
+    classify-policy-claude,
+  ]

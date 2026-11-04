@@ -49,6 +49,14 @@ from app.rules.schema import RulePack
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
+# M5.1: report accuracy/ECE/escalation/tokens/cost/latency per Claude
+# tier, not just the one model the policy's fallback actually uses.
+CLAUDE_TIER_MODELS = {
+    "classify-claude-haiku": "claude-haiku-5-5",
+    "classify-claude-sonnet": "claude-sonnet-5-5",
+    "classify-claude-opus": "claude-opus-5-5",
+}
+
 
 def _resolve(path_str: str, repo_root: Path) -> Path:
     path = Path(path_str)
@@ -126,16 +134,18 @@ def run_classify_mode(
     """Dispatches a classify eval mode by name (eval/config.yaml's
     `classify_modes`):
 
-    - "classify-jev" / "classify-claude": the backend alone, no
-      fallback - raw per-backend accuracy/calibration. Constructed
-      directly (not via app.backends.factory, which refuses to build a
-      Jev backend with no JEV_API_KEY configured - a correct guard for
-      a live deployment, but the cache/replay path these eval runs use
-      never needs a key at all).
+    - "classify-jev" / "classify-claude-{haiku,sonnet,opus}": the
+      backend alone, no fallback - raw per-backend/per-tier accuracy/
+      calibration. Constructed directly (not via app.backends.factory,
+      which refuses to build a Jev backend with no JEV_API_KEY
+      configured - a correct guard for a live deployment, but the
+      cache/replay path these eval runs use never needs a key at all).
     - "classify-policy-claude": app.backends.factory's real wiring,
       forced to DECISION_BACKEND=claude regardless of the ambient env
       - the exact path CLAUDE.md invariant 6 requires to work end to
-      end with zero Jev involvement.
+      end with zero Jev involvement. Always the haiku tier
+      (MODEL_CLASSIFY_FALLBACK), matching the real policy's cheap-tier
+      fallback - not whichever tier happens to run alongside it.
     """
     if mode_name == "classify-jev":
         primary: Any = _cached(
@@ -143,11 +153,9 @@ def run_classify_mode(
             app_settings.jev_model,
         )
         fallback = None
-    elif mode_name == "classify-claude":
-        primary = _cached(
-            ClaudeBackend(model=app_settings.model_classify_fallback),
-            app_settings.model_classify_fallback,
-        )
+    elif mode_name in CLAUDE_TIER_MODELS:
+        model = CLAUDE_TIER_MODELS[mode_name]
+        primary = _cached(ClaudeBackend(model=model), model)
         fallback = None
     elif mode_name == "classify-policy-claude":
         claude_settings = app_settings.model_copy(update={"decision_backend": "claude"})

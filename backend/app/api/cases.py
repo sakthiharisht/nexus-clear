@@ -42,12 +42,15 @@ from app.api.schemas import (
     ChecklistSlot,
     CreateCaseRequest,
     DocumentResponse,
+    GapExplanationRequest,
+    GapExplanationResponse,
 )
 from app.backends.base import DecisionBackend
 from app.backends.extract_cache import CachedExtractor
 from app.core.config import settings
 from app.core.contracts import Finding
 from app.core.finding_store import load_case_findings
+from app.core.injection import contains_injection_text
 from app.core.orm import AuditLog, Case, Document, Extraction, ReviewItem
 from app.escalate.engine import EscalationThresholds
 from app.orchestrator.run import RunResult, run_case
@@ -284,6 +287,48 @@ def get_findings(case_id: UUID, session: Session = Depends(get_session)) -> list
     one-sentence summary."""
     case = _get_case_or_404(session, case_id)
     return [finding for _, finding in load_case_findings(session, case.id)]
+
+
+@router.post("/{case_id}/gap-explanation", response_model=GapExplanationResponse)
+def submit_gap_explanation(
+    case_id: UUID,
+    body: GapExplanationRequest,
+    session: Session = Depends(get_session),
+    case: Case = Depends(require_provider_token),
+) -> GapExplanationResponse:
+    """M9.1 #5: a provider-supplied explanation for a work-history gap
+    (R-WORK-001). This is untrusted free text (CLAUDE.md invariant 3,
+    same standing as document text) - run through the same deterministic
+    injection scanner R-SEC-001 uses, never through a model, and never
+    written to any logger (it's persisted on the case row for the
+    reviewer to read, same as attested_packet, not emitted anywhere
+    else). Providing one does not change any finding's status: code
+    still decides pass/fail (CLAUDE.md invariant 1) - this only
+    guarantees the finding escalates to a human reviewer
+    (app/escalate/engine.py's gap_explanation_provided criterion), who
+    sees the explanation and decides whether to accept it.
+    """
+    injection_detected = contains_injection_text(body.explanation)
+    explanation = GapExplanationResponse(
+        gap_start=body.gap_start,
+        gap_end=body.gap_end,
+        explanation=body.explanation,
+        injection_detected=injection_detected,
+        submitted_at=datetime.now(UTC),
+    )
+    case.gap_explanation = explanation.model_dump(mode="json")
+    session.add(
+        AuditLog(
+            actor="provider",
+            action="gap_explanation_submitted",
+            case_id=case.id,
+            # Metadata only - the explanation text itself never goes in
+            # the audit log (CLAUDE.md invariant 4).
+            detail={"injection_detected": injection_detected},
+        )
+    )
+    session.commit()
+    return explanation
 
 
 def _case_extractions(session: Session, case_id: UUID) -> list[Extraction]:

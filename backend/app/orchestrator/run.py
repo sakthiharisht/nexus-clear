@@ -395,6 +395,7 @@ def run_case(
         rules_by_id={rule.id: rule for rule in pack.rules},
         unverified_namespaces=unverified_namespaces,
         thresholds=escalation_thresholds,
+        has_gap_explanation=case.gap_explanation is not None,
     )
     escalated_finding_ids: list[str] = []
     for decision in decisions:

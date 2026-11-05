@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import type { components } from "../api/client";
-import { getCaseId } from "../session";
+import { getCaseId, getProviderToken } from "../session";
 import { InjectionBadge, NeedsVerificationBadge, SeverityBadge, StatusBadge } from "../components/Badges";
 
 type GapReport = components["schemas"]["GapReport"];
 type Finding = components["schemas"]["Finding"];
+
+// M9.1 #5: same hardcoded-rule-id pattern as the injection badge above
+// (R-SEC-001) - the gap-explanation form only makes sense on the one
+// rule it's for.
+const GAP_EXPLANATION_RULE_ID = "R-WORK-001";
 
 export default function FindingsReport() {
   const [caseId] = useState<string | null>(getCaseId());
@@ -14,6 +19,31 @@ export default function FindingsReport() {
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [onlyIssues, setOnlyIssues] = useState(true);
+  const [gapStart, setGapStart] = useState("");
+  const [gapEnd, setGapEnd] = useState("");
+  const [gapText, setGapText] = useState("");
+  const [gapResult, setGapResult] = useState<string | null>(null);
+  const [gapError, setGapError] = useState<string | null>(null);
+
+  async function submitGapExplanation() {
+    const providerToken = getProviderToken();
+    if (!caseId || !providerToken) return;
+    setGapError(null);
+    setGapResult(null);
+    const { data, error: err } = await api.POST("/cases/{case_id}/gap-explanation", {
+      params: { path: { case_id: caseId }, header: { "x-provider-token": providerToken } },
+      body: { gap_start: gapStart, gap_end: gapEnd, explanation: gapText },
+    });
+    if (err) {
+      setGapError(JSON.stringify(err));
+      return;
+    }
+    setGapResult(
+      data.injection_detected
+        ? "Saved - instruction-like text detected in your explanation; a reviewer will see it as written."
+        : "Saved. Run the case again to send this to the reviewer queue.",
+    );
+  }
 
   useEffect(() => {
     if (!caseId) return;
@@ -90,6 +120,42 @@ export default function FindingsReport() {
                 {entry.doc_date ? ` · dated ${entry.doc_date}` : ""} · last verified{" "}
                 {entry.last_verified}
               </p>
+              {entry.rule_id === GAP_EXPLANATION_RULE_ID && entry.status === "fail" && (
+                <div className="evidence-box">
+                  <p className="hint">
+                    Explain this gap. This does not change the finding - it stays a gap on
+                    record, and a reviewer decides whether to accept your explanation.
+                  </p>
+                  <label>
+                    Gap start
+                    <input
+                      type="date"
+                      value={gapStart}
+                      onChange={(e) => setGapStart(e.target.value)}
+                    />
+                  </label>
+                  <label>
+                    Gap end
+                    <input type="date" value={gapEnd} onChange={(e) => setGapEnd(e.target.value)} />
+                  </label>
+                  <label>
+                    Explanation (max 1000 characters)
+                    <textarea
+                      maxLength={1000}
+                      value={gapText}
+                      onChange={(e) => setGapText(e.target.value)}
+                    />
+                  </label>
+                  {gapError && <p className="error">{gapError}</p>}
+                  {gapResult && <p className="hint">{gapResult}</p>}
+                  <button
+                    disabled={!gapStart || !gapEnd || !gapText}
+                    onClick={() => void submitGapExplanation()}
+                  >
+                    Submit explanation
+                  </button>
+                </div>
+              )}
               {expanded === entry.finding_id && finding && (
                 <div className="evidence-box">
                   {finding.confidence != null && <p>confidence: {finding.confidence.toFixed(2)}</p>}

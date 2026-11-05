@@ -129,6 +129,36 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/cases/{case_id}/gap-explanation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Submit Gap Explanation
+         * @description M9.1 #5: a provider-supplied explanation for a work-history gap
+         *     (R-WORK-001). This is untrusted free text (CLAUDE.md invariant 3,
+         *     same standing as document text) - run through the same deterministic
+         *     injection scanner R-SEC-001 uses, never through a model, and never
+         *     written to any logger (it's persisted on the case row for the
+         *     reviewer to read, same as attested_packet, not emitted anywhere
+         *     else). Providing one does not change any finding's status: code
+         *     still decides pass/fail (CLAUDE.md invariant 1) - this only
+         *     guarantees the finding escalates to a human reviewer
+         *     (app/escalate/engine.py's gap_explanation_provided criterion), who
+         *     sees the explanation and decides whether to accept it.
+         */
+        post: operations["submit_gap_explanation_cases__case_id__gap_explanation_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/cases/{case_id}/attest": {
         parameters: {
             query?: never;
@@ -617,6 +647,43 @@ export interface components {
              */
             decided_by: "code" | "jev" | "claude" | "human";
         };
+        /** GapExplanationRequest */
+        GapExplanationRequest: {
+            /**
+             * Gap Start
+             * Format: date
+             */
+            gap_start: string;
+            /**
+             * Gap End
+             * Format: date
+             */
+            gap_end: string;
+            /** Explanation */
+            explanation: string;
+        };
+        /** GapExplanationResponse */
+        GapExplanationResponse: {
+            /**
+             * Gap Start
+             * Format: date
+             */
+            gap_start: string;
+            /**
+             * Gap End
+             * Format: date
+             */
+            gap_end: string;
+            /** Explanation */
+            explanation: string;
+            /** Injection Detected */
+            injection_detected: boolean;
+            /**
+             * Submitted At
+             * Format: date-time
+             */
+            submitted_at: string;
+        };
         /** GapReport */
         GapReport: {
             /** Readiness Score */
@@ -726,6 +793,7 @@ export interface components {
             /** Resolved At */
             resolved_at: string | null;
             finding: components["schemas"]["Finding"];
+            gap_explanation?: components["schemas"]["GapExplanationResponse"] | null;
         };
         /** ReviewItemResponse */
         ReviewItemResponse: {
@@ -1024,6 +1092,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Finding"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_gap_explanation_cases__case_id__gap_explanation_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-provider-token": string;
+            };
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GapExplanationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GapExplanationResponse"];
                 };
             };
             /** @description Validation Error */

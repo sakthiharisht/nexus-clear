@@ -50,13 +50,17 @@ def _finding(
 
 
 def _escalate(
-    pack: RulePack, findings: list[Finding], unverified: set[str] | None = None
+    pack: RulePack,
+    findings: list[Finding],
+    unverified: set[str] | None = None,
+    has_gap_explanation: bool = False,
 ) -> list[EscalationDecision]:
     return escalate(
         findings,
         rules_by_id=_rules_by_id(pack),
         unverified_namespaces=unverified or set(),
         thresholds=_THRESHOLDS,
+        has_gap_explanation=has_gap_explanation,
     )
 
 
@@ -145,6 +149,42 @@ def test_injection_flag_escalates_on_fail_despite_info_severity(pack: RulePack) 
 
 def test_injection_flag_pass_does_not_escalate(pack: RulePack) -> None:
     decisions = _escalate(pack, [_finding("R-SEC-001", status="pass", severity="info")])
+    assert decisions[0].reasons == []
+
+
+def test_gap_explanation_escalates_a_failing_history_gap_finding(pack: RulePack) -> None:
+    decisions = _escalate(
+        pack,
+        [_finding("R-WORK-001", status="fail", severity="warning")],
+        has_gap_explanation=True,
+    )
+    assert decisions[0].reasons == ["gap_explanation_provided"]
+
+
+def test_no_gap_explanation_does_not_escalate_a_failing_history_gap_finding(
+    pack: RulePack,
+) -> None:
+    # Current behavior, unchanged: without an explanation on file, a
+    # confidence-less warning-severity fail has no other criterion to
+    # trigger on.
+    decisions = _escalate(
+        pack,
+        [_finding("R-WORK-001", status="fail", severity="warning")],
+        has_gap_explanation=False,
+    )
+    assert decisions[0].reasons == []
+
+
+def test_gap_explanation_on_a_passing_history_gap_finding_does_not_escalate(
+    pack: RulePack,
+) -> None:
+    # Providing an explanation never flips a finding to escalate unless
+    # code already decided "fail" - a resolved gap stays resolved.
+    decisions = _escalate(
+        pack,
+        [_finding("R-WORK-001", status="pass", severity="warning")],
+        has_gap_explanation=True,
+    )
     assert decisions[0].reasons == []
 
 

@@ -17,12 +17,19 @@ from sqlalchemy.orm import Session
 from app.api.auth import require_reviewer_token
 from app.api.deps import get_session
 from app.api.schemas import (
+    GapExplanationResponse,
     ResolveReviewRequest,
     ReviewItemDetailResponse,
     ReviewItemResponse,
 )
 from app.core.contracts import Finding
-from app.core.orm import AuditLog, FindingRecord, ReviewItem
+from app.core.orm import AuditLog, Case, FindingRecord, ReviewItem
+
+# The one rule this applies to (app/rules/kinds.py's history_gap kind,
+# rules/tx_bcbstx_lpc.yaml's R-WORK-001) - hardcoded the same way
+# FindingsReport.tsx already keys its own injection badge off
+# "R-SEC-001" rather than threading rule-kind metadata through the API.
+GAP_EXPLANATION_RULE_ID = "R-WORK-001"
 
 router = APIRouter(prefix="/reviews", tags=["reviews"])
 
@@ -58,6 +65,13 @@ def get_review(review_id: UUID, session: Session = Depends(get_session)) -> dict
     record = session.get(FindingRecord, item.finding_id)
     if record is None:  # pragma: no cover - defensive: FK guarantees this exists
         raise HTTPException(status.HTTP_404_NOT_FOUND, "underlying finding not found")
+
+    gap_explanation = None
+    if record.finding.get("rule_id") == GAP_EXPLANATION_RULE_ID:
+        case = session.get(Case, item.case_id)
+        if case is not None and case.gap_explanation is not None:
+            gap_explanation = GapExplanationResponse.model_validate(case.gap_explanation)
+
     return {
         "id": item.id,
         "case_id": item.case_id,
@@ -67,6 +81,7 @@ def get_review(review_id: UUID, session: Session = Depends(get_session)) -> dict
         "created_at": item.created_at,
         "resolved_at": item.resolved_at,
         "finding": Finding.model_validate(record.finding),
+        "gap_explanation": gap_explanation,
     }
 
 

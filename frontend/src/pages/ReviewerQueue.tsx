@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import type { components } from "../api/client";
 import { getCaseId, getReviewerToken, saveReviewerToken } from "../session";
-import { NeedsVerificationBadge, SeverityBadge, StatusBadge } from "../components/Badges";
+import { InjectionBadge, NeedsVerificationBadge, SeverityBadge, StatusBadge } from "../components/Badges";
 
 type ReviewItemResponse = components["schemas"]["ReviewItemResponse"];
 type ReviewItemDetailResponse = components["schemas"]["ReviewItemDetailResponse"];
@@ -118,6 +118,21 @@ export default function ReviewerQueue() {
               <li key={i}>"{ev.quote}"</li>
             ))}
           </ul>
+
+          {detail.gap_explanation && (
+            <div className="banner">
+              <p>
+                Provider's explanation ({detail.gap_explanation.gap_start} to{" "}
+                {detail.gap_explanation.gap_end}):
+              </p>
+              <p>"{detail.gap_explanation.explanation}"</p>
+              {detail.gap_explanation.injection_detected && <InjectionBadge />}
+              <p className="hint">
+                Shown as written - deciding whether to accept this is your call, not the
+                system's.
+              </p>
+            </div>
+          )}
 
           {detail.status === "resolved" ? (
             <p className="hint">already resolved: {JSON.stringify(detail.reviewer_resolution)}</p>

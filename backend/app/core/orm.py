@@ -85,6 +85,17 @@ class Case(Base):
     # more. Not a substitute for real identity verification.
     provider_token: Mapped[str] = mapped_column(String, nullable=False)
 
+    # M9.1 #5 - work-history gap explanation: provider-supplied free
+    # text (CLAUDE.md invariant 3: untrusted input, same as document
+    # text) explaining an R-WORK-001 gap. {"gap_start", "gap_end",
+    # "explanation", "injection_detected", "submitted_at"} - stored
+    # here rather than in audit_log, same reasoning as attested_packet
+    # above (audit_log must never carry this kind of free text).
+    # Providing one does NOT change the finding's status - it only
+    # guarantees escalation to a human reviewer (app/escalate/engine.py);
+    # code still decides pass/fail.
+    gap_explanation: Mapped[dict[str, object] | None] = mapped_column(JSONB, nullable=True)
+
 
 class Document(Base):
     __tablename__ = "documents"

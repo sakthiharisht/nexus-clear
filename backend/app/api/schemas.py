@@ -10,7 +10,7 @@ from datetime import date, datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.contracts import Finding
 
@@ -100,10 +100,34 @@ class ReviewItemResponse(BaseModel):
     resolved_at: datetime | None
 
 
+class GapExplanationRequest(BaseModel):
+    # M9.1 #5: untrusted free text (CLAUDE.md invariant 3 - same
+    # standing as document text), length-limited at the API boundary.
+    gap_start: date
+    gap_end: date
+    explanation: str = Field(min_length=1, max_length=1000)
+
+
+class GapExplanationResponse(BaseModel):
+    gap_start: date
+    gap_end: date
+    explanation: str
+    # Deterministic scanner result (app/core/injection.py), computed at
+    # submission time and never re-derived from a model - same
+    # invariant as R-SEC-001's own injection_flag finding.
+    injection_detected: bool
+    submitted_at: datetime
+
+
 class ReviewItemDetailResponse(ReviewItemResponse):
     # The full Finding (evidence quote + doc page, or registry record)
     # this review item is about - SPEC.md section 7.9: "view evidence".
     finding: Finding
+    # Present only when this item's underlying rule is the work-history
+    # gap check and the provider has submitted an explanation for it
+    # (M9.1 #5) - shown to the reviewer alongside the finding, never
+    # auto-resolving it.
+    gap_explanation: GapExplanationResponse | None = None
 
 
 class AttestRequest(BaseModel):

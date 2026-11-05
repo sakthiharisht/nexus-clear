@@ -24,6 +24,11 @@ Five independent criteria, any one of which escalates a finding:
 5. injection_flag: an injection_flag finding reporting `fail` - CLAUDE.md
    invariant 3 territory, always reviewed regardless of its "info"
    severity, since a detected injection attempt is never routine.
+6. gap_explanation_provided: a history_gap finding reporting `fail`
+   when the case has a provider-supplied gap explanation on file
+   (M9.1 #5). Providing an explanation never flips the finding to
+   pass on its own - code still decided `fail` - it only guarantees a
+   human sees the explanation and decides whether to accept it.
 
 Name-match ambiguity (listed in the M8 brief alongside these) isn't a
 separate code path: name_match is exactly the kind whose `confidence`
@@ -48,6 +53,7 @@ EscalationReason = Literal[
     "leie_possible_match",
     "unverified_quote_on_blocker",
     "injection_flag",
+    "gap_explanation_provided",
 ]
 
 
@@ -88,6 +94,7 @@ def escalate(
     rules_by_id: dict[str, Rule],
     unverified_namespaces: set[str],
     thresholds: EscalationThresholds,
+    has_gap_explanation: bool = False,
 ) -> list[EscalationDecision]:
     decisions: list[EscalationDecision] = []
     for finding in findings:
@@ -119,6 +126,14 @@ def escalate(
 
         if rule is not None and rule.kind == "injection_flag" and finding.status == "fail":
             reasons.append("injection_flag")
+
+        if (
+            rule is not None
+            and rule.kind == "history_gap"
+            and finding.status == "fail"
+            and has_gap_explanation
+        ):
+            reasons.append("gap_explanation_provided")
 
         decisions.append(
             EscalationDecision(

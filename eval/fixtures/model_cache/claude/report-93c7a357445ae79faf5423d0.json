@@ -1,0 +1,11 @@
+{
+  "sentences": {
+    "R-COI-004": "The certificate of insurance lists the insured name as 'Robert Chen', which does not exactly match the legal name 'Robert J. Chen' on your profile, and the automated match confidence is only 0.88, so the name must be reconciled before the application can proceed."
+  },
+  "input_tokens": 833,
+  "output_tokens": 428,
+  "cost_usd": 0.0002973,
+  "cost_known": true,
+  "latency_ms": 2784.056889999192,
+  "simulated": false
+}

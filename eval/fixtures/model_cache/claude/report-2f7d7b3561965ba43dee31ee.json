@@ -1,0 +1,13 @@
+{
+  "sentences": {
+    "R-LIC-001": "Your license is listed as an LPC Associate rather than a full LPC, which means this application does not currently meet the requirement for a full LPC license.",
+    "R-SUP-001": "We have not yet been able to confirm through the state registry that your supervisor's license is active, so this check is still pending.",
+    "R-SUP-002": "We do not yet know how many supervisors you have, so we cannot yet confirm whether you meet the limit of two supervisors for Associates."
+  },
+  "input_tokens": 796,
+  "output_tokens": 201,
+  "cost_usd": 0.00018010000000000001,
+  "cost_known": true,
+  "latency_ms": 2296.000000089407,
+  "simulated": false
+}

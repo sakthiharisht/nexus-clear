@@ -1,0 +1,12 @@
+{
+  "sentences": {
+    "R-LIC-004": "The name on the license is 'Robert Chen' while the provider profile lists 'Robert J. Chen', so the names do not fully match and this needs to be corrected or explained before the application can move forward.",
+    "R-COI-004": "The insured name on the certificate of insurance is 'Robert Chen' while the provider profile lists 'Robert J. Chen' and no practice name is on file, so the insured name does not match and the certificate needs to be corrected or explained before the application can move forward."
+  },
+  "input_tokens": 810,
+  "output_tokens": 198,
+  "cost_usd": 0.00018,
+  "cost_known": true,
+  "latency_ms": 2047.000000020489,
+  "simulated": false
+}

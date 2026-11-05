@@ -1,0 +1,17 @@
+{
+  "sentences": {
+    "R-DOC-001:fa80b58c-6f0c-4d26-8070-dfa0e77df879": "The uploaded file was labeled as a CV, but this checklist slot requires a Texas LPC license document, so the wrong document was uploaded and needs to be replaced.",
+    "R-DOC-002:fa80b58c-6f0c-4d26-8070-dfa0e77df879": "The uploaded document scored 0.2 on legibility, below the required minimum of 0.7, so it is too unclear to review and a clearer copy should be uploaded.",
+    "R-LIC-001": "We cannot yet confirm whether the license is a full LPC rather than an LPC Associate because the license type is not known yet.",
+    "R-LIC-002": "We cannot yet confirm whether the license is active and unexpired at the target date because the expiration date is not known yet.",
+    "R-LIC-003": "We cannot yet confirm whether the license expires within 90 days of the target date because the expiration date is not known yet.",
+    "R-LIC-004": "The license holder name has not been found yet, so it cannot be checked against the legal name 'Alicia Bailey' on the provider profile.",
+    "R-SEC-001:f14396b4-c172-4767-a4c1-29e86f5905df": "The uploaded document contains text that appears to be aimed at the system, which fails the security check and requires manual review before it can be accepted."
+  },
+  "input_tokens": 1114,
+  "output_tokens": 1181,
+  "cost_usd": 0.0007019,
+  "cost_known": true,
+  "latency_ms": 5497.322657989571,
+  "simulated": false
+}

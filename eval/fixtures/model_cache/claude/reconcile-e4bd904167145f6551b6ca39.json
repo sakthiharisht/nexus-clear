@@ -1,0 +1,51 @@
+{
+  "name_match_conclusions": [],
+  "registry_conclusions": [
+    {
+      "rule_id": "R-ID-002",
+      "exists": null,
+      "status": null,
+      "checks": {
+        "exists": true,
+        "name_consistent": true,
+        "taxonomy_counselor": true
+      },
+      "possible_match": null,
+      "registry": "NPPES",
+      "record_hash": null,
+      "fetched_at": null
+    },
+    {
+      "rule_id": "R-EXC-001",
+      "exists": null,
+      "status": null,
+      "checks": {},
+      "possible_match": false,
+      "registry": null,
+      "record_hash": null,
+      "fetched_at": null
+    }
+  ],
+  "audit_log": [
+    {
+      "tool_name": "nppes_lookup",
+      "query": "1000000087",
+      "record_hash": "25725abee1d723527fb3ff5d26035ad664a6d99361fb7a23fed41da163cae2c1",
+      "fetched_at": "2026-11-05T21:08:20.169277+13:00",
+      "mode": "fixture"
+    },
+    {
+      "tool_name": "leie_check",
+      "query": "Joseph Sullivan",
+      "record_hash": "999c23c117637883d68f8718a0f33e8f4a0623ad4c0cebecf103f45d8aa1fc24",
+      "fetched_at": "2026-11-05T21:08:20.183791+13:00",
+      "mode": "fixture"
+    }
+  ],
+  "tool_calls_made": 2,
+  "aborted_reason": null,
+  "input_tokens": 4689,
+  "output_tokens": 414,
+  "cost_usd": 0.0006759000000000001,
+  "latency_ms": 2983.9999999385327
+}

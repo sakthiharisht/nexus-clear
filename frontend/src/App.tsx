@@ -16,7 +16,7 @@ function App() {
           </NavLink>
           <NavLink to="/report">Findings</NavLink>
           <NavLink to="/reviews">Reviewer queue</NavLink>
-          <NavLink to="/packet">Packet &amp; attest</NavLink>
+          <NavLink to="/packet">Packet &amp; confirmation</NavLink>
           <NavLink to="/eval">Eval dashboard</NavLink>
         </nav>
       </header>

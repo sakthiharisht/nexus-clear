@@ -4,15 +4,20 @@ A provider-facing tool for solo and small-practice Texas LPCs that answers: "Am 
 credentialed with BCBSTX, and what is missing or wrong?" It checks uploaded documents against a
 sourced rule pack, cross-checks them against public registries, explains every problem with cited
 evidence, routes uncertain findings to a human reviewer, and produces a pre-filled packet the
-provider reviews and attests.
+provider reviews and confirms is accurate. **This is not CAQH attestation** - CAQH has its own,
+separate attestation step, and the provider still has to log into CAQH and attest there (M9.1 #2;
+see "Payer authorization and other CAQH steps" below for the full list of what this app does not
+cover).
 
 ## What this is - and is not
 
 - **All data is synthetic.** Every packet, name, NPI, and LEIE exclusion row is generator-produced
   from a fixed seed (`app/eval/generator/`). Nothing here is a real person's information.
 - **It never submits anything to a payer**, and **it never writes to CAQH/DataSpring**. There is
-  no code path that can attest on a provider's behalf (enforced by a test, not just a convention -
-  `backend/tests/api/test_m8_acceptance.py::test_attest_requires_an_explicit_confirmation_payload`).
+  no code path that can confirm the packet on a provider's behalf (enforced by a test, not just a
+  convention -
+  `backend/tests/api/test_m8_acceptance.py::test_attest_requires_an_explicit_confirmation_payload` -
+  internal test/endpoint/field names still say "attest"; only user-facing copy changed, M9.1 #2).
 - The packet it produces is explicitly labeled **"CAQH-style"** - a prefilled profile assembled
   from fields the system has *verified* against document text, not a claim of compatibility with
   the real CAQH/DataSpring schema (which was never reverse-engineered or tested against).
@@ -23,7 +28,7 @@ provider reviews and attests.
 
 ```mermaid
 flowchart LR
-    Provider[Provider browser] -->|upload, run, attest| API
+    Provider[Provider browser] -->|upload, run, confirm| API
     Reviewer[Reviewer browser] -->|resolve queue items| API
 
     subgraph Backend [FastAPI backend]
@@ -57,9 +62,10 @@ value/confidence/page/quote per field, citation-verified in code) → **Reconcil
 matches resolve in code; ambiguous ones and every registry lookup go to a Claude investigator agent
 with a hard tool-call limit) → **Validate** (pure rules engine, code decides pass/fail, zero model
 involvement) → **Escalate** (confidence thresholds route uncertain findings to a reviewer queue) →
-**Report/Attest** (Claude phrases plain English, code verifies every date/number/name against
-evidence before trusting it; attestation is an explicit provider action, gated on no open blockers
-and no run predating a later upload or review resolution).
+**Report/Confirm** (Claude phrases plain English, code verifies every date/number/name against
+evidence before trusting it; confirming the packet is accurate is an explicit provider action -
+not CAQH attestation, which still happens separately in CAQH - gated on no open blockers and no
+run predating a later upload or review resolution).
 
 ## How to run
 
@@ -116,7 +122,7 @@ for exactly when.
 4. Run: score, blockers with cited evidence, "needs verification" markers on rules with weak
    provenance (60s).
 5. The ambiguous name match lands in the reviewer queue; resolve it (45s).
-6. Fix, re-run, attest, download the packet (45s).
+6. Fix, re-run, confirm the packet is accurate, download the packet (45s).
 7. Eval dashboard: defect precision/recall, Jev vs. Claude cost/latency/calibration, and what the
    human corrections would feed (60s).
 

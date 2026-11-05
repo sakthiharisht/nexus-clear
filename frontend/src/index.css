@@ -180,6 +180,24 @@ button:disabled {
   opacity: 0.7;
 }
 
+.banner {
+  background: #fdeecb;
+  color: #8a5a00;
+  border: 1px solid #e8c77a;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+@media (prefers-color-scheme: dark) {
+  .banner {
+    background: #3a2f12;
+    color: #f2c55c;
+    border-color: #6b5420;
+  }
+}
+
 .error {
   color: #d9342b;
   font-size: 13px;

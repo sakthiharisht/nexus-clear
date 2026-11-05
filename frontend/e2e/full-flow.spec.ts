@@ -102,15 +102,16 @@ test("defective packet: upload through reviewer resolution to an attested packet
     timeout: 30_000,
   });
 
-  await page.getByRole("navigation").getByRole("link", { name: "Packet & attest" }).click();
-  await expect(page.getByText("Not yet attested")).toBeVisible();
-  await page.getByLabel("Attested by").fill("reviewer-1");
+  await page.getByRole("navigation").getByRole("link", { name: "Packet & confirmation" }).click();
+  await expect(page.getByText("This is not CAQH attestation")).toBeVisible();
+  await expect(page.getByText("Not yet confirmed")).toBeVisible();
+  await page.getByLabel("Confirmed by").fill("reviewer-1");
   await page.getByLabel("Typed name").fill("Reviewer One");
   await page.getByLabel(/I confirm this packet/).check();
   await page.screenshot({ path: path.join(SCREENSHOT_DIR, "06-attest-form.png") });
-  await page.getByRole("button", { name: "Attest" }).click();
+  await page.getByRole("button", { name: "Confirm packet is accurate" }).click();
 
-  await expect(page.getByText(/attested - packet hash/)).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText(/confirmed - packet hash/)).toBeVisible({ timeout: 15_000 });
   await expect(page.getByText("CAQH-style")).toBeVisible();
   await expect(page.getByText(/"holder_name": "Christopher Lee"/)).toBeVisible();
   await page.screenshot({ path: path.join(SCREENSHOT_DIR, "07-attested-packet.png") });

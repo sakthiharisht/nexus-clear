@@ -295,7 +295,18 @@ def _case_extractions(session: Session, case_id: UUID) -> list[Extraction]:
     )
 
 
-@router.post("/{case_id}/attest", response_model=AttestResponse)
+@router.post(
+    "/{case_id}/attest",
+    response_model=AttestResponse,
+    summary="Confirm packet is accurate",
+    description=(
+        "Provider confirmation that the packet is accurate and complete, gated on no open "
+        "blockers and no unresolved review items. This is NOT CAQH attestation - the "
+        "provider must still log into CAQH and attest there separately; this app never "
+        "submits to CAQH/DataSpring or any payer (endpoint path and field names kept as "
+        "'attest'/'attested_*' for API stability - M9.1 #2 renamed only user-facing copy)."
+    ),
+)
 def attest(
     case_id: UUID,
     body: AttestRequest,
@@ -303,7 +314,7 @@ def attest(
     case: Case = Depends(require_provider_token),
 ) -> AttestResponse:
     if case.attested_at is not None:
-        raise HTTPException(status.HTTP_409_CONFLICT, "case is already attested")
+        raise HTTPException(status.HTTP_409_CONFLICT, "case is already confirmed")
 
     documents = session.query(Document).filter_by(case_id=case.id).all()
     review_items = session.query(ReviewItem).filter_by(case_id=case.id).all()
@@ -312,7 +323,7 @@ def attest(
     )
     if stale_reason is not None:
         raise HTTPException(
-            status.HTTP_409_CONFLICT, f"cannot attest: {stale_reason} - run the case again first"
+            status.HTTP_409_CONFLICT, f"cannot confirm: {stale_reason} - run the case again first"
         )
 
     findings = [finding for _, finding in load_case_findings(session, case.id)]
@@ -320,14 +331,14 @@ def attest(
     if open_blockers:
         raise HTTPException(
             status.HTTP_409_CONFLICT,
-            f"cannot attest: open blocker findings exist: {', '.join(open_blockers)}",
+            f"cannot confirm: open blocker findings exist: {', '.join(open_blockers)}",
         )
 
     unresolved = unresolved_review_ids(review_items)
     if unresolved:
         raise HTTPException(
             status.HTTP_409_CONFLICT,
-            f"cannot attest: unresolved review items exist: {', '.join(unresolved)}",
+            f"cannot confirm: unresolved review items exist: {', '.join(unresolved)}",
         )
 
     packet = build_packet(
@@ -365,6 +376,6 @@ def get_packet(case_id: UUID, session: Session = Depends(get_session)) -> CaqhSt
     case = _get_case_or_404(session, case_id)
     if case.attested_packet is None:
         raise HTTPException(
-            status.HTTP_404_NOT_FOUND, "no packet yet - the case has not been attested"
+            status.HTTP_404_NOT_FOUND, "no packet yet - the case has not been confirmed"
         )
     return CaqhStylePacket.model_validate(case.attested_packet)

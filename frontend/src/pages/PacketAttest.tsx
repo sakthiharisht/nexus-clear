@@ -5,6 +5,11 @@ import { getCaseId, getProviderToken } from "../session";
 
 type CaqhStylePacket = components["schemas"]["CaqhStylePacket"];
 
+// M9.1 #2: user-facing copy says "confirm", not "attest" - CAQH has its
+// own, separate attestation step, and calling ours "attest" too invited
+// providers to think this one substitutes for that one. Internal names
+// (this function/endpoint/field names, the DB columns, the audit action)
+// are unchanged - only what a person reads was renamed.
 export default function PacketAttest() {
   const [caseId] = useState<string | null>(getCaseId());
   const providerToken = getProviderToken();
@@ -45,7 +50,7 @@ export default function PacketAttest() {
       setError(JSON.stringify(err));
       return;
     }
-    setAttestResult(`attested - packet hash ${data?.packet_hash}`);
+    setAttestResult(`confirmed - packet hash ${data?.packet_hash}`);
     await loadPacket();
   }
 
@@ -54,7 +59,8 @@ export default function PacketAttest() {
 
   return (
     <section className="card">
-      <h1>Packet &amp; attest</h1>
+      <h1>Packet &amp; confirmation</h1>
+      <p className="banner">This is not CAQH attestation; you still attest in CAQH.</p>
       {error && <p className="error">{error}</p>}
       {attestResult && <p className="result-box">{attestResult}</p>}
 
@@ -75,12 +81,12 @@ export default function PacketAttest() {
       {notAttested && !packet && (
         <>
           <p className="hint">
-            Not yet attested. Attestation blocks on any open blocker finding, any unresolved
+            Not yet confirmed. Confirmation blocks on any open blocker finding, any unresolved
             review item, or a run that predates one of those - run the case again after
-            resolving everything, then attest.
+            resolving everything, then confirm.
           </p>
           <label>
-            Attested by
+            Confirmed by
             <input value={attestedBy} onChange={(e) => setAttestedBy(e.target.value)} />
           </label>
           <label>
@@ -99,7 +105,7 @@ export default function PacketAttest() {
             disabled={!confirmed || !attestedBy || !typedName}
             onClick={() => void attest()}
           >
-            Attest
+            Confirm packet is accurate
           </button>
         </>
       )}

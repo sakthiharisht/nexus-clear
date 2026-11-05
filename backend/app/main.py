@@ -29,11 +29,27 @@ app.add_middleware(MaxContentLengthMiddleware, max_bytes=settings.max_upload_siz
 # the API, so the browser needs CORS to call it at all. Real auth is
 # the X-Provider-Token/X-Reviewer-Token headers (app/api/auth.py), not
 # origin checking - this is permissive on purpose for a local demo.
+# Also accepts 127.0.0.1 explicitly, not just the "localhost" hostname:
+# the Playwright E2E harness addresses both the page and the API by
+# that literal IP (uvicorn binds IPv4-only by default, so a browser
+# whose Happy Eyeballs picks "localhost"'s IPv6 address for one side
+# but not the other gets a silent connection failure).
+# allow_private_network=True: Chrome's Private Network Access gates any
+# cross-origin request targeting a loopback address behind an extra
+# preflight opt-in (Access-Control-Request-Private-Network), which
+# Starlette otherwise actively refuses (400 "Disallowed CORS
+# private-network") rather than merely omitting - confirmed live, not
+# curl-reproducible since PNA is purely a browser-enforced policy with
+# no server-visible symptom beyond this one preflight header. Both
+# sides are loopback in every case this app runs (local demo or the
+# Playwright harness), so there's no real private-network boundary
+# being crossed.
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"http://localhost:\d+",
+    allow_origin_regex=r"http://(localhost|127\.0\.0\.1):\d+",
     allow_methods=["*"],
     allow_headers=["*"],
+    allow_private_network=True,
 )
 app.include_router(cases_router)
 app.include_router(reviews_router)

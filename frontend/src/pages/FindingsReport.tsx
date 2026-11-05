@@ -13,6 +13,7 @@ export default function FindingsReport() {
   const [findingsById, setFindingsById] = useState<Record<string, Finding>>({});
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [onlyIssues, setOnlyIssues] = useState(true);
 
   useEffect(() => {
     if (!caseId) return;
@@ -45,15 +46,29 @@ export default function FindingsReport() {
       {report.simulated && (
         <p className="badge badge-simulated">SIMULATED - not a live model run</p>
       )}
+      <label className="checkbox-label">
+        <input
+          type="checkbox"
+          checked={onlyIssues}
+          onChange={(e) => setOnlyIssues(e.target.checked)}
+        />
+        Show only issues (fail / unknown)
+      </label>
       <ul className="findings-list">
-        {report.entries.map((entry) => {
+        {report.entries
+          .filter((entry) => !onlyIssues || entry.status === "fail" || entry.status === "unknown")
+          .map((entry) => {
           const finding = findingsById[entry.finding_id];
           const isInjection = entry.rule_id === "R-SEC-001";
           return (
             <li key={entry.finding_id} className="finding-row">
               <div className="finding-summary">
                 <StatusBadge status={entry.status} />
-                <SeverityBadge severity={entry.severity} />
+                {/* Severity (blocker/warning/info) only matters once a check
+                    isn't passing - "pass" + "blocker" side by side reads as
+                    a contradiction even though it just means "this is an
+                    important check, and right now it's fine." */}
+                {entry.status !== "pass" && <SeverityBadge severity={entry.severity} />}
                 <NeedsVerificationBadge needsVerification={entry.needs_verification} />
                 {isInjection && entry.status === "fail" && <InjectionBadge />}
                 <span className="finding-title">{entry.rule_title}</span>

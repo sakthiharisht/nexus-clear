@@ -8,27 +8,24 @@ whatever was last written there.
 from __future__ import annotations
 
 import json
-from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, status
 
-router = APIRouter(prefix="/eval", tags=["eval"])
+from app.core.config import settings
 
-# backend/app/api/eval_endpoint.py -> repo root, same convention as
-# app/core/config.py's _REPO_ROOT.
-_REPO_ROOT = Path(__file__).resolve().parents[3]
-_RUNS_DIR = _REPO_ROOT / "eval" / "runs"
+router = APIRouter(prefix="/eval", tags=["eval"])
 
 
 @router.get("/latest")
 def get_latest_eval_run() -> dict[str, Any]:
-    if not _RUNS_DIR.is_dir():
+    runs_dir = settings.eval_runs_dir
+    if not runs_dir.is_dir():
         raise HTTPException(
             status.HTTP_404_NOT_FOUND,
             "no eval runs found - run `uv run python -m app.eval.run` from the repo root first",
         )
-    run_files = sorted(_RUNS_DIR.glob("run-*.json"))
+    run_files = sorted(runs_dir.glob("run-*.json"))
     if not run_files:
         raise HTTPException(
             status.HTTP_404_NOT_FOUND,

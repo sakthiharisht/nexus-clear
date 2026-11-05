@@ -85,6 +85,11 @@ class Settings(BaseSettings):
     registry_fixtures_root: Path = _REPO_ROOT / "eval" / "fixtures" / "registry"
     leie_cache_path: Path = Path("data/cache/leie_updated.csv")
 
+    # GET /eval/latest (app/api/eval_endpoint.py) - same local-checkout
+    # default as model_cache_root/registry_fixtures_root above, same
+    # need to override it in Docker (docker-compose.yml).
+    eval_runs_dir: Path = _REPO_ROOT / "eval" / "runs"
+
     # Reconcile (SPEC.md section 7.5): hard cap on tool calls per
     # Investigator invocation - Jev is "known to repeat tool calls in
     # agent loops" per SPEC 7.2, and an unbounded Claude loop is the

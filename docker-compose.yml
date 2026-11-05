@@ -30,11 +30,22 @@ services:
       # below instead of baking the rule pack into the image, since
       # it's data the loader reads at startup, not application code.
       RULE_PACK_PATH: /app/rules/tx_bcbstx_lpc.yaml
+      # Same reasoning as RULE_PACK_PATH above: config.py's defaults for
+      # these also resolve off the local-checkout repo root, which
+      # doesn't exist inside the image. Without this, every cached
+      # model call (classify/extract/reconcile/report) and every
+      # fixture-mode registry lookup fails inside the container, even
+      # when MODEL_CACHE_MODE=replay and the fixture genuinely exists
+      # on the host.
+      MODEL_CACHE_ROOT: /app/eval/fixtures/model_cache
+      REGISTRY_FIXTURES_ROOT: /app/eval/fixtures/registry
+      EVAL_RUNS_DIR: /app/eval/runs
     ports:
       - "8000:8000"
     volumes:
       - vault_data:/app/data/vault
       - ./rules:/app/rules:ro
+      - ./eval:/app/eval
 
   frontend:
     build: ./frontend

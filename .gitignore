@@ -8,6 +8,10 @@ CLAUDE.md
 !.env.example
 *.key
 
+# Session-local compose overrides (e.g. live-recording a demo) - never
+# the committed default behavior.
+docker-compose.override.yml
+
 # Python
 __pycache__/
 *.pyc

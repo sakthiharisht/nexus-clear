@@ -93,7 +93,7 @@ def test_classify_modes_run_against_the_real_committed_fixture_cache() -> None:
     ):
         mode = _find(base_mode)
         metrics = result["classify_metrics"][mode]
-        assert metrics["n"] == 60  # 12 packets x 5 slots
+        assert metrics["n"] == 75  # 15 packets x 5 slots
         assert 0.0 <= metrics["accuracy"] <= 1.0
         assert 0.0 <= metrics["ece"] <= 1.0
         assert metrics["total_input_tokens"] > 0

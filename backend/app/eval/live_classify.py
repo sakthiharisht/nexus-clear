@@ -1,7 +1,8 @@
 """Live classify runner (M5.1): makes REAL calls against Claude (and
-Jev, if JEV_API_KEY is set) over all 60 real documents (12 packets x 5
-slots) and records genuine responses into eval/fixtures/model_cache/,
-replacing app/eval/classify_fixture_seed.py's simulated placeholders.
+Jev, if JEV_API_KEY is set) over every real document in the main set
+(5 slots per packet) and records genuine responses into
+eval/fixtures/model_cache/, replacing app/eval/classify_fixture_seed.py's
+simulated placeholders.
 
 NOT run automatically anywhere - not by pytest, not by CI. This spends
 real money and makes real network calls. Invoke explicitly:

@@ -1,0 +1,15 @@
+{
+  "doc_type": "w9",
+  "probabilities": {
+    "w9": 0.95
+  },
+  "legible": 0.95,
+  "slot_match": true,
+  "decided_by": "claude",
+  "input_tokens": 814,
+  "output_tokens": 42,
+  "cost_usd": 0.004096,
+  "cost_known": true,
+  "latency_ms": 1312.0000001508743,
+  "simulated": false
+}

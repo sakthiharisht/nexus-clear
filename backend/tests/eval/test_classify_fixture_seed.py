@@ -40,10 +40,10 @@ class _UnreachableBackend:
 
 def test_seed_writes_one_file_per_document_per_backend_and_tier(tmp_path: Path) -> None:
     written = seed(GROUND_TRUTH, FIXTURES_ROOT, tmp_path)
-    # 12 packets x 5 slots x {jev, claude-haiku, claude-sonnet, claude-opus}
-    assert written == 12 * 5 * 4
-    assert len(list((tmp_path / "jev").glob("*.json"))) == 60
-    assert len(list((tmp_path / "claude").glob("*.json"))) == 60 * 3
+    # 15 packets x 5 slots x {jev, claude-haiku, claude-sonnet, claude-opus}
+    assert written == 15 * 5 * 4
+    assert len(list((tmp_path / "jev").glob("*.json"))) == 75
+    assert len(list((tmp_path / "claude").glob("*.json"))) == 75 * 3
 
 
 def test_seed_never_overwrites_an_already_real_recording(tmp_path: Path) -> None:
@@ -75,7 +75,7 @@ def test_seed_never_overwrites_an_already_real_recording(tmp_path: Path) -> None
     # Every OTHER file in this second pass was a legitimate re-seed
     # (freshly written to tmp_path); only the one marked real was
     # skipped.
-    assert written == 12 * 5 * 4 - 1
+    assert written == 15 * 5 * 4 - 1
 
 
 def test_seeded_fixtures_are_replayable_without_any_live_call(tmp_path: Path) -> None:

@@ -157,9 +157,9 @@ def test_run_classify_covers_every_uploaded_document_across_all_packets() -> Non
         tau_classify=0.85,
         legible_threshold=0.7,
     )
-    # 12 packets x 5 slots, all uploaded in every packet.
-    assert len(result.documents) == 60
-    assert len(backend.inputs) == 60
+    # 15 packets x 5 slots, all uploaded in every packet.
+    assert len(result.documents) == 75
+    assert len(backend.inputs) == 75
     assert result.mode == "test-mode"
 
 

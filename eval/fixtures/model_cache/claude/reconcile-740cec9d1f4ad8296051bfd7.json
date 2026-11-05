@@ -1,0 +1,60 @@
+{
+  "name_match_conclusions": [
+    {
+      "rule_id": "R-LIC-004",
+      "probability": 0.9
+    },
+    {
+      "rule_id": "R-COI-004",
+      "probability": 0.9
+    }
+  ],
+  "registry_conclusions": [
+    {
+      "rule_id": "R-ID-002",
+      "exists": true,
+      "status": null,
+      "checks": {
+        "exists": true,
+        "name_consistent": true,
+        "taxonomy_counselor": true
+      },
+      "possible_match": null,
+      "registry": "NPPES",
+      "record_hash": null,
+      "fetched_at": null
+    },
+    {
+      "rule_id": "R-EXC-001",
+      "exists": null,
+      "status": null,
+      "checks": {},
+      "possible_match": false,
+      "registry": null,
+      "record_hash": null,
+      "fetched_at": null
+    }
+  ],
+  "audit_log": [
+    {
+      "tool_name": "nppes_lookup",
+      "query": "1000000145",
+      "record_hash": "40e692d63825f4f85643e9a365755018bb21a26be3b3b53f6770a4a068c52429",
+      "fetched_at": "2026-11-05T12:53:10.482766+13:00",
+      "mode": "fixture"
+    },
+    {
+      "tool_name": "leie_check",
+      "query": "William Harrison III",
+      "record_hash": "a0f034a608eb90acac096b06a772d71b7676322991729f56204e2513156f6441",
+      "fetched_at": "2026-11-05T12:53:10.497509+13:00",
+      "mode": "fixture"
+    }
+  ],
+  "tool_calls_made": 2,
+  "aborted_reason": null,
+  "input_tokens": 4937,
+  "output_tokens": 501,
+  "cost_usd": 0.0007442000000000001,
+  "latency_ms": 2921.9999997876585
+}

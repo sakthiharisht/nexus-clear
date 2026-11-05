@@ -40,8 +40,16 @@
     "npi": "1000000112",
     "possible_match": true
   },
+  "Maria Garcia Lopez": {
+    "npi": "1000000129",
+    "possible_match": false
+  },
   "Melanie Sullivan MD": {
     "npi": "1000000079",
+    "possible_match": false
+  },
+  "Robert J. Chen": {
+    "npi": "1000000137",
     "possible_match": false
   },
   "Scott West": {
@@ -50,6 +58,10 @@
   },
   "Victoria Richardson": {
     "npi": "1000000053",
+    "possible_match": false
+  },
+  "William Harrison III": {
+    "npi": "1000000145",
     "possible_match": false
   }
 }

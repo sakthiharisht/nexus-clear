@@ -1,0 +1,74 @@
+{
+  "kind": "cv",
+  "fields": {
+    "name": {
+      "value": "Maria Garcia Lopez",
+      "confidence": 0.97,
+      "page": 1,
+      "quote": "Name: Maria Garcia Lopez"
+    },
+    "positions": [
+      {
+        "title": {
+          "value": "Associate Counselor",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Associate Counselor"
+        },
+        "employer": {
+          "value": "Armstrong, Berry and Copeland Behavioral Health",
+          "confidence": 0.93,
+          "page": 1,
+          "quote": "Armstrong, Berry and Copeland Behavioral Health"
+        },
+        "start": {
+          "value": "2020-11-18",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "2020-11-18"
+        },
+        "end": {
+          "value": "2023-11-18",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "2020-11-18 - 2023-11-18"
+        }
+      },
+      {
+        "title": {
+          "value": "Licensed Professional Counselor",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Licensed Professional Counselor"
+        },
+        "employer": {
+          "value": "Hoffman, Garcia and Hamilton Counseling Group",
+          "confidence": 0.93,
+          "page": 1,
+          "quote": "Hoffman, Garcia and Hamilton Counseling Group"
+        },
+        "start": {
+          "value": "2023-11-18",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "2023-11-18 - present"
+        },
+        "end": {
+          "value": null,
+          "confidence": 0.9,
+          "page": 1,
+          "quote": null
+        }
+      }
+    ],
+    "education": []
+  },
+  "decided_by": "claude",
+  "input_tokens": 1502,
+  "output_tokens": 477,
+  "cost_usd": 0.015548,
+  "cost_known": true,
+  "latency_ms": 4312.999999849126,
+  "simulated": false,
+  "extraction_error": null
+}

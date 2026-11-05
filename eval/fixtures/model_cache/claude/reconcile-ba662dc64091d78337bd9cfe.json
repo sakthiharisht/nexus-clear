@@ -1,0 +1,74 @@
+{
+  "name_match_conclusions": [
+    {
+      "rule_id": "R-LIC-004",
+      "probability": 0.88
+    },
+    {
+      "rule_id": "R-COI-004",
+      "probability": 0.88
+    }
+  ],
+  "registry_conclusions": [
+    {
+      "rule_id": "R-ID-002",
+      "exists": true,
+      "status": null,
+      "checks": {
+        "exists": true,
+        "name_consistent": true,
+        "taxonomy_counselor": true
+      },
+      "possible_match": null,
+      "registry": "NPPES",
+      "record_hash": null,
+      "fetched_at": null
+    },
+    {
+      "rule_id": "R-EXC-001",
+      "exists": null,
+      "status": null,
+      "checks": {},
+      "possible_match": false,
+      "registry": "LEIE",
+      "record_hash": null,
+      "fetched_at": null
+    }
+  ],
+  "audit_log": [
+    {
+      "tool_name": "nppes_lookup",
+      "query": "1000000137",
+      "record_hash": "e4b3d20b0dfe0ad3d90558036a0e847687fd5f19a04a1357343d7d50e0c41ae9",
+      "fetched_at": "2026-11-05T12:53:07.055709+13:00",
+      "mode": "fixture"
+    },
+    {
+      "tool_name": "leie_check",
+      "query": "Robert J. Chen",
+      "record_hash": "902c58afe301c504b225735667a647bcc3f51b2af1baa12a92d57b17c75a7a1b",
+      "fetched_at": "2026-11-05T12:53:07.071829+13:00",
+      "mode": "fixture"
+    },
+    {
+      "tool_name": "get_rule",
+      "query": "R-LIC-004",
+      "record_hash": "3baf3e83c25b5f78402cdbb6c3bd449a91995a50e51a5f9059cc260803558408",
+      "fetched_at": "2026-11-05T12:53:07.073682+13:00",
+      "mode": "fixture"
+    },
+    {
+      "tool_name": "get_rule",
+      "query": "R-COI-004",
+      "record_hash": "dd29a153ed9b2e55cc508775b8e257c5efd910d7c95ac6832e334a75fb4b75c3",
+      "fetched_at": "2026-11-05T12:53:07.087711+13:00",
+      "mode": "fixture"
+    }
+  ],
+  "tool_calls_made": 4,
+  "aborted_reason": null,
+  "input_tokens": 5375,
+  "output_tokens": 701,
+  "cost_usd": 0.000888,
+  "latency_ms": 3641.0000000614673
+}

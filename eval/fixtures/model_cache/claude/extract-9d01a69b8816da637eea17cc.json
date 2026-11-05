@@ -1,0 +1,74 @@
+{
+  "kind": "cv",
+  "fields": {
+    "name": {
+      "value": "William Harrison III",
+      "confidence": 0.97,
+      "page": 1,
+      "quote": "Name: William Harrison III"
+    },
+    "positions": [
+      {
+        "title": {
+          "value": "Associate Counselor",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Associate Counselor, Taylor-Webb Behavioral Health (2020-11-18 - 2023-11-18)"
+        },
+        "employer": {
+          "value": "Taylor-Webb Behavioral Health",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Associate Counselor, Taylor-Webb Behavioral Health (2020-11-18 - 2023-11-18)"
+        },
+        "start": {
+          "value": "2020-11-18",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Associate Counselor, Taylor-Webb Behavioral Health (2020-11-18 - 2023-11-18)"
+        },
+        "end": {
+          "value": "2023-11-18",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Associate Counselor, Taylor-Webb Behavioral Health (2020-11-18 - 2023-11-18)"
+        }
+      },
+      {
+        "title": {
+          "value": "Licensed Professional Counselor",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Licensed Professional Counselor, Jones Ltd Counseling Group (2023-11-18 - present)"
+        },
+        "employer": {
+          "value": "Jones Ltd Counseling Group",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Licensed Professional Counselor, Jones Ltd Counseling Group (2023-11-18 - present)"
+        },
+        "start": {
+          "value": "2023-11-18",
+          "confidence": 0.95,
+          "page": 1,
+          "quote": "Licensed Professional Counselor, Jones Ltd Counseling Group (2023-11-18 - present)"
+        },
+        "end": {
+          "value": null,
+          "confidence": 0.9,
+          "page": 1,
+          "quote": null
+        }
+      }
+    ],
+    "education": []
+  },
+  "decided_by": "claude",
+  "input_tokens": 1477,
+  "output_tokens": 629,
+  "cost_usd": 0.018488,
+  "cost_known": true,
+  "latency_ms": 5094.000000040978,
+  "simulated": false,
+  "extraction_error": null
+}

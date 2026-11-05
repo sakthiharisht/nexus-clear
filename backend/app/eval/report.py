@@ -137,7 +137,8 @@ def _classify_section(result: dict[str, Any]) -> list[str]:
     lines += _simulated_caveat(classify_metrics)
 
     if easy_modes:
-        lines += ["### Easy set (12 packets, 60 documents)", ""]
+        any_n = next(iter(easy_modes.values()))["n"]
+        lines += [f"### Easy set ({any_n} documents)", ""]
         lines += _classify_table(easy_modes)
 
     if hard_modes:

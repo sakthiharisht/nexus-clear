@@ -70,5 +70,23 @@
     "name": "Katherine Robinson",
     "name_consistent": true,
     "taxonomy_counselor": true
+  },
+  "1000000129": {
+    "exists": true,
+    "name": "Maria Garcia Lopez",
+    "name_consistent": true,
+    "taxonomy_counselor": true
+  },
+  "1000000137": {
+    "exists": true,
+    "name": "Robert J. Chen",
+    "name_consistent": true,
+    "taxonomy_counselor": true
+  },
+  "1000000145": {
+    "exists": true,
+    "name": "William Harrison III",
+    "name_consistent": true,
+    "taxonomy_counselor": true
   }
 }

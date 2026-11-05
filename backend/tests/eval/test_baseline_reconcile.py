@@ -91,7 +91,7 @@ def test_missing_right_and_alt_right_is_skipped_not_guessed(pack: RulePack) -> N
 def test_load_registry_fixtures_reads_the_real_committed_files() -> None:
     fixtures = load_registry_fixtures(REPO_ROOT / "eval" / "fixtures")
     assert set(fixtures) == {"nppes", "tx_license", "leie"}
-    assert len(fixtures["nppes"]) == 12  # one per packet
+    assert len(fixtures["nppes"]) == 15  # one per packet
 
 
 def test_load_registry_fixtures_missing_dir_returns_empty(tmp_path: Path) -> None:

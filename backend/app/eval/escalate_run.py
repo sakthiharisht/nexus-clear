@@ -1,6 +1,6 @@
 """Escalate eval (SPEC.md section 7.7, M8): runs the real pipeline
 (Extract -> Reconcile -> Validate, the same stages app/eval/end_to_end_run.py
-scores) over the 12-packet ground truth, escalates every resulting
+scores) over the 15-packet ground truth, escalates every resulting
 Finding (app/escalate/engine.py), and reports the escalation rate plus
 precision/recall against this corpus's own known escalation-relevant
 defects.
@@ -12,9 +12,9 @@ PacketResult/ModeResult types only carry a finding_id -> status dict
 not enough to escalate with, since escalate() needs each Finding's
 confidence, severity, and rule_source too.
 
-Ground truth, scoped honestly: four (packet_id, finding_id) pairs in
-this 12-packet corpus have a defect whose escalation outcome is
-knowable ahead of time -
+Ground truth, scoped honestly - five (packet_id, finding_id) pairs in
+this corpus have a defect whose escalation outcome is knowable ahead
+of time -
 - defective-3's D13 (COI insured name is a different practice
   entirely): R-COI-004 resolves to a confident "fail" in the end, but
   getting there needs the Investigator (a genuine mismatch, not an
@@ -26,6 +26,15 @@ knowable ahead of time -
   should escalate (leie_possible_match).
 - defective-7's D14 (an injected-instruction CV): R-SEC-001 should
   escalate (injection_flag).
+- benign-4-middle-initial (pre-M9 fix #5: "Robert Chen" vs "Robert J.
+  Chen"): a real person, but the live Investigator's resolved
+  confidence (0.88, checked directly) lands just under
+  blocker_confidence_threshold (0.90) - blocker_low_confidence,
+  verified empirically, not assumed. The other two pre-M9 fix #5
+  packets (a hyphenated surname, a generational suffix) resolved
+  confidently (0.95, 0.90) and do NOT escalate - a real, not
+  engineered, split result across three name variants that look
+  equally "ambiguous" on paper.
 Every other finding in this corpus resolves exactly (a clean name
 match, confidence 1.0, resolved in code with no model call at all -
 app/reconcile/engine.py) and is expected to never escalate.
@@ -58,6 +67,7 @@ GROUND_TRUTH_ESCALATIONS: dict[tuple[str, str], bool] = {
     # (license/coi/education/w9, which correctly never flag) don't each
     # count as a false negative against the one that should.
     ("defective-7", "R-SEC-001:doc-cv"): True,
+    ("benign-4-middle-initial", "R-LIC-004"): True,
 }
 
 

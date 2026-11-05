@@ -1,0 +1,60 @@
+{
+  "name_match_conclusions": [
+    {
+      "rule_id": "R-LIC-004",
+      "probability": 0.95
+    },
+    {
+      "rule_id": "R-COI-004",
+      "probability": 0.95
+    }
+  ],
+  "registry_conclusions": [
+    {
+      "rule_id": "R-ID-002",
+      "exists": true,
+      "status": null,
+      "checks": {
+        "exists": true,
+        "name_consistent": true,
+        "taxonomy_counselor": true
+      },
+      "possible_match": null,
+      "registry": "NPPES",
+      "record_hash": null,
+      "fetched_at": null
+    },
+    {
+      "rule_id": "R-EXC-001",
+      "exists": null,
+      "status": null,
+      "checks": {},
+      "possible_match": false,
+      "registry": "LEIE",
+      "record_hash": null,
+      "fetched_at": null
+    }
+  ],
+  "audit_log": [
+    {
+      "tool_name": "nppes_lookup",
+      "query": "1000000129",
+      "record_hash": "36bb35537ffb6dba1d31cd37567fe8547d49197d7ecad9ef3832a4f0f0bb1efe",
+      "fetched_at": "2026-11-05T12:53:03.618203+13:00",
+      "mode": "fixture"
+    },
+    {
+      "tool_name": "leie_check",
+      "query": "Maria Garcia Lopez",
+      "record_hash": "b12d686d91a12a80d05573bb07da1765d568f36455452bfc4b0999315d94f164",
+      "fetched_at": "2026-11-05T12:53:03.642787+13:00",
+      "mode": "fixture"
+    }
+  ],
+  "tool_calls_made": 2,
+  "aborted_reason": null,
+  "input_tokens": 5005,
+  "output_tokens": 568,
+  "cost_usd": 0.0007845,
+  "latency_ms": 3297.000000020489
+}

@@ -2109,6 +2109,519 @@
       "packet_id": "defective-8",
       "primary_defect": "D12",
       "target_date": "2026-11-17"
+    },
+    {
+      "defect_ids": [],
+      "description": "license holder's surname is hyphenated on the license, spaced on intake (Garcia-Lopez vs Garcia Lopez); must not false-positive",
+      "documents": {
+        "coi": "packets/benign-3-hyphenated-surname/coi.pdf",
+        "cv": "packets/benign-3-hyphenated-surname/cv.pdf",
+        "education": "packets/benign-3-hyphenated-surname/education.pdf",
+        "license": "packets/benign-3-hyphenated-surname/license.pdf",
+        "w9": "packets/benign-3-hyphenated-surname/w9.pdf"
+      },
+      "expected_findings": {
+        "R-COI-001": "pass",
+        "R-COI-002": "pass",
+        "R-COI-003": "pass",
+        "R-COI-004": "pass",
+        "R-DOC-001:doc-coi": "pass",
+        "R-DOC-001:doc-cv": "pass",
+        "R-DOC-001:doc-education": "pass",
+        "R-DOC-001:doc-license": "pass",
+        "R-DOC-001:doc-w9": "pass",
+        "R-DOC-002:doc-coi": "pass",
+        "R-DOC-002:doc-cv": "pass",
+        "R-DOC-002:doc-education": "pass",
+        "R-DOC-002:doc-license": "pass",
+        "R-DOC-002:doc-w9": "pass",
+        "R-EXC-001": "pass",
+        "R-ID-001": "pass",
+        "R-ID-002": "pass",
+        "R-LIC-001": "pass",
+        "R-LIC-002": "pass",
+        "R-LIC-003": "pass",
+        "R-LIC-004": "pass",
+        "R-PATH-001": "pass",
+        "R-SEC-001:doc-coi": "pass",
+        "R-SEC-001:doc-cv": "pass",
+        "R-SEC-001:doc-education": "pass",
+        "R-SEC-001:doc-license": "pass",
+        "R-SEC-001:doc-w9": "pass",
+        "R-SUP-001": "not_applicable",
+        "R-SUP-002": "not_applicable",
+        "R-WORK-001": "pass"
+      },
+      "facts": {
+        "coi": {
+          "aggregate": 300000.0,
+          "carrier": "Perkins, Mccoy and Cortez Mutual Insurance",
+          "doc_id": "doc-coi",
+          "effective_date": "2026-05-01",
+          "expiration_date": "2027-05-01",
+          "insured_name": "Maria Garcia-Lopez",
+          "per_occurrence": 100000.0,
+          "policy_number": "POL-200012"
+        },
+        "cv": {
+          "doc_id": "doc-cv",
+          "positions": [
+            {
+              "employer": "Armstrong, Berry and Copeland Behavioral Health",
+              "end": "2023-11-18",
+              "start": "2020-11-18",
+              "title": "Associate Counselor"
+            },
+            {
+              "employer": "Hoffman, Garcia and Hamilton Counseling Group",
+              "end": null,
+              "start": "2023-11-18",
+              "title": "Licensed Professional Counselor"
+            }
+          ]
+        },
+        "documents": [
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-license",
+            "expected_doc_type": "texas_lpc_license",
+            "legible_score": 0.95,
+            "readable": true,
+            "slot": "license",
+            "uploaded_doc_type": "texas_lpc_license"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-coi",
+            "expected_doc_type": "malpractice_coi",
+            "legible_score": 0.95,
+            "readable": true,
+            "slot": "coi",
+            "uploaded_doc_type": "malpractice_coi"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-cv",
+            "expected_doc_type": "cv",
+            "legible_score": 0.95,
+            "readable": true,
+            "slot": "cv",
+            "uploaded_doc_type": "cv"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-education",
+            "expected_doc_type": "degree_transcript",
+            "legible_score": 0.95,
+            "readable": true,
+            "slot": "education",
+            "uploaded_doc_type": "degree_transcript"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-w9",
+            "expected_doc_type": "w9",
+            "legible_score": 0.95,
+            "readable": true,
+            "slot": "w9",
+            "uploaded_doc_type": "w9"
+          }
+        ],
+        "license": {
+          "doc_id": "doc-license",
+          "expiration_date": "2028-11-16",
+          "holder_name": "Maria Garcia-Lopez",
+          "issue_date": "2020-11-18",
+          "issuing_board": "Texas Behavioral Health Executive Council",
+          "license_number": "LPC-100012",
+          "license_type": "LPC",
+          "status": "Active"
+        },
+        "name_match_probabilities": {
+          "R-COI-004": 0.9,
+          "R-LIC-004": 0.9
+        },
+        "profile": {
+          "legal_name": "Maria Garcia Lopez",
+          "npi": "1000000129",
+          "practice_name": "Ortiz Counseling, PLLC"
+        },
+        "registry_results": {
+          "R-EXC-001": {
+            "checks": {},
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": false,
+            "record_hash": null,
+            "registry": "leie",
+            "status": null
+          },
+          "R-ID-002": {
+            "checks": {
+              "exists": true,
+              "name_consistent": true,
+              "taxonomy_counselor": true
+            },
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": null,
+            "record_hash": null,
+            "registry": "nppes",
+            "status": null
+          }
+        },
+        "supervision": {
+          "supervisor_count": null,
+          "supervisor_license_number": "LPC-100012-SUPERVISOR"
+        },
+        "target_date": "2026-11-17"
+      },
+      "kind": "benign",
+      "packet_id": "benign-3-hyphenated-surname",
+      "primary_defect": null,
+      "target_date": "2026-11-17"
+    },
+    {
+      "defect_ids": [],
+      "description": "intake profile adds a middle initial the license doesn't have (Robert Chen vs Robert J. Chen); must not false-positive",
+      "documents": {
+        "coi": "packets/benign-4-middle-initial/coi.pdf",
+        "cv": "packets/benign-4-middle-initial/cv.pdf",
+        "education": "packets/benign-4-middle-initial/education.pdf",
+        "license": "packets/benign-4-middle-initial/license.pdf",
+        "w9": "packets/benign-4-middle-initial/w9.pdf"
+      },
+      "expected_findings": {
+        "R-COI-001": "pass",
+        "R-COI-002": "pass",
+        "R-COI-003": "pass",
+        "R-COI-004": "pass",
+        "R-DOC-001:doc-coi": "pass",
+        "R-DOC-001:doc-cv": "pass",
+        "R-DOC-001:doc-education": "pass",
+        "R-DOC-001:doc-license": "pass",
+        "R-DOC-001:doc-w9": "pass",
+        "R-DOC-002:doc-coi": "pass",
+        "R-DOC-002:doc-cv": "pass",
+        "R-DOC-002:doc-education": "pass",
+        "R-DOC-002:doc-license": "pass",
+        "R-DOC-002:doc-w9": "pass",
+        "R-EXC-001": "pass",
+        "R-ID-001": "pass",
+        "R-ID-002": "pass",
+        "R-LIC-001": "pass",
+        "R-LIC-002": "pass",
+        "R-LIC-003": "pass",
+        "R-LIC-004": "pass",
+        "R-PATH-001": "pass",
+        "R-SEC-001:doc-coi": "pass",
+        "R-SEC-001:doc-cv": "pass",
+        "R-SEC-001:doc-education": "pass",
+        "R-SEC-001:doc-license": "pass",
+        "R-SEC-001:doc-w9": "pass",
+        "R-SUP-001": "not_applicable",
+        "R-SUP-002": "not_applicable",
+        "R-WORK-001": "pass"
+      },
+      "facts": {
+        "coi": {
+          "aggregate": 300000.0,
+          "carrier": "Price, Day and Frederick Mutual Insurance",
+          "doc_id": "doc-coi",
+          "effective_date": "2026-05-01",
+          "expiration_date": "2027-05-01",
+          "insured_name": "Robert Chen",
+          "per_occurrence": 100000.0,
+          "policy_number": "POL-200013"
+        },
+        "cv": {
+          "doc_id": "doc-cv",
+          "positions": [
+            {
+              "employer": "Harrington, Joseph and Vaughan Behavioral Health",
+              "end": "2023-11-18",
+              "start": "2020-11-18",
+              "title": "Associate Counselor"
+            },
+            {
+              "employer": "Wright Group Counseling Group",
+              "end": null,
+              "start": "2023-11-18",
+              "title": "Licensed Professional Counselor"
+            }
+          ]
+        },
+        "documents": [
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-license",
+            "expected_doc_type": "texas_lpc_license",
+            "legible_score": 0.95,
+            "readable": true,
+            "slot": "license",
+            "uploaded_doc_type": "texas_lpc_license"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-coi",
+            "expected_doc_type": "malpractice_coi",
+            "legible_score": 0.95,
+            "readable": true,
+            "slot": "coi",
+            "uploaded_doc_type": "malpractice_coi"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-cv",
+            "expected_doc_type": "cv",
+            "legible_score": 0.95,
+            "readable": true,
+            "slot": "cv",
+            "uploaded_doc_type": "cv"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-education",
+            "expected_doc_type": "degree_transcript",
+            "legible_score": 0.95,
+            "readable": true,
+            "slot": "education",
+            "uploaded_doc_type": "degree_transcript"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-w9",
+            "expected_doc_type": "w9",
+            "legible_score": 0.95,
+            "readable": true,
+            "slot": "w9",
+            "uploaded_doc_type": "w9"
+          }
+        ],
+        "license": {
+          "doc_id": "doc-license",
+          "expiration_date": "2028-11-16",
+          "holder_name": "Robert Chen",
+          "issue_date": "2020-11-18",
+          "issuing_board": "Texas Behavioral Health Executive Council",
+          "license_number": "LPC-100013",
+          "license_type": "LPC",
+          "status": "Active"
+        },
+        "name_match_probabilities": {
+          "R-COI-004": 0.9,
+          "R-LIC-004": 0.9
+        },
+        "profile": {
+          "legal_name": "Robert J. Chen",
+          "npi": "1000000137",
+          "practice_name": "Schmidt Counseling, PLLC"
+        },
+        "registry_results": {
+          "R-EXC-001": {
+            "checks": {},
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": false,
+            "record_hash": null,
+            "registry": "leie",
+            "status": null
+          },
+          "R-ID-002": {
+            "checks": {
+              "exists": true,
+              "name_consistent": true,
+              "taxonomy_counselor": true
+            },
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": null,
+            "record_hash": null,
+            "registry": "nppes",
+            "status": null
+          }
+        },
+        "supervision": {
+          "supervisor_count": null,
+          "supervisor_license_number": "LPC-100013-SUPERVISOR"
+        },
+        "target_date": "2026-11-17"
+      },
+      "kind": "benign",
+      "packet_id": "benign-4-middle-initial",
+      "primary_defect": null,
+      "target_date": "2026-11-17"
+    },
+    {
+      "defect_ids": [],
+      "description": "intake profile adds a generational suffix the (older) license doesn't have (William Harrison vs William Harrison III); must not false-positive",
+      "documents": {
+        "coi": "packets/benign-5-suffix/coi.pdf",
+        "cv": "packets/benign-5-suffix/cv.pdf",
+        "education": "packets/benign-5-suffix/education.pdf",
+        "license": "packets/benign-5-suffix/license.pdf",
+        "w9": "packets/benign-5-suffix/w9.pdf"
+      },
+      "expected_findings": {
+        "R-COI-001": "pass",
+        "R-COI-002": "pass",
+        "R-COI-003": "pass",
+        "R-COI-004": "pass",
+        "R-DOC-001:doc-coi": "pass",
+        "R-DOC-001:doc-cv": "pass",
+        "R-DOC-001:doc-education": "pass",
+        "R-DOC-001:doc-license": "pass",
+        "R-DOC-001:doc-w9": "pass",
+        "R-DOC-002:doc-coi": "pass",
+        "R-DOC-002:doc-cv": "pass",
+        "R-DOC-002:doc-education": "pass",
+        "R-DOC-002:doc-license": "pass",
+        "R-DOC-002:doc-w9": "pass",
+        "R-EXC-001": "pass",
+        "R-ID-001": "pass",
+        "R-ID-002": "pass",
+        "R-LIC-001": "pass",
+        "R-LIC-002": "pass",
+        "R-LIC-003": "pass",
+        "R-LIC-004": "pass",
+        "R-PATH-001": "pass",
+        "R-SEC-001:doc-coi": "pass",
+        "R-SEC-001:doc-cv": "pass",
+        "R-SEC-001:doc-education": "pass",
+        "R-SEC-001:doc-license": "pass",
+        "R-SEC-001:doc-w9": "pass",
+        "R-SUP-001": "not_applicable",
+        "R-SUP-002": "not_applicable",
+        "R-WORK-001": "pass"
+      },
+      "facts": {
+        "coi": {
+          "aggregate": 300000.0,
+          "carrier": "Wood PLC Mutual Insurance",
+          "doc_id": "doc-coi",
+          "effective_date": "2026-05-01",
+          "expiration_date": "2027-05-01",
+          "insured_name": "William Harrison",
+          "per_occurrence": 100000.0,
+          "policy_number": "POL-200014"
+        },
+        "cv": {
+          "doc_id": "doc-cv",
+          "positions": [
+            {
+              "employer": "Taylor-Webb Behavioral Health",
+              "end": "2023-11-18",
+              "start": "2020-11-18",
+              "title": "Associate Counselor"
+            },
+            {
+              "employer": "Jones Ltd Counseling Group",
+              "end": null,
+              "start": "2023-11-18",
+              "title": "Licensed Professional Counselor"
+            }
+          ]
+        },
+        "documents": [
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-license",
+            "expected_doc_type": "texas_lpc_license",
+            "legible_score": 0.95,
+            "readable": true,
+            "slot": "license",
+            "uploaded_doc_type": "texas_lpc_license"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-coi",
+            "expected_doc_type": "malpractice_coi",
+            "legible_score": 0.95,
+            "readable": true,
+            "slot": "coi",
+            "uploaded_doc_type": "malpractice_coi"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-cv",
+            "expected_doc_type": "cv",
+            "legible_score": 0.95,
+            "readable": true,
+            "slot": "cv",
+            "uploaded_doc_type": "cv"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-education",
+            "expected_doc_type": "degree_transcript",
+            "legible_score": 0.95,
+            "readable": true,
+            "slot": "education",
+            "uploaded_doc_type": "degree_transcript"
+          },
+          {
+            "contains_injection_text": false,
+            "doc_id": "doc-w9",
+            "expected_doc_type": "w9",
+            "legible_score": 0.95,
+            "readable": true,
+            "slot": "w9",
+            "uploaded_doc_type": "w9"
+          }
+        ],
+        "license": {
+          "doc_id": "doc-license",
+          "expiration_date": "2028-11-16",
+          "holder_name": "William Harrison",
+          "issue_date": "2020-11-18",
+          "issuing_board": "Texas Behavioral Health Executive Council",
+          "license_number": "LPC-100014",
+          "license_type": "LPC",
+          "status": "Active"
+        },
+        "name_match_probabilities": {
+          "R-COI-004": 0.9,
+          "R-LIC-004": 0.9
+        },
+        "profile": {
+          "legal_name": "William Harrison III",
+          "npi": "1000000145",
+          "practice_name": "Bauer Counseling, PLLC"
+        },
+        "registry_results": {
+          "R-EXC-001": {
+            "checks": {},
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": false,
+            "record_hash": null,
+            "registry": "leie",
+            "status": null
+          },
+          "R-ID-002": {
+            "checks": {
+              "exists": true,
+              "name_consistent": true,
+              "taxonomy_counselor": true
+            },
+            "exists": null,
+            "fetched_at": null,
+            "possible_match": null,
+            "record_hash": null,
+            "registry": "nppes",
+            "status": null
+          }
+        },
+        "supervision": {
+          "supervisor_count": null,
+          "supervisor_license_number": "LPC-100014-SUPERVISOR"
+        },
+        "target_date": "2026-11-17"
+      },
+      "kind": "benign",
+      "packet_id": "benign-5-suffix",
+      "primary_defect": null,
+      "target_date": "2026-11-17"
     }
   ],
   "rule_pack_version": "0.2.0",

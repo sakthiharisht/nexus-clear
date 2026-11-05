@@ -68,5 +68,20 @@
     "holder_name": "Katherine Robinson",
     "license_type": "LPC",
     "status": "Active"
+  },
+  "LPC-100012": {
+    "holder_name": "Maria Garcia-Lopez",
+    "license_type": "LPC",
+    "status": "Active"
+  },
+  "LPC-100013": {
+    "holder_name": "Robert Chen",
+    "license_type": "LPC",
+    "status": "Active"
+  },
+  "LPC-100014": {
+    "holder_name": "William Harrison",
+    "license_type": "LPC",
+    "status": "Active"
   }
 }

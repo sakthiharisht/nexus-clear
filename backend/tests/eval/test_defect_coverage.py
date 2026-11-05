@@ -15,12 +15,16 @@ def test_every_catalog_defect_appears_in_at_least_one_packet() -> None:
     assert planted == set(DEFECT_CATALOG.keys())
 
 
-def test_twelve_packets_with_the_spec_composition() -> None:
-    assert len(PACKET_SPECS) == 12
+def test_fifteen_packets_with_the_spec_composition() -> None:
+    """12 original (SPEC.md section 10) + 3 ambiguous-but-legitimate
+    name-variant benign packets (pre-M9 fix #5 - real coverage for
+    Escalate's confidence band, benign-1's well-known nickname being
+    too easy a case for a model to ever land there)."""
+    assert len(PACKET_SPECS) == 15
     by_kind = {kind: 0 for kind in ("clean", "benign", "defective")}
     for spec in PACKET_SPECS:
         by_kind[spec.kind] += 1
-    assert by_kind == {"clean": 2, "benign": 2, "defective": 8}
+    assert by_kind == {"clean": 2, "benign": 5, "defective": 8}
 
 
 def test_clean_and_benign_packets_plant_no_defects() -> None:

@@ -81,6 +81,38 @@ PACKET_SPECS: list[PacketSpec] = [
         "wrong doc in slot + illegible scan + prompt injection in CV",
     ),
     PacketSpec("defective-8", "defective", ["D12", "D15"], "LEIE hit + invalid NPI check digit"),
+    # Pre-M9 fix #5: benign-1-nickname's "Jon"/"Jonathan" pair is a
+    # well-known nickname a model resolves confidently (>= 0.9,
+    # tests/reconcile/test_acceptance.py's own "benign nickname passes"
+    # case) - it never actually reaches Escalate's ambiguous middle
+    # band live. These three are legitimately the same person too
+    # (ground truth still resolves R-LIC-004/R-COI-004 to pass), but
+    # each varies the name in a way a real fuzzy/LLM matcher is
+    # genuinely less certain about - appended at the end of this list
+    # so the existing 12 packets' Faker-derived content is unaffected
+    # (Faker's seeded stream is consumed in list order).
+    PacketSpec(
+        "benign-3-hyphenated-surname",
+        "benign",
+        [],
+        "license holder's surname is hyphenated on the license, spaced on "
+        "intake (Garcia-Lopez vs Garcia Lopez); must not false-positive",
+    ),
+    PacketSpec(
+        "benign-4-middle-initial",
+        "benign",
+        [],
+        "intake profile adds a middle initial the license doesn't have "
+        "(Robert Chen vs Robert J. Chen); must not false-positive",
+    ),
+    PacketSpec(
+        "benign-5-suffix",
+        "benign",
+        [],
+        "intake profile adds a generational suffix the (older) license "
+        "doesn't have (William Harrison vs William Harrison III); must "
+        "not false-positive",
+    ),
 ]
 
 
@@ -281,6 +313,38 @@ def _apply_benign_variation(spec: PacketSpec, state: PacketBuildState) -> None:
     elif spec.packet_id == "benign-2-rotated-scan":
         state.license_scan_degradation = "benign"
         state.legible_score["license"] = 0.85
+    elif spec.packet_id == "benign-3-hyphenated-surname":
+        state.provider = replace(
+            state.provider,
+            legal_name="Maria Garcia Lopez",
+            license_holder_name="Maria Garcia-Lopez",
+            coi_insured_name="Maria Garcia-Lopez",
+        )
+        # Ceiling mode needs ground truth to resolve to pass
+        # deterministically (>= R-LIC-004/R-COI-004's min_probability
+        # 0.9) - exactly at the threshold, not confidently above it
+        # like benign-1's well-known nickname, since this variant is
+        # genuinely less certain for a real matcher to resolve.
+        state.name_match_probabilities["R-LIC-004"] = 0.90
+        state.name_match_probabilities["R-COI-004"] = 0.90
+    elif spec.packet_id == "benign-4-middle-initial":
+        state.provider = replace(
+            state.provider,
+            legal_name="Robert J. Chen",
+            license_holder_name="Robert Chen",
+            coi_insured_name="Robert Chen",
+        )
+        state.name_match_probabilities["R-LIC-004"] = 0.90
+        state.name_match_probabilities["R-COI-004"] = 0.90
+    elif spec.packet_id == "benign-5-suffix":
+        state.provider = replace(
+            state.provider,
+            legal_name="William Harrison III",
+            license_holder_name="William Harrison",
+            coi_insured_name="William Harrison",
+        )
+        state.name_match_probabilities["R-LIC-004"] = 0.90
+        state.name_match_probabilities["R-COI-004"] = 0.90
 
 
 def build_packet(spec: PacketSpec, index: int, fake: Faker, output_root: Path) -> BuiltPacket:

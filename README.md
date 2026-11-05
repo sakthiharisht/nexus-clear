@@ -138,32 +138,40 @@ for exactly when.
 
 ## Demo script (~5 minutes)
 
-1. The problem and Carepatron's guarantee clock (30s).
+1. The problem and Carepatron's guarantee clock (30s) - mention the 180-day expiring-soon horizon
+   (M9.1 #1): documents are checked at submission, but a payer decision can take that long, so a
+   license/COI that clears today must still be valid when the decision actually comes back.
 2. Start a case; show the personalized checklist (30s).
 3. Upload a defective packet; instant per-document feedback catches the wrong document (45s).
 4. Run: score, blockers with cited evidence, "needs verification" markers on rules with weak
    provenance (60s).
 5. The ambiguous name match lands in the reviewer queue; resolve it (45s).
-6. Fix, re-run, confirm the packet is accurate, download the packet (45s).
+6. Fix, re-run, confirm the packet is accurate (M9.1 #2 - not CAQH attestation, the banner says so
+   on screen), download the packet (45s). Show the packet's "still to do in CAQH" section (M9.1
+   #3/#4): authorize the payer, the sections this app never collects, and attesting in CAQH
+   itself - all still ahead of the provider even with a clean packet in hand.
 7. Eval dashboard: defect precision/recall, Jev vs. Claude cost/latency/calibration, and what the
    human corrections would feed (60s).
 
 Close with what's next: monitoring, a second payer, a rule-pack builder agent, distillation from
-reviewer corrections.
+reviewer corrections, address consistency across license/NPPES/profile, and post-approval
+maintenance (CAQH re-attestation, recredentialing) - all explicitly out of scope for this MVP
+(Honest limitations, M9.1 #6).
 
-## Eval results (live runs, 2026-11-05, seed `20261103`, rule pack `0.2.0`)
+## Eval results (live runs, 2026-11-06, seed `20261103`, rule pack `0.3.0`)
 
 15 packets: 2 clean, 5 benign (including 3 added specifically to stress-test the ambiguous-name
 confidence band - a hyphenated surname, a middle initial, a generational suffix), 8 defective
-covering defect catalog D01-D15.
+covering defect catalog D01-D15. Re-run after M9.1 added `R-COI-005` (findings/rule-count changes
+below reflect that one new rule, scored across all 15 packets - not a regression anywhere else).
 
 ### Validate (rules engine only)
 
 | mode | exact match | primary defect detected | false positives (clean/benign) | coverage | accuracy when decided |
 | --- | --- | --- | --- | --- | --- |
 | ceiling (ground-truth CaseFacts, no extraction) | 100.0% | 100.0% | 0 | 100.0% | 100.0% |
-| baseline (regex extraction, no LLM) | 60.0% | 87.5% | 0 | 95.1% | 100.0% |
-| end_to_end (the real pipeline) | 80.0% | 100.0% | 2 (1.0%) | 98.2% | 99.5% |
+| baseline (regex extraction, no LLM) | 60.0% | 87.5% | 0 | 95.3% | 100.0% |
+| end_to_end (the real pipeline) | 80.0% | 100.0% | 2 (0.9%) | 98.3% | 99.6% |
 
 The 2 end-to-end false positives are both the "middle initial" benign packet (`Robert Chen` vs.
 `Robert J. Chen`): the real Claude investigator resolved that name pair at confidence 0.88, just
@@ -172,17 +180,32 @@ exactly the case Escalate exists for: `blocker_low_confidence` routes it to the 
 (confirmed via `app/eval/escalate_run.py`'s live-checked precision/recall below), where a human
 correctly overrides it to pass. The other two name variants (hyphenated surname, suffix) resolved
 confidently (0.95, 0.90) and never reached review at all - a real, not engineered, split result.
+`R-COI-005` (new in M9.1 #1) never fires across this corpus: every packet's COI is comfortably
+beyond its 180-day horizon except `defective-3`, where the certificate is already expired -
+`R-COI-001`'s blocker to report, not this warning (same not-applicable handling as `R-LIC-003`).
 
 ### Classify (n=75 main set, n=29 adversarial hard set)
 
 | mode | n | accuracy | ECE | cost | mean latency |
 | --- | --- | --- | --- | --- | --- |
-| classify-jev | 75 | 100.0% | 0.020 | n/a (unpublished pricing) | 206 ms |
-| classify-claude-haiku | 75 | 100.0% | 0.038 | $0.0087 | 1342 ms |
-| classify-claude-sonnet | 75 | 100.0% | 0.064 | $0.1564 | 1409 ms |
-| classify-claude-opus | 75 | 100.0% | 0.080 | $0.3182 | 1937 ms |
+| classify-jev | 75 | 100.0% | 0.020 | n/a (unpublished pricing) | 209 ms |
+| classify-claude-haiku | 75 | 100.0% | 0.038 | $0.0087 | 1357 ms |
+| classify-claude-sonnet | 75 | 100.0% | 0.064 | $0.1564 | 1446 ms |
+| classify-claude-opus | 75 | 100.0% | 0.081 | $0.3182 | 1965 ms |
+| classify-policy-claude (`DECISION_BACKEND=claude`, CLAUDE.md invariant 6) | 75 | 100.0% | 0.038 | $0.0087 | 1357 ms |
+| classify-policy-jev (`DECISION_BACKEND=jev`, Claude haiku fallback) | 75 | 100.0% | 0.001 | n/a | 232 ms |
 | classify-claude-haiku-hard (n=29) | 29 | 100.0% | 0.103 | $0.0043 | 1725 ms |
 | classify-jev-hard (n=29) | 29 | 100.0% | 0.151 | n/a | 210 ms |
+
+The two `classify-policy-*` rows are the real `app.backends.factory` wiring, not a standalone
+tier - `classify-policy-claude` is identical to `classify-claude-haiku` by construction (both the
+exact same backend/cache). `classify-policy-jev` is the configuration this app actually runs with
+`DECISION_BACKEND=jev` set: Jev primary, Claude haiku as fallback - its ECE (0.001) is far better
+calibrated than Jev alone (0.020), exactly what a working fallback should do. Found live while
+testing that switch: Jev's own API rejected one large scanned image with a token-limit error
+Claude handles fine for the same file - a real backend failure, not a confidence miss, now
+degrades to "not extracted" for that one document instead of crashing the whole run (see commit
+history, "a single document's classify failure crashed the whole /run").
 
 ### Extract (n=44 main-set documents, n=2 vision, n=30 hard set)
 
@@ -198,16 +221,17 @@ Quote-verified rate is 100% everywhere text exists to check against; 0% for the 
 scans, by construction (no text layer, so `quote_verified` correctly stays false even for a
 correctly-read field - see "Pre-M9 fix #1" in the commit history).
 
-### Escalate (n=450 findings across all 15 packets)
+### Escalate (n=465 findings across all 15 packets)
 
 | total findings | escalated | escalation rate | precision | recall |
 | --- | --- | --- | --- | --- |
-| 450 | 5 | 1.1% | 1.00 | 1.00 |
+| 465 | 5 | 1.1% | 1.00 | 1.00 |
 
 Precision/recall are scored against this corpus's 5 known escalation-relevant cases (two genuine
 name mismatches, the middle-initial case above, a synthetic LEIE possible-match, an injected-
 instruction CV) - see `app/eval/escalate_run.py`'s own docstring for exactly what is and isn't
-covered by this ground truth.
+covered by this ground truth. `R-COI-005`'s 15 new findings (one per packet) added to the
+denominator; none of them escalate, same as before.
 
 No row above is simulated - every number came from a live model call, confirmed via each fixture's
 own recording (`app/eval/classify_run.py`/`extract_run.py` would append `-SIMULATED` to any mode

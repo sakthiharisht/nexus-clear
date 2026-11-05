@@ -48,10 +48,11 @@ def _upload_clean_1(client: TestClient, case_id: str) -> None:
         assert response.status_code == 201, response.text
 
 
-def _attest(client: TestClient, case_id: str) -> int:
+def _attest(client: TestClient, case: dict[str, Any]) -> int:
     response = client.post(
-        f"/cases/{case_id}/attest",
+        f"/cases/{case['id']}/attest",
         json={"confirmed": True, "attested_by": "reviewer-1", "typed_name": "Reviewer One"},
+        headers={"X-Provider-Token": case["provider_token"]},
     )
     return response.status_code
 
@@ -59,7 +60,7 @@ def _attest(client: TestClient, case_id: str) -> int:
 def test_attest_fails_if_the_case_was_never_run(api_client: TestClient) -> None:
     case = _create_case(api_client)
     _upload_clean_1(api_client, case["id"])
-    assert _attest(api_client, case["id"]) == 409
+    assert _attest(api_client, case) == 409
 
 
 def test_attest_succeeds_right_after_a_clean_run_with_no_open_issues(
@@ -71,7 +72,7 @@ def test_attest_succeeds_right_after_a_clean_run_with_no_open_issues(
     assert run_response.status_code == 200, run_response.text
     assert run_response.json()["escalated_finding_ids"] == []
 
-    assert _attest(api_client, case["id"]) == 200
+    assert _attest(api_client, case) == 200
 
 
 def test_attest_fails_after_an_upload_that_postdates_the_last_run(
@@ -94,4 +95,4 @@ def test_attest_fails_after_an_upload_that_postdates_the_last_run(
     case_row.last_run_at = datetime(2000, 1, 1, tzinfo=UTC)
     db_session.commit()
 
-    assert _attest(api_client, case["id"]) == 409
+    assert _attest(api_client, case) == 409

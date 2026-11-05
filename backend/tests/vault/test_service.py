@@ -5,6 +5,7 @@ asserted directly against what actually got written, not just inferred.
 """
 
 import hashlib
+import secrets
 import uuid
 from datetime import date
 from pathlib import Path
@@ -30,6 +31,7 @@ def _make_case(db_session: Session, key_manager: LocalKeyManager) -> Case:
         provider_type="LPC",
         target_date=date(2026, 11, 17),
         wrapped_data_key=service.create_wrapped_case_key(key_manager, case_id=case_id),
+        provider_token=secrets.token_urlsafe(24),
     )
     db_session.add(case)
     db_session.flush()

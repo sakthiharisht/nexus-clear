@@ -102,5 +102,14 @@ class Settings(BaseSettings):
     low_confidence_threshold: float = 0.60
     blocker_confidence_threshold: float = 0.90
 
+    # Pre-M9 fix #4 - demo-grade auth (SPEC.md section 8: "a role
+    # switch (provider | reviewer), no real auth in MVP"). One shared
+    # secret for the reviewer role across every case - unlike
+    # provider_token (per-case, app/core/orm.py's Case.provider_token),
+    # there's exactly one reviewer role in this demo, not one per
+    # case. Never a real identity/authorization system; README (M9)
+    # states this plainly.
+    reviewer_token: str = "demo-reviewer-token"
+
 
 settings = Settings()

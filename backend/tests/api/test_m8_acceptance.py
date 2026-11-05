@@ -79,6 +79,13 @@ def _upload_clean_1(client: TestClient, case_id: str) -> None:
         assert response.status_code == 201, response.text
 
 
+def _attest_headers(case: dict[str, Any]) -> dict[str, str]:
+    return {"X-Provider-Token": case["provider_token"]}
+
+
+_REVIEWER_HEADERS = {"X-Reviewer-Token": real_settings.reviewer_token}
+
+
 def _run_acceptance_flow(client: TestClient, db_session: Session) -> None:
     case = _create_case(client)
     case_id = case["id"]
@@ -101,6 +108,7 @@ def _run_acceptance_flow(client: TestClient, db_session: Session) -> None:
     blocked = client.post(
         f"/cases/{case_id}/attest",
         json={"confirmed": True, "attested_by": "reviewer-1", "typed_name": "Reviewer One"},
+        headers=_attest_headers(case),
     )
     assert blocked.status_code == 409
 
@@ -117,6 +125,7 @@ def _run_acceptance_flow(client: TestClient, db_session: Session) -> None:
                 "note": "Confirmed same person via a secondary ID check.",
                 "resolved_by": "reviewer-1",
             },
+            headers=_REVIEWER_HEADERS,
         )
         assert resolve.status_code == 200, resolve.text
         assert resolve.json()["status"] == "resolved"
@@ -139,6 +148,7 @@ def _run_acceptance_flow(client: TestClient, db_session: Session) -> None:
     stale = client.post(
         f"/cases/{case_id}/attest",
         json={"confirmed": True, "attested_by": "reviewer-1", "typed_name": "Reviewer One"},
+        headers=_attest_headers(case),
     )
     assert stale.status_code == 409
 
@@ -154,6 +164,7 @@ def _run_acceptance_flow(client: TestClient, db_session: Session) -> None:
     attest = client.post(
         f"/cases/{case_id}/attest",
         json={"confirmed": True, "attested_by": "reviewer-1", "typed_name": "Reviewer One"},
+        headers=_attest_headers(case),
     )
     assert attest.status_code == 200, attest.text
     attest_body = attest.json()
@@ -169,6 +180,7 @@ def _run_acceptance_flow(client: TestClient, db_session: Session) -> None:
     again = client.post(
         f"/cases/{case_id}/attest",
         json={"confirmed": True, "attested_by": "reviewer-1", "typed_name": "Reviewer One"},
+        headers=_attest_headers(case),
     )
     assert again.status_code == 409
 
@@ -212,11 +224,29 @@ def test_attest_requires_an_explicit_confirmation_payload(api_client: TestClient
     missing_confirmed = api_client.post(
         f"/cases/{case['id']}/attest",
         json={"attested_by": "reviewer-1", "typed_name": "Reviewer One"},
+        headers=_attest_headers(case),
     )
     assert missing_confirmed.status_code == 422
 
     confirmed_false = api_client.post(
         f"/cases/{case['id']}/attest",
         json={"confirmed": False, "attested_by": "reviewer-1", "typed_name": "Reviewer One"},
+        headers=_attest_headers(case),
     )
     assert confirmed_false.status_code == 422
+
+
+def test_attest_requires_the_cases_own_provider_token(api_client: TestClient) -> None:
+    case = _create_case(api_client)
+    response = api_client.post(
+        f"/cases/{case['id']}/attest",
+        json={"confirmed": True, "attested_by": "reviewer-1", "typed_name": "Reviewer One"},
+        headers={"X-Provider-Token": "wrong-token"},
+    )
+    assert response.status_code == 403
+
+    missing_header = api_client.post(
+        f"/cases/{case['id']}/attest",
+        json={"confirmed": True, "attested_by": "reviewer-1", "typed_name": "Reviewer One"},
+    )
+    assert missing_header.status_code == 422  # FastAPI: required header absent

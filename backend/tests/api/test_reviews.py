@@ -5,14 +5,18 @@ the override_status requirement, and the already-resolved conflict.
 
 from __future__ import annotations
 
+import secrets
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.core.config import settings as real_settings
 from app.core.orm import Case, FindingRecord, ReviewItem
 from app.vault import service
 from tests.api.conftest import VaultComponents
+
+_REVIEWER_HEADERS = {"X-Reviewer-Token": real_settings.reviewer_token}
 
 
 def _seed_case_with_review_item(
@@ -28,6 +32,7 @@ def _seed_case_with_review_item(
         wrapped_data_key=service.create_wrapped_case_key(
             vault_components.key_manager, case_id=case_id
         ),
+        provider_token=secrets.token_urlsafe(24),
     )
     db_session.add(case)
     db_session.flush()
@@ -67,8 +72,21 @@ def test_resolve_unknown_review_is_404(api_client: TestClient) -> None:
     response = api_client.post(
         f"/reviews/{uuid4()}/resolve",
         json={"decision": "confirm", "note": "x", "resolved_by": "reviewer-1"},
+        headers=_REVIEWER_HEADERS,
     )
     assert response.status_code == 404
+
+
+def test_resolve_requires_the_reviewer_token(
+    api_client: TestClient, db_session: Session, vault_components: VaultComponents
+) -> None:
+    _case, review_item = _seed_case_with_review_item(db_session, vault_components)
+    response = api_client.post(
+        f"/reviews/{review_item.id}/resolve",
+        json={"decision": "confirm", "note": "x", "resolved_by": "reviewer-1"},
+        headers={"X-Reviewer-Token": "wrong-token"},
+    )
+    assert response.status_code == 403
 
 
 def test_override_without_override_status_is_rejected(
@@ -78,6 +96,7 @@ def test_override_without_override_status_is_rejected(
     response = api_client.post(
         f"/reviews/{review_item.id}/resolve",
         json={"decision": "override", "note": "x", "resolved_by": "reviewer-1"},
+        headers=_REVIEWER_HEADERS,
     )
     assert response.status_code == 400
 
@@ -89,12 +108,14 @@ def test_resolving_an_already_resolved_item_is_a_conflict(
     first = api_client.post(
         f"/reviews/{review_item.id}/resolve",
         json={"decision": "confirm", "note": "x", "resolved_by": "reviewer-1"},
+        headers=_REVIEWER_HEADERS,
     )
     assert first.status_code == 200
 
     second = api_client.post(
         f"/reviews/{review_item.id}/resolve",
         json={"decision": "confirm", "note": "y", "resolved_by": "reviewer-2"},
+        headers=_REVIEWER_HEADERS,
     )
     assert second.status_code == 409
 
@@ -106,6 +127,7 @@ def test_confirm_keeps_the_original_status_but_marks_decided_by_human(
     response = api_client.post(
         f"/reviews/{review_item.id}/resolve",
         json={"decision": "confirm", "note": "confirmed correct", "resolved_by": "reviewer-1"},
+        headers=_REVIEWER_HEADERS,
     )
     assert response.status_code == 200
 
@@ -127,6 +149,7 @@ def test_override_changes_the_findings_status(
             "note": "confirmed same person",
             "resolved_by": "reviewer-1",
         },
+        headers=_REVIEWER_HEADERS,
     )
     assert response.status_code == 200
 

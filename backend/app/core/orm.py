@@ -77,6 +77,14 @@ class Case(Base):
     # before attesting.
     last_run_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
+    # Pre-M9 fix #4 - demo-grade auth (SPEC.md section 8: "a role
+    # switch (provider | reviewer), no real auth in MVP"). Generated
+    # once at case creation (app/api/cases.py), returned only in that
+    # response - never re-exposed by GET /cases/{id}. Proves the caller
+    # holds the token this specific case was created with; nothing
+    # more. Not a substitute for real identity verification.
+    provider_token: Mapped[str] = mapped_column(String, nullable=False)
+
 
 class Document(Base):
     __tablename__ = "documents"

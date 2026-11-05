@@ -14,6 +14,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.api.auth import require_reviewer_token
 from app.api.deps import get_session
 from app.api.schemas import (
     ResolveReviewRequest,
@@ -67,7 +68,10 @@ def get_review(review_id: UUID, session: Session = Depends(get_session)) -> dict
 
 @router.post("/{review_id}/resolve", response_model=ReviewItemResponse)
 def resolve_review(
-    review_id: UUID, body: ResolveReviewRequest, session: Session = Depends(get_session)
+    review_id: UUID,
+    body: ResolveReviewRequest,
+    session: Session = Depends(get_session),
+    _reviewer: None = Depends(require_reviewer_token),
 ) -> ReviewItem:
     item = _get_review_item_or_404(session, review_id)
     if item.status == "resolved":

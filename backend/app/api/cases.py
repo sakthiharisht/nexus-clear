@@ -14,12 +14,14 @@ from __future__ import annotations
 
 import hashlib
 import json
+import secrets
 from datetime import UTC, date, datetime, timedelta
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
+from app.api.auth import require_provider_token
 from app.api.deps import (
     get_blob_store,
     get_extractor,
@@ -34,6 +36,7 @@ from app.api.deps import (
 from app.api.schemas import (
     AttestRequest,
     AttestResponse,
+    CaseCreatedResponse,
     CaseResponse,
     ChecklistResponse,
     ChecklistSlot,
@@ -108,7 +111,7 @@ def _get_case_or_404(session: Session, case_id: UUID) -> Case:
     return case
 
 
-@router.post("", response_model=CaseResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=CaseCreatedResponse, status_code=status.HTTP_201_CREATED)
 def create_case(
     body: CreateCaseRequest,
     session: Session = Depends(get_session),
@@ -133,6 +136,8 @@ def create_case(
         provider_profile=body.provider_profile.model_dump(mode="json"),
         target_date=target_date,
         wrapped_data_key=service.create_wrapped_case_key(key_manager, case_id=case_id),
+        # Pre-M9 fix #4: this response is the only time it's ever shown.
+        provider_token=secrets.token_urlsafe(24),
     )
     session.add(case)
     session.commit()
@@ -281,9 +286,11 @@ def _case_extractions(session: Session, case_id: UUID) -> list[Extraction]:
 
 @router.post("/{case_id}/attest", response_model=AttestResponse)
 def attest(
-    case_id: UUID, body: AttestRequest, session: Session = Depends(get_session)
+    case_id: UUID,
+    body: AttestRequest,
+    session: Session = Depends(get_session),
+    case: Case = Depends(require_provider_token),
 ) -> AttestResponse:
-    case = _get_case_or_404(session, case_id)
     if case.attested_at is not None:
         raise HTTPException(status.HTTP_409_CONFLICT, "case is already attested")
 

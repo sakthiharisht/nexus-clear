@@ -55,6 +55,14 @@ class CaseResponse(BaseModel):
     created_at: datetime
 
 
+class CaseCreatedResponse(CaseResponse):
+    # Pre-M9 fix #4: returned only here, once, at creation - never
+    # re-exposed by GET /cases/{id} (CaseResponse itself has no such
+    # field). The caller must save it; there is no recovery endpoint,
+    # same as any other demo-grade bearer token.
+    provider_token: str
+
+
 class ChecklistSlot(BaseModel):
     slot: str
     doc_type: str

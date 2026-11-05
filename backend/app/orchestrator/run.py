@@ -40,6 +40,8 @@ from datetime import UTC, datetime
 from typing import Literal
 from uuid import UUID
 
+import anthropic
+import httpx
 import pypdf
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -185,7 +187,17 @@ def run_case(
                 classify_input, primary=primary_backend, fallback=fallback_backend,
                 tau_classify=tau_classify, legible_threshold=legible_threshold,
             )
-        except ValueError as exc:
+        # ValueError: a backend's own deliberate "couldn't answer this"
+        # signal (e.g. ClaudeBackend's missing structured output).
+        # httpx.HTTPStatusError / anthropic.APIError: the underlying
+        # HTTP client's own failure for a single call - JevBackend
+        # doesn't wrap raise_for_status() at all, and the Anthropic SDK
+        # raises its own exception type rather than ValueError. Without
+        # catching these too, one oversized or malformed document's
+        # classify call crashes the whole /run instead of escalating
+        # just that document - found live when Jev's own token limit
+        # rejected a large scanned image Claude handles fine.
+        except (ValueError, httpx.HTTPStatusError, anthropic.APIError) as exc:
             logger.warning(
                 "classify failed case_id=%s slot=%s backend=%s: %s",
                 case.id, document.slot, primary_backend.name, exc,

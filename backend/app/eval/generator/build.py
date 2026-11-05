@@ -19,7 +19,7 @@ from app.eval.generator.defects import DEFECT_CATALOG
 from app.eval.generator.packets import PACKET_SPECS, TARGET_DATE, build_packet
 
 DEFAULT_SEED = 20261103
-RULE_PACK_VERSION = "0.2.0"
+RULE_PACK_VERSION = "0.3.0"
 
 # A standing, non-packet-attached LEIE fixture (tests/reconcile/
 # test_investigator_injection.py): a synthetic exclusion-check record

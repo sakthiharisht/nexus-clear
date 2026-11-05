@@ -68,7 +68,7 @@ def _write_pack(tmp_path: Path, data: dict[str, Any]) -> Path:
 def test_loads_the_real_seed_pack() -> None:
     pack = load_rule_pack(REAL_PACK_PATH)
     assert pack.pack_id == "tx-bcbstx-lpc"
-    assert len(pack.rules) == 18
+    assert len(pack.rules) == 19
     # Every rule's params must already match its kind (Rule's own
     # model_validator enforces this at load time); re-checking here just
     # documents the expectation for readers of this test.

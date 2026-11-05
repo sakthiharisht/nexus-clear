@@ -10,9 +10,22 @@
 # (R-SUP-001), `registry_flags_check` (R-ID-002), `registry_exclusion_check`
 # (R-EXC-001) — each had an unrelated params shape under the old shared kind.
 # R-WORK-001's title was shortened (mechanical rename, no behavior change).
+#
+# v0.3.0 (M9.1 gap-fix pass): documents are checked at submission, but a
+# payer decision (per Carepatron's published guidance, not a BCBSTX rule -
+# https://www.carepatron.com/blog/insurance-credentialing-guide/) typically
+# takes 60-180 days, and therapists often wait 4-6 months; a file returned
+# for corrections "effectively restarts the clock." A 90-day expiring-soon
+# warning could clear Validate today and still expire before a decision
+# comes back. Default expiring-soon horizon is now 180 days (R-LIC-003,
+# and the new R-COI-005 below) - configurable per rule via `within_days`,
+# both marked needs_verification: true (this is a policy choice reacting to
+# a third-party timeline claim, not a confirmed BCBSTX requirement; confirm
+# the real expected decision window with BCBSTX before relying on it).
+# R-LIC-002/R-COI-001 (already-expired, blockers) are unchanged.
 
 pack_id: tx-bcbstx-lpc
-version: 0.2.0
+version: 0.3.0
 jurisdiction: TX
 payer: BCBSTX
 provider_type: LPC
@@ -113,12 +126,16 @@ rules:
     needs_verification: false
 
   - id: R-LIC-003
-    title: License does not expire within 90 days of the target date
+    title: License does not expire within 180 days of the target date
     severity: warning
     kind: date_expiring_soon
-    params: {field: license.expiration_date, as_of: target_date, within_days: 90}
+    params: {field: license.expiration_date, as_of: target_date, within_days: 180}
     source: internal_policy
-    needs_verification: false
+    needs_verification: true
+    note: >
+      Horizon widened from 90 to 180 days (v0.3.0) because a payer decision can take up to
+      180 days per published third-party guidance (Carepatron), not a BCBSTX-stated review
+      window - confirm the real expected decision timeline with BCBSTX.
 
   - id: R-LIC-004
     title: License holder name matches the provider profile
@@ -178,6 +195,18 @@ rules:
     params: {left: coi.insured_name, right: profile.legal_name, alt_right: profile.practice_name, min_probability: 0.9}
     source: internal_policy
     needs_verification: false
+
+  - id: R-COI-005
+    title: Malpractice certificate does not expire within 180 days of the target date
+    severity: warning
+    kind: date_expiring_soon
+    params: {field: coi.expiration_date, as_of: target_date, within_days: 180}
+    source: internal_policy
+    needs_verification: true
+    note: >
+      New in v0.3.0, same reasoning as R-LIC-003: a payer decision can take up to 180 days
+      per published third-party guidance (Carepatron), not a BCBSTX-stated review window -
+      confirm the real expected decision timeline with BCBSTX.
 
   - id: R-WORK-001
     title: Work history has no gap over 6 months

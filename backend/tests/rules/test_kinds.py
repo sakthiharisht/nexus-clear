@@ -241,6 +241,29 @@ class TestDateExpiringSoon:
         assert evaluate_date_expiring_soon(self.params, ctx).status == "not_applicable"
 
 
+class TestDateExpiringSoonAt180Days:
+    """v0.3.0: R-LIC-003/R-COI-005's real configured horizon (rules/
+    tx_bcbstx_lpc.yaml) - a parallel boundary suite at the value actually
+    shipped, kept alongside TestDateExpiringSoon's generic 90-day coverage
+    above rather than replacing it."""
+
+    params = DateExpiringSoonParams(
+        field="coi.expiration_date", as_of="target_date", within_days=180
+    )
+
+    def test_boundary_fail_one_day_inside_the_180_day_window(self) -> None:
+        ctx = _ctx(coi=CoiFacts(expiration_date=AS_OF + timedelta(days=179)))
+        assert evaluate_date_expiring_soon(self.params, ctx).status == "fail"
+
+    def test_boundary_fail_exactly_at_the_180_day_edge(self) -> None:
+        ctx = _ctx(coi=CoiFacts(expiration_date=AS_OF + timedelta(days=180)))
+        assert evaluate_date_expiring_soon(self.params, ctx).status == "fail"
+
+    def test_boundary_pass_one_day_past_the_180_day_edge(self) -> None:
+        ctx = _ctx(coi=CoiFacts(expiration_date=AS_OF + timedelta(days=181)))
+        assert evaluate_date_expiring_soon(self.params, ctx).status == "pass"
+
+
 class TestNameMatch:
     params = NameMatchParams(
         left="license.holder_name", right="profile.legal_name", min_probability=0.9

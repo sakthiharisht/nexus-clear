@@ -25,6 +25,7 @@ SINGLE_RULE_IDS = [
     "R-COI-002",
     "R-COI-003",
     "R-COI-004",
+    "R-COI-005",
     "R-WORK-001",
     "R-ID-001",
     "R-ID-002",
@@ -38,7 +39,9 @@ SINGLE_RULE_IDS = [
 DEFECT_OVERRIDES: dict[str, dict[str, FindingStatus]] = {
     "D01": {"R-LIC-002": "fail", "R-LIC-003": "not_applicable"},
     "D02": {"R-LIC-003": "fail"},
-    "D03": {"R-COI-001": "fail"},
+    # v0.3.0: same reasoning as D01/R-LIC-003 above - an already-expired
+    # COI is R-COI-001's blocker to report, not R-COI-005's warning.
+    "D03": {"R-COI-001": "fail", "R-COI-005": "not_applicable"},
     "D04": {"R-COI-002": "fail"},
     "D05": {"R-LIC-004": "fail", "R-ID-002": "fail"},
     "D06": {"R-LIC-001": "fail", "R-SUP-001": "pass", "R-SUP-002": "pass"},

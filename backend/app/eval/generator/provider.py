@@ -76,7 +76,10 @@ def build_provider(index: int, target_date: date, fake: Faker) -> ProviderSpec:
     license_expiration = target_date + timedelta(days=365 * 2)
 
     coi_effective = target_date - timedelta(days=200)
-    coi_expiration = target_date + timedelta(days=165)
+    # v0.3.0: R-COI-005 warns inside 180 days of target_date - 165 would
+    # have made every clean/benign packet a false positive the moment that
+    # rule shipped. 365 (an annual policy term) clears it comfortably.
+    coi_expiration = target_date + timedelta(days=365)
 
     # Continuous 5+ year work history ending "today" (ongoing), no gaps.
     job1_start = target_date - timedelta(days=365 * 6)

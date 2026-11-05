@@ -193,7 +193,9 @@ def _clean_case_facts() -> CaseFacts:
             holder_name="Jane Provider",
             license_type="LPC",
             status="Active",
-            expiration_date=date(2027, 6, 1),
+            # v0.3.0: comfortably beyond R-LIC-003's 180-day horizon, not
+            # just past it - this fixture represents a clean case.
+            expiration_date=date(2028, 1, 1),
         ),
         coi=CoiFacts(
             doc_id="doc-coi",
@@ -201,7 +203,8 @@ def _clean_case_facts() -> CaseFacts:
             carrier="Acme Ins",
             policy_number="P-123",
             effective_date=date(2026, 1, 1),
-            expiration_date=date(2027, 1, 1),
+            # v0.3.0: comfortably beyond R-COI-005's 180-day horizon too.
+            expiration_date=date(2028, 1, 1),
             per_occurrence=100_000,
             aggregate=300_000,
         ),
@@ -223,7 +226,7 @@ def _clean_case_facts() -> CaseFacts:
 def test_real_pack_loads_and_evaluates_without_error() -> None:
     pack = load_rule_pack(REAL_PACK_PATH)
     findings = evaluate_rule_pack(pack, _clean_case_facts(), AS_OF)
-    assert len(findings) == 18  # one per rule; exactly one document uploaded
+    assert len(findings) == 19  # one per rule; exactly one document uploaded
     assert all(f.evidence for f in findings)  # invariant 2: always evidence
 
 

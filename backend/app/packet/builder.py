@@ -26,6 +26,53 @@ PACKET_LABEL = "CAQH-style profile - not a CAQH/DataSpring submission"
 _DOCUMENT_SCHEMAS = ("license", "coi", "cv")
 
 
+class CaqhStep(BaseModel):
+    """One deterministic, static item this app never fills in and never
+    claims to - not derived from any case data, so it's identical on
+    every packet. needs_verification is always True here: the list
+    itself (which CAQH sections exist, and that authorization is
+    separate from attestation) is sourced from Carepatron's published
+    guidance, not CAQH's or BCBSTX's own documentation (M9.1 #3/#4;
+    verified live against
+    https://www.carepatron.com/blog/what-is-caqh-and-how-to-set-it-up)."""
+
+    description: str
+    source_id: str = "carepatron_caqh_guide"
+    needs_verification: bool = True
+
+
+# M9.1 #3 (payer authorization) + #4 (what the packet doesn't cover):
+# this app only ever reads license/COI/CV/education/W9 documents - a
+# real CAQH profile has several other sections, and access control
+# separate from the profile's own completeness, that nothing here
+# touches. Order follows the CAQH ProView flow: authorize first (a
+# payer can't see a profile at all without it, complete or not), then
+# the sections this app doesn't collect, then attest last.
+STILL_TO_DO_IN_CAQH: list[CaqhStep] = [
+    CaqhStep(
+        description=(
+            "Authorize the payer(s) you're credentialing with to access your CAQH profile - "
+            "without this, a payer can't see your data even if the profile is complete."
+        )
+    ),
+    CaqhStep(description="Complete practice locations (not collected by this app)."),
+    CaqhStep(description="Complete hospital affiliations (not collected by this app)."),
+    CaqhStep(description="Answer the disclosure questions (not collected by this app)."),
+    CaqhStep(description="List your specialties (not collected by this app)."),
+    CaqhStep(description="Add professional references (not collected by this app)."),
+    CaqhStep(
+        description="Add board certifications, if applicable (not collected by this app)."
+    ),
+    CaqhStep(
+        description=(
+            "Attest inside CAQH - your profile is not active and complete until you do, and "
+            "CAQH requires periodic re-attestation afterward. This app's own confirmation step "
+            "is not CAQH attestation."
+        )
+    ),
+]
+
+
 class CaqhStylePacket(BaseModel):
     case_id: UUID
     label: str = PACKET_LABEL
@@ -33,6 +80,7 @@ class CaqhStylePacket(BaseModel):
     license: dict[str, object] = {}
     coi: dict[str, object] = {}
     cv: dict[str, object] = {}
+    still_to_do_in_caqh: list[CaqhStep] = STILL_TO_DO_IN_CAQH
 
 
 def _verified_value(field: object) -> tuple[bool, object]:

@@ -175,6 +175,11 @@ def _run_acceptance_flow(client: TestClient, db_session: Session) -> None:
     packet = packet_response.json()
     assert packet["license"].get("holder_name") == "Christopher Lee"
     assert packet["label"].startswith("CAQH-style")
+    # M9.1 #3/#4: the packet always says what's still left to do in
+    # CAQH itself - never implied as covered just because license/COI/CV
+    # came back verified.
+    assert len(packet["still_to_do_in_caqh"]) > 0
+    assert all(step["needs_verification"] for step in packet["still_to_do_in_caqh"])
 
     # Re-attesting is rejected, not silently repeated.
     again = client.post(

@@ -24,6 +24,26 @@ cover).
 - It is an MVP built for a hiring interview, not a production system. See "Honest limitations"
   below for what that means concretely.
 
+## Payer authorization and other CAQH steps
+
+The attested/confirmed packet (`app/packet/builder.py`'s `still_to_do_in_caqh`, shown on the
+Packet & confirmation screen) always lists what this app does **not** do, regardless of how much
+of the license/COI/CV came back verified - never implied as covered just because those three did:
+
+- **Authorize the payer to access the profile.** CAQH's own documentation states a payer can't see
+  a profile at all without this, complete or not - it's a separate step from completing the
+  profile, and a separate step again from attesting it.
+- **Practice locations, hospital affiliations, disclosure questions, specialties, professional
+  references, and board certifications** (if applicable) - none of these are collected by this
+  app; it only ever reads license, COI, CV, education, and W9 documents.
+- **Attest (and periodically re-attest) inside CAQH itself.** This app's own confirmation step
+  (SPEC.md/M9.1 #2) is explicitly not CAQH attestation.
+
+This list is static (identical on every packet, not derived from case data) and sourced from
+Carepatron's own published CAQH guide (marketing content, not CAQH's or BCBSTX's own
+documentation), so every item carries a visible `needs_verification` flag -
+`https://www.carepatron.com/blog/what-is-caqh-and-how-to-set-it-up`, confirmed live.
+
 ## Architecture
 
 ```mermaid

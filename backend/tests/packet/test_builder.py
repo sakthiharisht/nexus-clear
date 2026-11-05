@@ -8,7 +8,7 @@ from __future__ import annotations
 from uuid import uuid4
 
 from app.core.orm import Extraction
-from app.packet.builder import PACKET_LABEL, build_packet
+from app.packet.builder import PACKET_LABEL, STILL_TO_DO_IN_CAQH, build_packet
 
 
 def _extraction(schema_version: str, fields: dict[str, object]) -> Extraction:
@@ -78,3 +78,50 @@ def test_the_packet_label_never_claims_to_be_a_real_caqh_submission() -> None:
     packet = build_packet(uuid4(), provider_profile={}, extractions=[])
     assert packet.label == PACKET_LABEL
     assert "not a" in PACKET_LABEL.lower()
+
+
+def test_still_to_do_in_caqh_is_always_present_regardless_of_case_content() -> None:
+    """M9.1 #3/#4: this section is static - not derived from the case's
+    profile or extractions - so it must be identical whether the
+    packet is fully verified or completely empty."""
+    empty = build_packet(uuid4(), provider_profile={}, extractions=[])
+    full_extraction = _extraction(
+        "license",
+        {
+            "holder_name": _known("Christopher Lee"),
+            "license_number": _known("LPC-100000"),
+        },
+    )
+    full = build_packet(
+        uuid4(),
+        provider_profile={"legal_name": "Christopher Lee", "npi": "1000000004"},
+        extractions=[full_extraction],
+    )
+    assert empty.still_to_do_in_caqh == STILL_TO_DO_IN_CAQH
+    assert full.still_to_do_in_caqh == STILL_TO_DO_IN_CAQH
+    assert len(STILL_TO_DO_IN_CAQH) > 0
+
+
+def test_still_to_do_in_caqh_covers_authorization_and_attestation_and_is_flagged() -> None:
+    packet = build_packet(uuid4(), provider_profile={}, extractions=[])
+    descriptions = " ".join(step.description.lower() for step in packet.still_to_do_in_caqh)
+    assert "authorize" in descriptions
+    assert "attest" in descriptions
+    # Every item is a third-party-sourced policy claim about what CAQH
+    # requires, not something this app verified against CAQH's own
+    # documentation - must stay visibly flagged (CLAUDE.md: items marked
+    # needs_verification must stay visible in the UI).
+    assert all(step.needs_verification for step in packet.still_to_do_in_caqh)
+    assert all(step.source_id for step in packet.still_to_do_in_caqh)
+
+
+def test_still_to_do_in_caqh_never_claims_the_uncollected_sections_were_filled() -> None:
+    """Even when the packet has verified license/COI/CV data, the
+    CAQH-sections list must still say those other sections (practice
+    locations, hospital affiliations, etc.) are not collected - this
+    app filling in license/COI/CV must never be read as filling in the
+    rest of a CAQH profile too."""
+    extraction = _extraction("license", {"holder_name": _known("Christopher Lee")})
+    packet = build_packet(uuid4(), provider_profile={}, extractions=[extraction])
+    not_collected = [s for s in packet.still_to_do_in_caqh if "not collected" in s.description]
+    assert len(not_collected) >= 5

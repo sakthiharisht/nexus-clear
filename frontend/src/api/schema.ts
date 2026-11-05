@@ -138,7 +138,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Attest */
+        /**
+         * Confirm packet is accurate
+         * @description Provider confirmation that the packet is accurate and complete, gated on no open blockers and no unresolved review items. This is NOT CAQH attestation - the provider must still log into CAQH and attest there separately; this app never submits to CAQH/DataSpring or any payer (endpoint path and field names kept as 'attest'/'attested_*' for API stability - M9.1 #2 renamed only user-facing copy).
+         */
         post: operations["attest_cases__case_id__attest_post"];
         delete?: never;
         options?: never;
@@ -328,6 +331,31 @@ export interface components {
             /** File */
             file: string;
         };
+        /**
+         * CaqhStep
+         * @description One deterministic, static item this app never fills in and never
+         *     claims to - not derived from any case data, so it's identical on
+         *     every packet. needs_verification is always True here: the list
+         *     itself (which CAQH sections exist, and that authorization is
+         *     separate from attestation) is sourced from Carepatron's published
+         *     guidance, not CAQH's or BCBSTX's own documentation (M9.1 #3/#4;
+         *     verified live against
+         *     https://www.carepatron.com/blog/what-is-caqh-and-how-to-set-it-up).
+         */
+        CaqhStep: {
+            /** Description */
+            description: string;
+            /**
+             * Source Id
+             * @default carepatron_caqh_guide
+             */
+            source_id: string;
+            /**
+             * Needs Verification
+             * @default true
+             */
+            needs_verification: boolean;
+        };
         /** CaqhStylePacket */
         CaqhStylePacket: {
             /**
@@ -365,6 +393,52 @@ export interface components {
             cv: {
                 [key: string]: unknown;
             };
+            /**
+             * Still To Do In Caqh
+             * @default [
+             *       {
+             *         "description": "Authorize the payer(s) you're credentialing with to access your CAQH profile - without this, a payer can't see your data even if the profile is complete.",
+             *         "source_id": "carepatron_caqh_guide",
+             *         "needs_verification": true
+             *       },
+             *       {
+             *         "description": "Complete practice locations (not collected by this app).",
+             *         "source_id": "carepatron_caqh_guide",
+             *         "needs_verification": true
+             *       },
+             *       {
+             *         "description": "Complete hospital affiliations (not collected by this app).",
+             *         "source_id": "carepatron_caqh_guide",
+             *         "needs_verification": true
+             *       },
+             *       {
+             *         "description": "Answer the disclosure questions (not collected by this app).",
+             *         "source_id": "carepatron_caqh_guide",
+             *         "needs_verification": true
+             *       },
+             *       {
+             *         "description": "List your specialties (not collected by this app).",
+             *         "source_id": "carepatron_caqh_guide",
+             *         "needs_verification": true
+             *       },
+             *       {
+             *         "description": "Add professional references (not collected by this app).",
+             *         "source_id": "carepatron_caqh_guide",
+             *         "needs_verification": true
+             *       },
+             *       {
+             *         "description": "Add board certifications, if applicable (not collected by this app).",
+             *         "source_id": "carepatron_caqh_guide",
+             *         "needs_verification": true
+             *       },
+             *       {
+             *         "description": "Attest inside CAQH - your profile is not active and complete until you do, and CAQH requires periodic re-attestation afterward. This app's own confirmation step is not CAQH attestation.",
+             *         "source_id": "carepatron_caqh_guide",
+             *         "needs_verification": true
+             *       }
+             *     ]
+             */
+            still_to_do_in_caqh: components["schemas"]["CaqhStep"][];
         };
         /** CaseCreatedResponse */
         CaseCreatedResponse: {

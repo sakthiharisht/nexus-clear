@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import type { components } from "../api/client";
+import { NeedsVerificationBadge } from "../components/Badges";
 import { getCaseId, getProviderToken } from "../session";
 
 type CaqhStylePacket = components["schemas"]["CaqhStylePacket"];
@@ -75,6 +76,19 @@ export default function PacketAttest() {
           <pre>{JSON.stringify(packet.coi, null, 2)}</pre>
           <h3>CV (verified fields only)</h3>
           <pre>{JSON.stringify(packet.cv, null, 2)}</pre>
+          <h3>Still to do in CAQH</h3>
+          <p className="hint">
+            This app never submits to CAQH and never fills these in - source:{" "}
+            {packet.still_to_do_in_caqh[0]?.source_id}.
+          </p>
+          <ul>
+            {packet.still_to_do_in_caqh.map((step, i) => (
+              <li key={i}>
+                {step.description}{" "}
+                <NeedsVerificationBadge needsVerification={step.needs_verification} />
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 

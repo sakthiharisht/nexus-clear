@@ -1,7 +1,9 @@
 # nexus-clear: Credentialing Readiness Agent
 
-A provider-facing tool for solo and small-practice Texas LPCs that answers: "Am I ready to be
-credentialed with BCBSTX, and what is missing or wrong?" It checks uploaded documents against a
+A provider-facing tool for solo and small-practice Texas LPCs that answers: "Am I ready to apply
+to BCBSTX, and what is missing or wrong?" (M9.1 #6: "ready to apply," not "ready to be
+credentialed" - credentialing is the payer's decision, not something this app determines). It
+checks uploaded documents against a
 sourced rule pack, cross-checks them against public registries, explains every problem with cited
 evidence, routes uncertain findings to a human reviewer, and produces a pre-filled packet the
 provider reviews and confirms is accurate. **This is not CAQH attestation** - CAQH has its own,
@@ -225,10 +227,27 @@ built from a placeholder, in both the table and the JSON run file).
   accident).
 - **Rule-pack currency.** `rules/tx_bcbstx_lpc.yaml` is dated and sourced, but several entries are
   explicitly flagged `needs_verification: true` and must stay visibly marked wherever they
-  surface, never presented as settled payer policy: `R-COI-002` (COI limits), `R-WORK-001` (CV gap
-  rule), `R-PATH-001` (CAQH/TSCA path routing), plus three required slots (`cv`, `education`,
-  `w9`). The NPI Luhn/80840 checksum algorithm and the BCBSTX checklist's own currency were
-  verified against public sources at build time, not re-verified since.
+  surface, never presented as settled payer policy: `R-COI-002` (COI limits), `R-LIC-003`/
+  `R-COI-005` (the 180-day expiring-soon horizon, M9.1 #1 - a policy choice reacting to a
+  third-party timeline claim, not a confirmed BCBSTX decision window), `R-WORK-001` (CV gap rule),
+  `R-PATH-001` (CAQH/TSCA path routing), the packet's "still to do in CAQH" list (M9.1 #3/#4,
+  sourced from the same kind of third-party guidance), plus three required slots (`cv`,
+  `education`, `w9`). The NPI Luhn/80840 checksum algorithm and the BCBSTX checklist's own currency
+  were verified against public sources at build time, not re-verified since.
+- **Panel availability is not modeled.** A clean readiness check says nothing about whether
+  BCBSTX's panel for this specialty/region is open - a provider can pass every check here and
+  still be rejected because the payer isn't accepting new providers in that category. This app has
+  no data source for panel status and doesn't claim to.
+- **Address consistency is not checked** (M9.1 #6, roadmap item). License, NPPES, and the provider
+  profile each carry an address independently, and this app never cross-checks them against each
+  other - a real credentialing reviewer does. Not built now; a reasonable next addition once a
+  real address-normalization/matching approach is chosen, not a quick addition to the existing
+  name-match machinery.
+- **Post-approval maintenance is out of scope** (M9.1 #6, roadmap item): CAQH's periodic
+  re-attestation requirement and payer recredentialing cycles aren't tracked anywhere here - this
+  app only ever helps with the one initial readiness check, not the ongoing relationship
+  afterward. A reasonable next addition (reminders ahead of a re-attestation/recredentialing date),
+  not built now.
 - **Demo-grade auth.** A per-case provider token (shown once, at case creation) and one shared
   reviewer secret (`REVIEWER_TOKEN`) are the entire auth model (`backend/app/api/auth.py`) - proof
   of possessing a token, not real identity verification, session management, or authorization

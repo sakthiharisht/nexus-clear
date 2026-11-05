@@ -45,12 +45,19 @@ _HAS_ANTHROPIC_KEY = bool(os.environ.get("ANTHROPIC_API_KEY"))
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 _PACKET = REPO_ROOT / "eval" / "fixtures" / "packets" / "benign-2-rotated-scan"
+# The license scan is a static, committed fixture (tests/fixtures/vision/),
+# not read from eval/fixtures/packets/ like the other four documents:
+# that tree is gitignored and regenerated per run, and Pillow's PNG
+# compression isn't byte-identical across platforms (unlike reportlab's
+# PDF output, which is) - a cache key derived from this image's sha256
+# would miss in CI otherwise, even though the pixels are identical.
+_VISION_FIXTURES = Path(__file__).resolve().parent.parent / "fixtures" / "vision"
 _FILES_BY_SLOT = {
-    "license": ("license.png", "image/png"),
-    "coi": ("coi.pdf", "application/pdf"),
-    "cv": ("cv.pdf", "application/pdf"),
-    "education": ("education.pdf", "application/pdf"),
-    "w9": ("w9.pdf", "application/pdf"),
+    "license": (_VISION_FIXTURES / "benign_2_license_scan.png", "image/png"),
+    "coi": (_PACKET / "coi.pdf", "application/pdf"),
+    "cv": (_PACKET / "cv.pdf", "application/pdf"),
+    "education": (_PACKET / "education.pdf", "application/pdf"),
+    "w9": (_PACKET / "w9.pdf", "application/pdf"),
 }
 
 
@@ -70,12 +77,12 @@ def _create_case(client: TestClient) -> dict[str, Any]:
 
 
 def _upload_benign_2(client: TestClient, case_id: str) -> None:
-    for slot, (filename, content_type) in _FILES_BY_SLOT.items():
-        content = (_PACKET / filename).read_bytes()
+    for slot, (path, content_type) in _FILES_BY_SLOT.items():
+        content = path.read_bytes()
         response = client.post(
             f"/cases/{case_id}/documents",
             params={"slot": slot},
-            files={"file": (filename, content, content_type)},
+            files={"file": (path.name, content, content_type)},
         )
         assert response.status_code == 201, response.text
 

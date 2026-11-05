@@ -15,10 +15,29 @@ from pydantic import BaseModel, ConfigDict
 from app.core.contracts import Finding
 
 
+class ProviderProfile(BaseModel):
+    """Pre-M9 fix #3: a typed intake profile instead of an opaque dict -
+    rejects a missing legal_name/npi or any unrecognized key at the API
+    boundary, rather than letting a typo or a wrong field name through
+    to silently resolve as `unknown` three stages later
+    (app/rules/context.py's ProfileFacts/SupervisionFacts, which this
+    model's fields line up with directly - app/orchestrator/run.py
+    reads them back out of the stored dict the same way either way).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    legal_name: str
+    npi: str
+    practice_name: str | None = None
+    supervisor_count: int | None = None
+    supervisor_license_number: str | None = None
+
+
 class CreateCaseRequest(BaseModel):
     payer: str
     provider_type: str
-    provider_profile: dict[str, object]
+    provider_profile: ProviderProfile
     # Defaults to today + the rule pack's target_date_default_offset_days
     # if omitted (SPEC.md section 6).
     target_date: date | None = None

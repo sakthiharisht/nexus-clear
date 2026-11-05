@@ -51,13 +51,44 @@ def test_create_case_defaults_target_date_from_the_rule_pack(api_client: TestCli
     assert (target - datetime.date.today()).days == 14
 
 
+def test_create_case_rejects_a_missing_required_profile_field(api_client: TestClient) -> None:
+    """Pre-M9 fix #3: npi is required - a provider_profile missing it
+    is rejected at the API boundary (422), not silently resolved to
+    `unknown` three stages later."""
+    response = api_client.post(
+        "/cases",
+        json={
+            "payer": "BCBSTX",
+            "provider_type": "LPC",
+            "provider_profile": {"legal_name": "Christopher Lee"},
+        },
+    )
+    assert response.status_code == 422
+
+
+def test_create_case_rejects_an_unknown_profile_field(api_client: TestClient) -> None:
+    response = api_client.post(
+        "/cases",
+        json={
+            "payer": "BCBSTX",
+            "provider_type": "LPC",
+            "provider_profile": {
+                "legal_name": "Christopher Lee",
+                "npi": "1000000004",
+                "ssn": "not a real field on this model",
+            },
+        },
+    )
+    assert response.status_code == 422
+
+
 def test_create_case_accepts_an_explicit_target_date(api_client: TestClient) -> None:
     response = api_client.post(
         "/cases",
         json={
             "payer": "BCBSTX",
             "provider_type": "LPC",
-            "provider_profile": {"legal_name": "Someone"},
+            "provider_profile": {"legal_name": "Someone", "npi": "1000000099"},
             "target_date": "2027-01-01",
         },
     )

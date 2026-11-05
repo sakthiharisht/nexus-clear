@@ -130,7 +130,7 @@ def create_case(
         id=case_id,
         payer=body.payer,
         provider_type=body.provider_type,
-        provider_profile=body.provider_profile,
+        provider_profile=body.provider_profile.model_dump(mode="json"),
         target_date=target_date,
         wrapped_data_key=service.create_wrapped_case_key(key_manager, case_id=case_id),
     )

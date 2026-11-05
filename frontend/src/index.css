@@ -1,0 +1,297 @@
+:root {
+  --text: #2d2a32;
+  --text-h: #08060d;
+  --bg: #fafafa;
+  --card-bg: #fff;
+  --border: #e0dfe3;
+  --accent: #6d28d9;
+  color-scheme: light dark;
+  font: 15px/1.5 system-ui, "Segoe UI", Roboto, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #d6d3d9;
+    --text-h: #f3f4f6;
+    --bg: #15151a;
+    --card-bg: #1e1e24;
+    --border: #33333c;
+    --accent: #c084fc;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+h1 {
+  font-size: 22px;
+  color: var(--text-h);
+  margin: 0 0 12px;
+}
+
+h2,
+h3 {
+  color: var(--text-h);
+  margin: 16px 0 8px;
+}
+
+.app {
+  max-width: 1000px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.app-title {
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.app-nav {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.app-nav a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.app-nav a.active {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.app-main {
+  flex: 1;
+  padding: 20px;
+}
+
+.app-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+label {
+  display: block;
+  margin: 10px 0;
+  font-size: 13px;
+}
+
+label.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+input,
+select,
+textarea {
+  display: block;
+  width: 100%;
+  max-width: 400px;
+  margin-top: 4px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+}
+
+label.checkbox-label input {
+  width: auto;
+  display: inline;
+}
+
+button {
+  margin-top: 12px;
+  padding: 8px 16px;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: var(--accent);
+  text-decoration: underline;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.hint {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.error {
+  color: #d9342b;
+  font-size: 13px;
+}
+
+.result-box {
+  margin-top: 16px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.readiness-score {
+  font-size: 18px;
+}
+
+.findings-list {
+  list-style: none;
+  padding: 0;
+}
+
+.finding-row {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.finding-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.finding-title {
+  font-weight: 600;
+}
+
+.finding-sentence {
+  margin: 6px 0;
+}
+
+.evidence-box {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: var(--bg);
+  border-radius: 4px;
+}
+
+.evidence-quote {
+  font-style: italic;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.badge-status-pass {
+  background: #d1f0dc;
+  color: #126b36;
+}
+.badge-status-fail {
+  background: #fbdada;
+  color: #9c1c1c;
+}
+.badge-status-unknown {
+  background: #e6e6e6;
+  color: #444;
+}
+.badge-status-not_applicable {
+  background: #e6e6e6;
+  color: #666;
+}
+
+.badge-severity-blocker {
+  background: #fbdada;
+  color: #9c1c1c;
+}
+.badge-severity-warning {
+  background: #fdeecb;
+  color: #8a5a00;
+}
+.badge-severity-info {
+  background: #dce8fb;
+  color: #1d4e8f;
+}
+
+.badge-needs-verification {
+  background: #fdeecb;
+  color: #8a5a00;
+  cursor: help;
+}
+
+.badge-injection {
+  background: #dce8fb;
+  color: #1d4e8f;
+}
+
+.badge-simulated {
+  background: #fdeecb;
+  color: #8a5a00;
+}
+
+pre {
+  background: var(--bg);
+  padding: 8px;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-size: 12px;
+}

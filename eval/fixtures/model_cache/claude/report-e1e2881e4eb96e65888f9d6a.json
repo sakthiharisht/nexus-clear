@@ -1,0 +1,12 @@
+{
+  "sentences": {
+    "R-LIC-004": "The license is issued to a different name (Christopher Lee) than the legal name on the provider profile (John Smyth), so the name on the license needs to be corrected or explained before the application can move forward.",
+    "R-COI-004": "The certificate of insurance lists the insured as Christopher Lee rather than the provider's legal name (John Smyth) or a matching practice name, so the insurance documentation must be corrected to match the provider or their practice entity."
+  },
+  "input_tokens": 816,
+  "output_tokens": 185,
+  "cost_usd": 0.00017410000000000003,
+  "cost_known": true,
+  "latency_ms": 2577.999999979511,
+  "simulated": false
+}

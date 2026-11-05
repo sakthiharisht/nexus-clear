@@ -1,0 +1,33 @@
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "gen:api:export": "cd ../backend && uv run python -m app.export_openapi",
+    "gen:api:types": "openapi-typescript ./openapi.json -o ./src/api/schema.ts",
+    "gen:api": "npm run gen:api:export && npm run gen:api:types",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "openapi-fetch": "^0.17.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "openapi-typescript": "^7.13.0",
+    "oxlint": "^1.89.0",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.5"
+  }
+}

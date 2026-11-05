@@ -134,3 +134,15 @@ class ResolveReviewRequest(BaseModel):
     # status (CLAUDE.md invariant 1 still holds: the model never set
     # this, a named human reviewer did, recorded as decided_by="human").
     override_status: Literal["pass", "fail", "not_applicable", "unknown"] | None = None
+
+
+class AuditLogEntryResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    ts: datetime
+    actor: str
+    action: str
+    case_id: UUID | None
+    object_ref: str | None
+    detail: dict[str, object] | None

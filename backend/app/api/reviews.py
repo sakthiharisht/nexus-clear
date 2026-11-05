@@ -45,7 +45,11 @@ def list_reviews(
         query = query.filter_by(case_id=case_id)
     if review_status is not None:
         query = query.filter_by(status=review_status)
-    return query.all()
+    # Postgres gives no row-order guarantee without ORDER BY, and an
+    # UPDATE (resolving an item) can change a row's physical scan
+    # position - without this, the queue's listed order could shuffle
+    # on every reload.
+    return query.order_by(ReviewItem.created_at).all()
 
 
 @router.get("/{review_id}", response_model=ReviewItemDetailResponse)

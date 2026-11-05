@@ -46,6 +46,7 @@ from app.api.schemas import (
 from app.backends.base import DecisionBackend
 from app.backends.extract_cache import CachedExtractor
 from app.core.config import settings
+from app.core.contracts import Finding
 from app.core.finding_store import load_case_findings
 from app.core.orm import AuditLog, Case, Document, Extraction, ReviewItem
 from app.escalate.engine import EscalationThresholds
@@ -273,6 +274,16 @@ def get_report(
     findings = [finding for _, finding in load_case_findings(session, case.id)]
     rule_titles = {rule.id: rule.title for rule in pack.rules}
     return build_gap_report(findings, rule_titles=rule_titles, phraser=phraser)
+
+
+@router.get("/{case_id}/findings", response_model=list[Finding])
+def get_findings(case_id: UUID, session: Session = Depends(get_session)) -> list[Finding]:
+    """The raw Findings behind GET /report's plain-English sentences -
+    full evidence (quote + page, or registry record) per finding, for
+    an evidence viewer (SPEC.md section 9) that shows more than the
+    one-sentence summary."""
+    case = _get_case_or_404(session, case_id)
+    return [finding for _, finding in load_case_findings(session, case.id)]
 
 
 def _case_extractions(session: Session, case_id: UUID) -> list[Extraction]:

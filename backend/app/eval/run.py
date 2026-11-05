@@ -238,7 +238,7 @@ def _cached(backend: Any, model: str) -> CachedBackend:
 
 def run_classify_mode(
     mode_name: str, ground_truth: dict[str, Any], fixtures_root: Path
-) -> ClassifyModeResult:
+) -> ClassifyModeResult | None:
     """Dispatches a classify eval mode by name (eval/config.yaml's
     `classify_modes` / `classify_modes_hard`):
 
@@ -254,6 +254,14 @@ def run_classify_mode(
       end with zero Jev involvement. Always the haiku tier
       (MODEL_CLASSIFY_FALLBACK), matching the real policy's cheap-tier
       fallback - not whichever tier happens to run alongside it.
+    - "classify-policy-jev": the same real wiring, forced to
+      DECISION_BACKEND=jev - Jev primary, Claude haiku fallback,
+      exactly what a live deployment gets with that env var set.
+      Returns None (skipped, not a hard failure) if no JEV_API_KEY is
+      configured, since unlike classify-policy-claude this mode is
+      inherently optional - eval/config.yaml says so in its own
+      comment, and a contributor without a Jev key still needs the
+      rest of this eval to run.
 
     A trailing "-hard" (M5.1 housekeeping #2's hard classify set,
     app/eval/generator/hard_classify_set.py) is stripped before
@@ -276,6 +284,11 @@ def run_classify_mode(
     elif base_mode_name == "classify-policy-claude":
         claude_settings = app_settings.model_copy(update={"decision_backend": "claude"})
         primary, fallback = build_primary_and_fallback(claude_settings)
+    elif base_mode_name == "classify-policy-jev":
+        if app_settings.jev_api_key is None:
+            return None
+        jev_settings = app_settings.model_copy(update={"decision_backend": "jev"})
+        primary, fallback = build_primary_and_fallback(jev_settings)
     else:
         raise ValueError(f"unknown classify mode: {mode_name!r}")
 
@@ -375,7 +388,8 @@ def run_eval(config: dict[str, Any], repo_root: Path = REPO_ROOT) -> dict[str, A
     classify_results: dict[str, ClassifyModeResult] = {}
     for mode_name in config.get("classify_modes", []):
         result = run_classify_mode(mode_name, ground_truth, fixtures_root)
-        classify_results[result.mode] = result
+        if result is not None:
+            classify_results[result.mode] = result
 
     # M5.1 housekeeping #2: the hard classify set is a different
     # ground_truth/fixtures_root entirely (not just different mode
@@ -389,7 +403,8 @@ def run_eval(config: dict[str, Any], repo_root: Path = REPO_ROOT) -> dict[str, A
         )
         for mode_name in config["classify_modes_hard"]:
             result = run_classify_mode(mode_name, hard_ground_truth, hard_fixtures_root)
-            classify_results[result.mode] = result
+            if result is not None:
+                classify_results[result.mode] = result
 
     classify_metrics: dict[str, ClassifyMetrics] = {
         mode_name: compute_classify_metrics(result)

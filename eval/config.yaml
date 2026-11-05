@@ -45,6 +45,7 @@ classify_modes:
     classify-claude-sonnet,
     classify-claude-opus,
     classify-policy-claude,
+    classify-policy-jev,
   ]
 
 # M5.1 housekeeping #2: ~30 adversarial documents (lookalikes, CVs with

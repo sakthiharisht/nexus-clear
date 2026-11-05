@@ -26,6 +26,7 @@ def test_load_config_reads_the_real_config() -> None:
         "classify-claude-sonnet",
         "classify-claude-opus",
         "classify-policy-claude",
+        "classify-policy-jev",
     }
 
 
@@ -106,6 +107,21 @@ def test_classify_modes_run_against_the_real_committed_fixture_cache() -> None:
     assert result["classify_metrics"][_find("classify-claude-haiku")] == (
         result["classify_metrics"][_find("classify-policy-claude")]
     )
+
+    # classify-policy-jev is genuinely optional (eval/config.yaml: "needs
+    # JEV_API_KEY and isn't run without one") - CI has no Jev key, so
+    # run_classify_mode returns None and it's silently absent there.
+    # Only assert on its shape when it's actually present.
+    jev_policy_matches = [
+        m for m in ("classify-policy-jev", "classify-policy-jev-SIMULATED")
+        if m in result["classify_metrics"]
+    ]
+    assert len(jev_policy_matches) <= 1, f"expected at most one, found {jev_policy_matches}"
+    for mode in jev_policy_matches:
+        metrics = result["classify_metrics"][mode]
+        assert metrics["n"] == 75
+        assert 0.0 <= metrics["accuracy"] <= 1.0
+        assert 0.0 <= metrics["ece"] <= 1.0
 
 
 def test_run_classify_mode_rejects_an_unknown_mode_name() -> None:
